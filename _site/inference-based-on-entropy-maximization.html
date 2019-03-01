@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Inference based on entropy maximization | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Inference based on entropy maximization | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Inference based on entropy maximization" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Entropy For a discrete random variable, the surprisal (or information content) of an outcome with probability is .  Rare events have a lot surprisal.  For a discrete random variable with outcomes that occur with probabilities , the entropy is the average surprisal" />
+<meta property="og:description" content="Entropy For a discrete random variable, the surprisal (or information content) of an outcome with probability is .  Rare events have a lot surprisal.  For a discrete random variable with outcomes that occur with probabilities , the entropy is the average surprisal" />
+<link rel="canonical" href="http://localhost:4000/inference-based-on-entropy-maximization.html" />
+<meta property="og:url" content="http://localhost:4000/inference-based-on-entropy-maximization.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/entropy.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-05-18T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"Entropy For a discrete random variable, the surprisal (or information content) of an outcome with probability is .  Rare events have a lot surprisal.  For a discrete random variable with outcomes that occur with probabilities , the entropy is the average surprisal","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/inference-based-on-entropy-maximization.html","image":"http://localhost:4000/entropy.png","headline":"Inference based on entropy maximization","dateModified":"2018-05-18T00:00:00-07:00","datePublished":"2018-05-18T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/inference-based-on-entropy-maximization.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Inference based on entropy maximization
+</h1>
+
+
+  <img src="/assets/img/entropy.png">
+
+
+<h2 id="entropy">Entropy</h2>
+<p>For a discrete random variable, the surprisal (or information content) of an outcome with probability <script type="math/tex">p</script> is <script type="math/tex">-\log p</script>.  Rare events have a lot surprisal.  For a discrete random variable with <script type="math/tex">n</script> outcomes that occur with probabilities <script type="math/tex">p_1, \ldots, p_n</script>, the entropy <script type="math/tex">H</script> is the average surprisal</p>
+
+<script type="math/tex; mode=display">H(p_1,\ldots,p_n) = \sum_{i=1}^n -p_i \log p_i.</script>
+
+<p>Roughly speaking, entropy measures average unpredictability of a random variable.  For example, the outcome of a fair coin has higher entropy (and is less predictable) than the outcome of a biased coin.  Remarkably, the formula for entropy is determined (up to a multiplicative constant) by a few simple properties:</p>
+
+<ol>
+  <li>Entropy is continuous.</li>
+  <li>Entropy is symmetric, which means the value of <script type="math/tex">H</script> does not depend on the order of its arguments.  For example, <script type="math/tex">H(p_1,\ldots,p_n) = H(p_n, \ldots, p_1)</script>.</li>
+  <li>Entropy is maximized when all outcomes are equally likely.  For equiprobable events, the entropy increases with the number of outcomes.</li>
+  <li>Entropy is consistent in the following sense.  Suppose the event space <script type="math/tex">\Omega</script> is partitioned into sets <script type="math/tex">\Omega_1, \ldots, \Omega_k</script> that occur with probabilities <script type="math/tex">\omega_j = \sum_{i \in \Omega_j} p_i</script>.  Then total entropy is the entropy between the sets plus a weighted average of the entropies within each set:
+<script type="math/tex">H(p_i : i \in \Omega) = H(\omega_1,\ldots, \omega_k) + \sum_{j=1}^k \omega_j H(p_i : i \in \Omega_j)</script>.</li>
+</ol>
+
+<p>As an aside, variance behaves in the same way</p>
+
+<script type="math/tex; mode=display">\textbf{Var}(X) = \textbf{Var}(\textbf{E}(X\vert Y)) + \textbf{E}(\textbf{Var}(X\vert Y)),</script>
+
+<p>a relationship more apparent in the ANOVA setting (where <script type="math/tex">X</script> are measurements and <script type="math/tex">Y</script> are group labels): the total variation is the variation between groups plus the the average variation within each group.</p>
+
+<h2 id="inference-with-insufficient-data">Inference with insufficient data</h2>
+<p>Whether a good idea or not, we often want to make inferences with insufficient data.  Doing so requires some kind of external assumption not present in the data.  For example, L1-regularized linear regression solves under-determined linear systems by assuming that the solution is sparse.  Another example is the principle of insufficient reason, which says that in the absence of additional information, we should assume all outcomes of a discrete random variable are equally likely.  In other words, we should assume the distribution with maximum entropy.</p>
+
+<p>Maximum entropy inference chooses the distribution with maximum entropy subject to what is known.  As an example, suppose that the averages of the functions <script type="math/tex">f_k</script> are known:</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n p_i f_k(x_i) = F_k.</script>
+
+<p>In this case, maximum entropy estimation selects the probability distribution that satisfies</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} \text{max.} &\quad -\sum_{i=1}^n p_i \log p_i \\ \text{s.t.} &\quad \sum_{i=1}^n f_k(x_i) p_i = F_k,\ 1 \leq k \leq K \\ &\quad \sum_{i=1}^n p_i = 1.  \end{aligned} %]]></script>
+
+<p>This convex problem has solution</p>
+
+<script type="math/tex; mode=display">p(x) = \frac{1}{Z} e^{\sum_{k=1}^K w_k f_k(x)},</script>
+
+<p>where <script type="math/tex">Z</script> and <script type="math/tex">w_k</script> are chosen so that the constraints are satisfied. (We use the notation <script type="math/tex">p_i = p(x_i)</script>.)  Notice that in this case, maximum entropy inference gives the same estimates of <script type="math/tex">p_i</script> that fitting an exponential family using maximum likelihood estimation gives.</p>
+
+<p>Although maximum entropy estimation lets us answer a question such as “Given the mean of <script type="math/tex">f(X)</script>, what is the mean of <script type="math/tex">g(X)</script>?”, we should always consider whether the answer is meaningful.  For example, when <script type="math/tex">f(x) = x</script> and <script type="math/tex">g(x) = x^2</script>, we are asking for the variance on the basis of just knowing the mean, and any a priori assumption that makes such a task feasible should be scrutinized.</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li><em>Information Theory and Statistical Mechanics</em> by E. T. Jaynes</li>
+  <li><em>Exercise 22.13 in Information Theory, Inference, and Learning Algorithms</em> by David J. Mackay</li>
+</ul>
+
+
+<span class="post-date">
+  Written on
+  
+  May
+  18th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Inference based on entropy maximization&amp;url=/inference-based-on-entropy-maximization.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/inference-based-on-entropy-maximization.html&amp;title=Inference based on entropy maximization" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/inference-based-on-entropy-maximization.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+          <li>
+            <h3>
+              <a href="/calibration-in-logistic-regression-and-other-generalized-linear-models.html">
+                Calibration in logistic regression and other generalized linear models
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>August 21, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/maximum-likelihood-estimation-with-censored-data.html">
+                Maximum likelihood estimation with censored data
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>April 20, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

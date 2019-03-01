@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Propagation of error | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Propagation of error | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Propagation of error" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates." />
+<meta property="og:description" content="Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates." />
+<link rel="canonical" href="http://localhost:4000/propogation-of-error.html" />
+<meta property="og:url" content="http://localhost:4000/propogation-of-error.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/bmi.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-28T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/propogation-of-error.html","image":"http://localhost:4000/bmi.png","headline":"Propagation of error","dateModified":"2018-04-28T00:00:00-07:00","datePublished":"2018-04-28T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/propogation-of-error.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Propagation of error
+</h1>
+
+
+  <img src="/assets/img/bmi.png">
+
+
+<p>Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates.</p>
+
+<p>Suppose I have height and weight measurements for a sample of people.  What is the mean and variance of the BMI?  (BMI is 703 times the weight (in pounds) over the square of the height (in inches).)</p>
+
+<p>The obvious thing is to compute the BMI for each individual in the data set, and then compute the mean of and variance of the BMIs.  But suppose that I don’t have access to the original data, but only have summary statistics about the heights and weights.  What can I say about BMI then?</p>
+
+<p>Propagation of error is derived by taking a first-order Taylor expansion about the mean.  Suppose <script type="math/tex">X</script> is a random variable with mean <script type="math/tex">\mu</script> and variance <script type="math/tex">\sigma^2</script>, and we want to approximate the mean and variance of <script type="math/tex">f(X)</script>.  We know <script type="math/tex">f(X) \approx f(\mu) + f'(\mu)(X- \mu)</script>, so</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\textbf{E}(f(X)) &\approx \textbf{E}(f(\mu) + f'(\mu)(X- \mu)) = f(\mu) \\
+\textbf{Var}(f(X)) &\approx \textbf{Var}(f(\mu) + f'(\mu)(X- \mu)) = f'(\mu)^2 \textbf{Var}(X).
+\end{aligned} %]]></script>
+
+<p>As a sanity check, notice that <script type="math/tex">\textbf{Var}(f(X))</script> is modulated by <script type="math/tex">\vert f'(\mu)\vert</script>.  This makes sense: if <script type="math/tex">f</script> is flat near <script type="math/tex">\mu</script>, the “range” of <script type="math/tex">X</script> is compressed (less variation), and if <script type="math/tex">f</script> is steep, the “range” is expanded (more variation).  How good are these approximations?  This depends on how non-linear <script type="math/tex">f</script> is and how central <script type="math/tex">X</script> is about its mean.  But the approximations are good enough for the central limit theorem.</p>
+
+<p>Consider a central limit theorem type statement like <script type="math/tex">\sqrt{n} (X_n - \theta)</script> converges to <script type="math/tex">N(0, \sigma^2)</script> in distribution (this is the central limit theorem if <script type="math/tex">X_n</script> is the sample mean of <script type="math/tex">n</script> data points and <script type="math/tex">\theta</script> is the true mean.)  If we consider some function of <script type="math/tex">X_n</script>, we still have a limit theorem:  <script type="math/tex">\sqrt{n} (f(X_n) - f(\theta))</script> converges to <script type="math/tex">N(0, f'(\theta)^2 \sigma^2)</script> (provided the derivative is non-zero).  The proof is just a Taylor expansion about <script type="math/tex">\theta</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\sqrt{n} (f(X_n) - f(\theta)) &= \sqrt{n} (f(\theta) + f'(\theta)(X_n - \theta) + \epsilon - f(\theta)) \\
+&= f'(\theta) \sqrt{n} (X_n - \theta) + \sqrt{n} \epsilon
+\end{aligned} %]]></script>
+
+<p>The first term <script type="math/tex">f'(\theta) \sqrt{n} (X_n - \theta)</script> converges in distribution to <script type="math/tex">f'(\theta) N(0, \sigma^2) = N(0, f'(\theta)^2 \sigma^2)</script>.  The error <script type="math/tex">\sqrt{n} \epsilon</script> converges to 0 in probability.  I think the easiest way to see this is to write <script type="math/tex">\sqrt{n} \epsilon</script> as <script type="math/tex">\vert \sqrt{n} (X_n - \theta)\vert   \cdot \left(\epsilon / \vert X_n - \theta\vert  \right)</script>.  The first factor <script type="math/tex">\vert \sqrt{n} (X_n - \theta)\vert</script> converges in distribution to the absolute value of a normal random variable, and the second factor <script type="math/tex">\epsilon / \vert X_n - \theta\vert</script> converges to 0 in probability.</p>
+
+<p>Using a multivariate Taylor expansion, we have the same statements in higher dimensions: if <script type="math/tex">\sqrt{n} (X_n - \theta)</script> converges in distribution to a multivariate normal <script type="math/tex">N(0, \Sigma)</script>, then <script type="math/tex">\sqrt{n}(f(X_n) - f(\theta))</script> converges to a univariate normal <script type="math/tex">N(0, \nabla f(\theta)^T \Sigma \nabla f(\theta))</script>.  Let’s work through the height, weight, and BMI example to make this more concrete.</p>
+
+<p>Suppose we have summary statistics about the weights and heights: <script type="math/tex">\mu_w = 164.39</script>, <script type="math/tex">\sigma_w = 23.58</script>,  <script type="math/tex">\mu_h = 70.45</script>, <script type="math/tex">\sigma_h = 3.03</script>, and correlation <script type="math/tex">\rho = 0.40</script>.  Let <script type="math/tex">f(w, h) = 703 w / h^2</script> be the BMI.  The covariance matrix and gradient at the mean are:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\Sigma &= \begin{bmatrix} \sigma_w^2 & \rho \sigma_w \sigma_h \\ \rho \sigma_w \sigma_h & \sigma_h^2 \end{bmatrix} =\begin{bmatrix} 556.02 & 28.58 \\ 28.58 & 9.18 \end{bmatrix} \\
+\nabla f(\theta) &= 703 \begin{bmatrix} 1/\mu_h^2 \\ -2 \mu_w / \mu_h^3 \end{bmatrix} = \begin{bmatrix} 0.14 \\ -0.66 \end{bmatrix}.
+\end{aligned} %]]></script>
+
+<p>By propagation of error combined with the central limit theorem, the mean BMI of <script type="math/tex">n</script> people is approximately normally distributed with mean <script type="math/tex">f(\theta) = (703)(164.39) / (70.45^2) = 23.28</script> and variance <script type="math/tex">\nabla f(\theta)^T \Sigma \nabla f(\theta)) / n = 9.82 / n</script>.  The approximation is better the larger <script type="math/tex">n</script> is.</p>
+
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  28th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Propagation of error&amp;url=/propogation-of-error.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/propogation-of-error.html&amp;title=Propagation of error" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/propogation-of-error.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

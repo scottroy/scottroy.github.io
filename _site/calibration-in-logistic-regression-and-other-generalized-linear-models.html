@@ -1,0 +1,376 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Calibration in logistic regression and other generalized linear models | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Calibration in logistic regression and other generalized linear models | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Calibration in logistic regression and other generalized linear models" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In general, scores returned by machine learning models are not necessarily well-calibrated probabilities (see my post on ROC space and AUC).  The probability estimates from a logistic regression model (without regularization) are partially calibrated, though.  In fact, many generalized linear models, including linear regression, logistic regression, binomial regression, and Poisson regression, give calibrated predicted values." />
+<meta property="og:description" content="In general, scores returned by machine learning models are not necessarily well-calibrated probabilities (see my post on ROC space and AUC).  The probability estimates from a logistic regression model (without regularization) are partially calibrated, though.  In fact, many generalized linear models, including linear regression, logistic regression, binomial regression, and Poisson regression, give calibrated predicted values." />
+<link rel="canonical" href="http://localhost:4000/calibration-in-logistic-regression-and-other-generalized-linear-models.html" />
+<meta property="og:url" content="http://localhost:4000/calibration-in-logistic-regression-and-other-generalized-linear-models.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/calibrate.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-08-21T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"In general, scores returned by machine learning models are not necessarily well-calibrated probabilities (see my post on ROC space and AUC).  The probability estimates from a logistic regression model (without regularization) are partially calibrated, though.  In fact, many generalized linear models, including linear regression, logistic regression, binomial regression, and Poisson regression, give calibrated predicted values.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/calibration-in-logistic-regression-and-other-generalized-linear-models.html","image":"http://localhost:4000/calibrate.jpg","headline":"Calibration in logistic regression and other generalized linear models","dateModified":"2018-08-21T00:00:00-07:00","datePublished":"2018-08-21T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/calibration-in-logistic-regression-and-other-generalized-linear-models.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Calibration in logistic regression and other generalized linear models
+</h1>
+
+
+  <img src="/assets/img/calibrate.jpg">
+
+
+<p>In general, scores returned by machine learning models are not necessarily well-calibrated probabilities (see my post on <a href="/ROC-space-and-AUC.html">ROC space and AUC</a>).  The probability estimates from a logistic regression model (without regularization) are partially calibrated, though.  In fact, many generalized linear models, including linear regression, logistic regression, binomial regression, and Poisson regression, give calibrated predicted values.</p>
+
+<h2 id="where-calibrated-models-are-important">Where calibrated models are important?</h2>
+<p>Before delving deeper into why most generalized linear models give calibrated estimates, let’s consider a situation in which calibrated estimates are important.  In online advertising, such as on Google or Facebook, an advertiser pays the ad company only when a user clicks on an ad (they are not charged just to show the ad).  An important task for the ad company is to decide which ads to show in its limited ad space.  Simply showing the ad with the highest bid will not maximize the ad company’s revenue.  For example, suppose that advertiser A has bid $10 for every click and advertiser B has bid $1 for every click.  Although advertiser B has bid less, suppose its ad is 20 times more likely to be clicked on.  In this case, the ad company will make twice as much money showing advertiser B’s ad (even though advertiser A has bid 10 times as much per click).  When deciding which ads to show, the ad company must consider two factors: 1) how much the advertiser has bid to pay the ad company each time its ad is clicked and 2) how likely a user is to click on the ad.  Inaccurately predicting how likely a user is to click on an ad may cause the ad company to make a suboptimal decision in which ad to show.  Logistic regression, discussed next, is very popular in online advertising.</p>
+
+<h2 id="logistic-regression">Logistic regression</h2>
+<p>In the logistic regression model, each unit of observation <script type="math/tex">i</script> has a binary response <script type="math/tex">y_i \in \{ 0, 1\}</script>, where the probability <script type="math/tex">p_i</script> that <script type="math/tex">y_i = 1</script> depends on some features <script type="math/tex">X_i</script> of the unit.  The units are assumed independent, but they are not i.i.d. since the probability that the response <script type="math/tex">y_i</script> is 1 varies for each unit, depending on its features <script type="math/tex">X_i</script>.  The units are linked by assuming that <script type="math/tex">p_i</script> has a specific parametric form, with shared parameters <script type="math/tex">\beta</script> across all units.  In particular, the log-odds <script type="math/tex">\log \left( \frac{p_i}{1-p_i} \right)</script> is assumed a linear function of the predictors with coefficients <script type="math/tex">\beta</script>:</p>
+
+<script type="math/tex; mode=display">\log \left( \frac{p_i}{1-p_i} \right) = \beta^T X_i = \beta_1 X_{i1} + \beta_2 X_{i2} + \ldots \beta_p X_{ip}.</script>
+
+<p>The log-odds function is also called the logit function <script type="math/tex">\text{logit}(p) = \log \left( \frac{p}{1-p} \right)</script>.</p>
+
+<p>By inverting the logit, we get the parametric form for the probabilities: <script type="math/tex">p_i = \text{logit}^{-1}(p_i) = \frac{1}{1 + e^{-\beta^T X_i}}</script>.  The inverse of the logit is called the logistic function (logistic regression is so-named because it models probabilities with a logistic function).  The estimates in logistic regression are harder to interpret than those in linear regression because increasing a predictor by 1 does not change the probability of outcome by a fixed amount.  This is because the logistic function <script type="math/tex">p(t) = \frac{1}{1 + e^{-t}}</script> is not a straight line (see the graph below).  Nevertheless, the logistic is nearly linear for values of <script type="math/tex">t</script> between -1 and 1, which corresponds to probabilities between 0.27 and 0.73 (see dashed red line in figure).  The slope of the dashed red line is 1/4 (the derivative of the logistic at <script type="math/tex">t = 0</script>).  For a moderate range of probabilities (about 0.3 to 0.7), increasing the covariate <script type="math/tex">X_{ij}</script> by 1 will change the predicted probability by about <script type="math/tex">\frac{\beta_j}{4}</script> (increase or decrease, depending on the sign of <script type="math/tex">\beta_j</script>).  Since the red line is the steepest part of the logistic curve, the approximated change <script type="math/tex">\frac{\beta_j}{4}</script> is always an upper bound (even for probabilities <strong>outside</strong> the range 0.3 to 0.7).</p>
+
+<p><img src="/assets/img/logistic.png" alt="" /></p>
+
+<h2 id="fitting-logistic-regression-and-calibration">Fitting logistic regression and calibration</h2>
+<p>Logistic regression is fit with maximum likelihood estimation.  The likelihood is</p>
+
+<script type="math/tex; mode=display">L(\beta) = \prod_{i=1}^n p_i^{y_i} (1-p_i)^{1-y_i}</script>
+
+<p>and the negative log-likelihood is</p>
+
+<script type="math/tex; mode=display">l(\beta) = \sum_{i=1}^n -y_i \log p_i - (1-y_i) \log (1 - p_i).</script>
+
+<p>Taking a derivative with respect to <script type="math/tex">\beta</script> (using the fact that <script type="math/tex">\nabla_{\beta}\ -\log p_i = -(1-p_i) X_i</script> and <script type="math/tex">\nabla_{\beta} -\log(1-p_i) = p_i X_i</script>), we get</p>
+
+<script type="math/tex; mode=display">\nabla l(\beta) = \sum_{i=1}^n -(1-p_i) y_i X_i + p_i (1-y_i) X_i = \sum_{i=1}^n -y_i X_i + p_i X_i.</script>
+
+<p>The probabilities thus satisfy</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n y_i X_i = \sum_{i=1}^n p_i X_i.</script>
+
+<p>These are <strong>calibration equations</strong>.  They hold for each component of the covariate vector <script type="math/tex">X_i = (X_{i1}, X_{i2}, \ldots, X_{ip})</script>:</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n y_i X_{ij} = \sum_{i=1}^n p_i X_{ij}.</script>
+
+<p>Under the logistic model, <script type="math/tex">p_i = \text{E}(y_i)</script> and so the above equations say that the observed value of <script type="math/tex">\sum_{i=1}^n y_i X_{ij}</script> in the data equals its expected value, according to the MLE fitted model.  Since <script type="math/tex">y_i \in \{0, 1\}</script>, these equations further simplify to: the observed sum of a covariate over the positive class equals the expected sum of the covariate over the positive class.</p>
+
+<p>To explain how these equations calibrate the model, let’s walk through an example.  Suppose we are predicting whether an English major is a man or women using 3 predictors: an intercept, an indicator for whether the student likes Jane Austen, and height.  Let <script type="math/tex">p_i</script> be the probability that student <script type="math/tex">i</script> is a man.  The calibration equations say:</p>
+
+<ol>
+  <li>(Intercept equation) The number of male English majors in the data equals <script type="math/tex">\sum_{i=1}^n p_i</script>, the expected number of male English majors in the data, as predicted by the logistic model.</li>
+  <li>(Jane Austen equation) The number of male English majors who like Jane Austen in the data equals <script type="math/tex">\sum_{i \text{ likes Jane Austen}} p_i</script>, the expected number of male English majors who like Jane Austen in the data, as predicted by the logistic model.</li>
+  <li>(Height equation) The sum of heights of all men in the data equals <script type="math/tex">\sum_{i=1}^n \text{height}_i \cdot p_i</script>, the expected sum of heights of all men in the data, as predicted by the model.  Combined with the first equation, we could reword this as: the average height of a man in the data equals the expected height of a man, as predicted by the model.</li>
+</ol>
+
+<p><strong>Note:</strong> the calibration equations have many solutions for the probabilities.  Logistic regression chooses the solution of the form <script type="math/tex">p_i = \frac{1}{1 + e^{-\beta^T X_i}}</script>.</p>
+
+<h2 id="updown-sampling-will-ruin-logistic-regression-probability-estimates">Up/down sampling will ruin logistic regression probability estimates</h2>
+<p>The common practice of up/down sampling in machine learning to get class balance will ruin the calibration in logistic regression probability estimates.  To explain, we continue with our previous example (but drop the height covariate).  Consider trying to model whether a student studying English literature is a man or woman, based on whether they like Jane Austen or not.  Suppose 80% of students studying English are women and only 20% are men.  Further suppose that 70% of the women students like Jane Austen, but only 40% of the men do.  Using Bayes’ rule, we can compute</p>
+
+<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{likes Jane Austen}) = 12.5\%</script>
+
+<p>and</p>
+
+<script type="math/tex; mode=display">\text{P}( \text{man} \vert  \text{does not like Jane Austen}) =33.3\%.</script>
+
+<p>A logistic regression with intercept term and an indicator for whether the English student likes Jane Austen will learn these probabilities (there is a unique solution to the calibration equations in this case).</p>
+
+<p>The probabilities above depend on the ratio of women to men among English majors.  If instead of 4 women to every man, the ratio is <script type="math/tex">\text{P}(\text{woman}) /\text{P}(\text{man})</script>, the conditional probabilities are</p>
+
+<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{likes Jane Austen}) = \frac{0.4}{0.4 + 0.7(\text{P}(\text{woman}) / \text{P}(\text{man}) )}</script>
+
+<p>and</p>
+
+<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 + 0.3(\text{P}(\text{woman}) / \text{P}(\text{man}) )}.</script>
+
+<p>These are the probabilities that a logistic regression will predict when trained on data where the ratio of women to men is <script type="math/tex">\text{P}(\text{woman}) / \text{P}(\text{man})</script>.  In particular, if we were to artificially balance the classes by downsampling the number of women by 4, logistic regression would return the estimates</p>
+
+<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{likes Jane Austen}) = \frac{0.4}{0.4 + 0.7} = 36.4\%</script>
+
+<p>and</p>
+
+<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 + 0.3} = 66.7\%.</script>
+
+<p>These probabilities do not match the probabilities <script type="math/tex">12.5\%</script> and <script type="math/tex">33.3\%</script> that we observe in reality!  In summary, logistic regression automatically calibrates (to some extent) its predicted probabilities, but this requires that the class balance in the training data match the class balance in the actual data.</p>
+
+<p>In this rest of this post, I want to go over where else the calibration equations above show up.</p>
+
+<h2 id="binomial-regression">Binomial regression</h2>
+<p>Binomial regression is a generalization of logistic regression.  In binomial regression, each response <script type="math/tex">y_i</script> is the number of successes in <script type="math/tex">n_i</script> trials, where the probability of success is <script type="math/tex">p_i</script> is modeled with the logistic function:</p>
+
+<script type="math/tex; mode=display">p_i = \frac{1}{1 + e^{-\beta^T X_i}}.</script>
+
+<p>The only change from logistic regression is that the likelihood (up to a constant factor independent of <script type="math/tex">\beta</script>) is now :</p>
+
+<script type="math/tex; mode=display">L(\beta) \propto \prod_{i=1}^n p_i^{y_i} (1-p_i)^{n_i-y_i}.</script>
+
+<p>Working through the derivatives, the MLE estimates for <script type="math/tex">p_i</script> satisfy:</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n y_i X_i = \sum_{i=1}^n n_i p_i X_i.</script>
+
+<p>Notice that <script type="math/tex">n_i p_i</script> is the expected value of <script type="math/tex">y_i</script> under the model.  These are the same calibration equations from logistic regression.</p>
+
+<p><strong>Note:</strong> logistic regression is a special case of binomial regression where <script type="math/tex">n_i = 1</script> for all units.  Similarly, binomial regression is equivalent to a logistic regression where the response <script type="math/tex">1</script> and the predictor <script type="math/tex">X_i</script> is repeated <script type="math/tex">y_i</script> times in the data matrix, and the response <script type="math/tex">0</script> and the predictor <script type="math/tex">X_i</script> is repeated <script type="math/tex">n_i - y_i</script> times.</p>
+
+<h2 id="linear-regression">Linear regression</h2>
+<p>The regression equations are <script type="math/tex">X^T X \beta = X^T Y</script> (see <a href="/geometric-interpretations-of-linear-regression-and-ANOVA.html">Geometric interpretations of linear regression and ANOVA</a> for more about the geometry behind these equations).  The predicted value in regression is <script type="math/tex">\hat{Y} = X \hat{\beta}</script>, where <script type="math/tex">\hat{\beta}</script> solves the regression equations.  Thus, the regression equations say that <script type="math/tex">X^T \hat{Y} = X^T Y</script> or <script type="math/tex">\sum_{i=1}^n \hat{y}_i X_i = \sum_{i=1}^n y_i X_i</script>.  Again, these are the calibration equations from above.  Note that <script type="math/tex">\hat{y}_i</script> is the mean of <script type="math/tex">y_i</script> under the linear regression model.</p>
+
+<h2 id="poisson-regression">Poisson regression</h2>
+<p>In Poission regression, the response <script type="math/tex">y_i</script> is a Poisson random variable with rate <script type="math/tex">\lambda_i</script> (<script type="math/tex">\lambda_i</script> is also the mean and variance).  The rates across different units are linked by assuming that the log-rate is a linear function of the predictors <script type="math/tex">X_i</script> with common slope <script type="math/tex">\beta</script>: <script type="math/tex">\log \lambda_i = \beta^T X_i</script>.  Often Poisson regression includes an exposure term <script type="math/tex">u_i</script> so that <script type="math/tex">\lambda_i</script> is the rate per unit of exposure.  In other words, unit <script type="math/tex">i</script> has response that is modeled Poisson with rate <script type="math/tex">u_i \lambda_i</script>.  The log-rate is <script type="math/tex">\log(u_i) + \log(\lambda_i) = \log(u_i) + \beta^T X_i</script>.  The exposure term <script type="math/tex">\log(u_i)</script> is called the offset and is constrained to have coefficient <script type="math/tex">1</script> in the fitting process.</p>
+
+<p>In Poisson regression, the likelihood is</p>
+
+<script type="math/tex; mode=display">L(\beta) = \prod_{i=1}^n \frac{e^{-\lambda_i} \lambda_i^{y_i}}{y_i!},</script>
+
+<p>and the negative log-likelihood (up to a constant) is</p>
+
+<script type="math/tex; mode=display">l(\beta) =  \sum_{i=1}^n \lambda_i - y_i \log \lambda_i.</script>
+
+<p>Differentiating with respect to <script type="math/tex">\beta</script>, we see that the fitted rates satisfy the calibration equations:</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n \lambda_i X_i = \sum_{i=1}^n y_i X_i</script>
+
+<h2 id="exponential-family-with-canonical-link-function">Exponential family with canonical link function</h2>
+<p>The calibration equations hold for any generalized linear model with “canonical” link function.  A random variable <script type="math/tex">Y</script> follows follows a scalar exponential family distribution if its density is of the form</p>
+
+<script type="math/tex; mode=display">f(y) = a(\theta) b(y) e^{\theta y},</script>
+
+<p>where <script type="math/tex">a(\theta) > 0</script> and <script type="math/tex">b(y) \geq 0</script>.  In other words, the parameter <script type="math/tex">\theta</script> and <script type="math/tex">y</script> only occur together as a product in an exponential.  The mean of an exponential family random variable can be expressed in terms of <script type="math/tex">a(\theta)</script>:</p>
+
+<script type="math/tex; mode=display">E(y) = -\frac{a'(\theta)}{a(\theta)} = - \frac{\text{d}}{\text{d} \theta} \log a(\theta).</script>
+
+<p>To see this, differentiate the density in <script type="math/tex">\theta</script></p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} \frac{\text{d}}{\text{d} \theta} \ f(y) &=  a'(\theta) b(y) e^{\theta y} + a(\theta) b(y) e^{\theta y} y \\ &= \frac{a'(\theta)}{a(\theta)} f(y) + y f(y) \end{aligned} %]]></script>
+
+<p>and then integrate over <script type="math/tex">y</script> (or sum if <script type="math/tex">Y</script> is discrete):</p>
+
+<script type="math/tex; mode=display">\int_{y} \frac{\text{d}}{\text{d} \theta}\ f(y) = \frac{a'(\theta)}{a(\theta)} + \text{E} \left( y \right).</script>
+
+<p>By interchanging the derivative and the integral, we see that this quantity is also 0:</p>
+
+<script type="math/tex; mode=display">\int_{y} \frac{\text{d}}{\text{d} \theta}\ f(y) = \frac{\text{d}}{\text{d} \theta} \int_{y} f(y) = \frac{\text{d}}{\text{d} \theta} 1 = 0.</script>
+
+<p>To make the concept of an exponential family more concrete, let’s see why the binomial distribution (with fixed number of trials <script type="math/tex">n</script>) is an exponential family:</p>
+
+<script type="math/tex; mode=display">\binom{n}{y} p^y (1-p)^{n-y} = \binom{n}{y} (1-p)^n e^{\log \left( \frac{p}{1-p} \right) \cdot y }.</script>
+
+<p>In this case, the natural parameter is <script type="math/tex">\theta = \log \left( \frac{p}{1-p} \right)</script>.  The binomial distribution is not an exponential family random variable if the number of trials <script type="math/tex">n</script> is considered a parameter (because then the range of <script type="math/tex">Y</script> depends on the parameter <script type="math/tex">n</script>, which means that <script type="math/tex">\theta</script> and <script type="math/tex">y</script> are coupled outside the exponential).</p>
+
+<p>Suppose that the response <script type="math/tex">y_i</script> of unit <script type="math/tex">i</script> has exponential family distribution with natural parameter <script type="math/tex">\theta_i</script>.  Suppose further that the parameters are related by <script type="math/tex">\theta_i = \beta^T X_i</script>, where <script type="math/tex">X_i</script> is a covariate vector for unit <script type="math/tex">i</script>.</p>
+
+<p>The negative log-likelihood (up to a constant in <script type="math/tex">\beta</script>) is</p>
+
+<script type="math/tex; mode=display">l(\beta) = \sum_{i=1}^n -\log a(\theta_i) - \theta_i y_i.</script>
+
+<p>Differentiating in <script type="math/tex">\beta</script> (to find the MLE), we get</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n \text{E} \left( y_i \right) X_i - y_i X_i.</script>
+
+<p>The expected values <script type="math/tex">\text{E}(y_i)</script> from the MLE fitted model therefore satisfy the calibration equations:</p>
+
+<script type="math/tex; mode=display">\sum_{i=1}^n \text{E} \left( y_i \right) X_i = \sum_{i=1}^n y_i X_i.</script>
+
+
+<span class="post-date">
+  Written on
+  
+  August
+  21st
+    ,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Calibration in logistic regression and other generalized linear models&amp;url=/calibration-in-logistic-regression-and-other-generalized-linear-models.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/calibration-in-logistic-regression-and-other-generalized-linear-models.html&amp;title=Calibration in logistic regression and other generalized linear models" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/calibration-in-logistic-regression-and-other-generalized-linear-models.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/inference-based-on-entropy-maximization.html">
+                Inference based on entropy maximization
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>May 18, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

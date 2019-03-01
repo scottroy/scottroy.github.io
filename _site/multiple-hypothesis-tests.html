@@ -1,0 +1,304 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Multiple Hypothesis Tests | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Multiple Hypothesis Tests | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Multiple Hypothesis Tests" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In hypothesis testing, rejecting the null hypothesis typically means we found something interesting — a drug performs better than the placebo, there is a difference between two fertilizers, the new textbook helps students achieve better test scores than the current one, etc. Rejecting the null hypothesis when it is true amounts to a false discovery.  On the other hand, accepting the null hypothesis when it is false means you failed to find an interesting result.  Here are some common synonyms:" />
+<meta property="og:description" content="In hypothesis testing, rejecting the null hypothesis typically means we found something interesting — a drug performs better than the placebo, there is a difference between two fertilizers, the new textbook helps students achieve better test scores than the current one, etc. Rejecting the null hypothesis when it is true amounts to a false discovery.  On the other hand, accepting the null hypothesis when it is false means you failed to find an interesting result.  Here are some common synonyms:" />
+<link rel="canonical" href="http://localhost:4000/multiple-hypothesis-tests.html" />
+<meta property="og:url" content="http://localhost:4000/multiple-hypothesis-tests.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/plant.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-13T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"In hypothesis testing, rejecting the null hypothesis typically means we found something interesting — a drug performs better than the placebo, there is a difference between two fertilizers, the new textbook helps students achieve better test scores than the current one, etc. Rejecting the null hypothesis when it is true amounts to a false discovery.  On the other hand, accepting the null hypothesis when it is false means you failed to find an interesting result.  Here are some common synonyms:","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/multiple-hypothesis-tests.html","image":"http://localhost:4000/plant.jpg","headline":"Multiple Hypothesis Tests","dateModified":"2018-04-13T00:00:00-07:00","datePublished":"2018-04-13T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/multiple-hypothesis-tests.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Multiple Hypothesis Tests
+</h1>
+
+
+  <img src="/assets/img/plant.jpg">
+
+
+<p>In hypothesis testing, rejecting the null hypothesis typically means we found something interesting — a drug performs better than the placebo, there is a difference between two fertilizers, the new textbook helps students achieve better test scores than the current one, etc. Rejecting the null hypothesis when it is true amounts to a false discovery.  On the other hand, accepting the null hypothesis when it is false means you failed to find an interesting result.  Here are some common synonyms:</p>
+
+<ul>
+  <li>Asserting something interesting that’s not = False Positive = False Discovery = Type I Error</li>
+  <li>Failing to detect something interesting = False Negative = Miss = Type II Error</li>
+</ul>
+
+<p>Performing multiple hypothesis tests inflates false positive rates. Imagine 500 science labs around the world try to determine if playing music to pea plants makes them grow faster.  Each lab uses the same experiment design and performs a t-test with significance level <script type="math/tex">\alpha = 0.01</script>.  Assuming the null that music has no effect on pea growth, each lab will reject the null with probability <script type="math/tex">0.01</script>.  Although each individual lab is unlikely to reject the null, there is a greater than <script type="math/tex">99\%</script> chance that some lab will reject the null:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\textbf{P}(\text{at least one false positive}) &= 1 - \textbf{P}(\text{500 true negatives}) \\
+&= 1 - (0.99)^{500} \\
+&= 0.993.
+\end{aligned} %]]></script>
+
+<p>There are a couple ways to address this inflation of false positives:</p>
+
+<ul>
+  <li>Use a Bonferroni correction to control the family-wise error rate (FWER)</li>
+  <li>Control the false-discovery rate (FDR)</li>
+</ul>
+
+<h3 id="bonferroni-correction">Bonferroni correction</h3>
+
+<p>For <script type="math/tex">m</script> hypothesis tests, the family-wise error rate is the false positive rate for the family of tests: the probability that one of the <script type="math/tex">m</script> tests rejects the null when it is true.  To control the FWER at <script type="math/tex">\alpha</script>, we set the significance level for each individual test at <script type="math/tex">\alpha / m</script>.  Alternatively, we can use significance level <script type="math/tex">\alpha</script> for each individual test, but form Bonferroni-adjusted <script type="math/tex">p</script>-values by multiplying each <script type="math/tex">p</script>-value by <script type="math/tex">m</script>.  The Bonferroni correction only works for a moderate number of tests — if <script type="math/tex">m</script> is too large, each individual test will be too cautious and never reject the null.  You’ll never find anything interesting!</p>
+
+<h3 id="false-discovery-rate">False-discovery rate</h3>
+
+<p>A more modern approach for multiple hypothesis testing is to control the false-discovery rate .  We accept that some hypothesis tests will result in false positives, but control the fraction of false-positives to all positives. The test works as follows.</p>
+
+<p>Choose a false-discovery rate <script type="math/tex">\alpha</script>, and compute the q-values <script type="math/tex">q_i = (i/m) \alpha</script>.
+Look at the ordered <script type="math/tex">p</script>-values <script type="math/tex">% <![CDATA[
+p_{(1)} < p_{(2)} < \ldots < p_{(m)} %]]></script> corresponding to (after relabeling) the null hypotheses <script type="math/tex">H_1, H_2, \ldots, H_m</script>, and find the largest index <script type="math/tex">j</script> with <script type="math/tex">p_{(k)} \leq q_k</script> for <script type="math/tex">k = 1\ldots j</script>.
+Reject the first <script type="math/tex">j</script> hypotheses <script type="math/tex">H_1, H_2, \ldots, H_j</script>.
+This procedure caps the FDR at <script type="math/tex">\alpha</script>, and unlike the Bonferroni correction, we will typically reject some hypotheses.</p>
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  13th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Multiple Hypothesis Tests&amp;url=/multiple-hypothesis-tests.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/multiple-hypothesis-tests.html&amp;title=Multiple Hypothesis Tests" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/multiple-hypothesis-tests.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+          <li>
+            <h3>
+              <a href="/controlling-error-when-testing-many-hypotheses.html">
+                Controlling error when testing many hypotheses
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>November 18, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/ROC-space-and-AUC.html">
+                ROC space and AUC
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>April 29, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

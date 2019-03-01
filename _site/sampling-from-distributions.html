@@ -1,0 +1,272 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Sampling from distributions | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Sampling from distributions | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Sampling from distributions" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post." />
+<meta property="og:description" content="There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post." />
+<link rel="canonical" href="http://localhost:4000/sampling-from-distributions.html" />
+<meta property="og:url" content="http://localhost:4000/sampling-from-distributions.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/sampling.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-05-12T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/sampling-from-distributions.html","image":"http://localhost:4000/sampling.png","headline":"Sampling from distributions","dateModified":"2018-05-12T00:00:00-07:00","datePublished":"2018-05-12T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/sampling-from-distributions.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Sampling from distributions
+</h1>
+
+
+  <img src="/assets/img/sampling.png">
+
+
+<p>There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post.</p>
+
+<p>I said “almost no difference” because to sample from a density, you do need some external source of randomness.  Sampling techniques do not create randomness, but rather transform one kind of random samples (usually uniform) into samples from a specified density.  As an aside, a uniform random sample <script type="math/tex">x</script> can be generated by flipping a coin infinitely many times.  First flip a coin to decide whether to look for <script type="math/tex">x</script> in the first or second half of the interval <script type="math/tex">(0,1)</script>.  If the coin shows heads, we look for <script type="math/tex">x</script> in <script type="math/tex">[0,0.5)</script>, otherwise we look in <script type="math/tex">[0.5,1)</script>.  This process is repeated recursively.  For example, if the first toss is heads, we toss again to decide whether to look for <script type="math/tex">x</script> in <script type="math/tex">[0,0.25)</script> or <script type="math/tex">[0.25,0.5)</script>.  In practice, to sample <script type="math/tex">x</script> with 9 digits of accuracy, we only need to toss the coin 30 times.</p>
+
+<p>The observation that we can estimate anything about a distribution by being able to draw samples from it is important for Bayesian statistics in practice.  Bayesian inference is a matter of being able to draw from the posterior.  I’ll now touch on various methods for generating random samples from a given density.</p>
+
+<h2 id="use-related-distributions">Use related distributions</h2>
+<p>There are many relationships between common random variables.  For example,</p>
+
+<ul>
+  <li>If <script type="math/tex">Z</script> is standard normal, then <script type="math/tex">\sigma Z + \mu</script> is <script type="math/tex">N(\mu, \sigma^2)</script>.</li>
+  <li>If <script type="math/tex">Z</script> is standard normal and <script type="math/tex">V</script> is independently <script type="math/tex">\chi^2_{p}</script>, then <script type="math/tex">T = \frac{Z}{\sqrt{V / p}}</script> has Student’s t-distribution with <script type="math/tex">p</script> degrees of freedom.</li>
+  <li>If <script type="math/tex">U</script> is uniform, then <script type="math/tex">-\frac{1}{\beta} \log(U)</script> is exponential with rate <script type="math/tex">\beta</script>.</li>
+  <li>If <script type="math/tex">X \sim \text{Gamma}(\alpha, \lambda)</script> and independently <script type="math/tex">Y \sim \text{Gamma}(\beta, \lambda)</script>, then <script type="math/tex">\frac{X}{X+Y} \sim \text{Beta}(\alpha, \beta)</script>.</li>
+</ul>
+
+<p>These relationships can be exploited to generate random samples.  For example, to draw <script type="math/tex">x</script> from an exponential distribution with rate parameter 1, first draw <script type="math/tex">u</script> uniformly over <script type="math/tex">(0,1)</script> and set <script type="math/tex">x = -\log(u)</script>.  Along the same line, a <script type="math/tex">\text{Beta}(\alpha, \beta)</script> random draw can be formed as the ratio of two exponential draws (exponential is a special case of gamma):</p>
+
+<script type="math/tex; mode=display">\frac{\frac{1}{\alpha}\log(u_1)}{\frac{1}{\alpha}\log(u_1) + \frac{1}{\beta}\log(u_2)}</script>
+
+<h2 id="inverse-cdf-method">Inverse CDF method</h2>
+<p>If <script type="math/tex">F</script> is an invertible CDF and <script type="math/tex">U</script> is uniform, then <script type="math/tex">X = F^{-1}(U)</script> is distributed with CDF <script type="math/tex">F</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} \textbf{P}(X \leq t) &= \textbf{P}(F^{-1}(U) \leq t) \\ &=\textbf{P}(U \leq F(t)) \\ &= F(t) \end{aligned} %]]></script>
+
+<p>Summary: if we know the inverse CDF of a distribution, we can sample from it.  As an aside, the inverse CDF of an exponential distribution is <script type="math/tex">F^{-1}(t) = -\frac{1}{\beta} \log(t)</script>, which we used in the previous section.</p>
+
+<p>We can approximate the inverse CDF method with a Riemann sum.  Below I approximate a density with rectangles.</p>
+
+<p><img src="/assets/img/sampling.png" alt="" /></p>
+
+<p>The CDF is represented by stacking these rectangles end to end to form a strip.  The inverse is represented in the color-coding.  In the figure, a dot is drawn uniformly on the strip, and is mapped back (using colors) to get a sample from the density.</p>
+
+<h2 id="rejection-sampling">Rejection sampling</h2>
+<p>Rejection sampling is a technique to sample from a subset, assuming we know how to sample from the larger set.  I’ll explain the technique with an example.  Suppose I want to sample a random point from a lightning bolt subset of a square.</p>
+
+<p><img src="/assets/img/accept_reject.png" alt="" /></p>
+
+<p>In rejection sampling, I first draw a point uniformly at random from the square, and I accept the sample if it lands in the lightning bolt, and reject the sample otherwise.  The accepted samples are distributed uniformly over the lightning bolt.The probability that a sample is accepted is the area of the lightning bolt over the area of the square.  The acceptance probability measures the efficiency of the method: if I want <script type="math/tex">n</script> random samples from the lightning bolt, on average I have to draw <script type="math/tex">\frac{n}{\textbf{P}(\text{acceptance})}</script> samples from the square.</p>
+
+<p>Rejection sampling is often introduced as a technique for drawing from a density.  Drawing from a density is equivalent to drawing uniformly from the region below the density.  To be more precise, drawing a random variable from a density <script type="math/tex">f</script> is equivalent to drawing uniformly from the region below the density in the following sense:</p>
+
+<ul>
+  <li>If <script type="math/tex">(x,y)</script> is drawn uniformly over the region below the density, then <script type="math/tex">x</script> is a random draw from <script type="math/tex">f</script>.</li>
+  <li>If <script type="math/tex">x</script> is a random draw from <script type="math/tex">f</script>, and <script type="math/tex">y</script> is a uniform draw from the interval <script type="math/tex">(0, f(x))</script>, then <script type="math/tex">(x, y)</script> is uniformly distributed over the region below the density.</li>
+</ul>
+
+<p>To sample from <script type="math/tex">f</script> with rejection sampling, we first find a proposal density <script type="math/tex">g</script> and constant <script type="math/tex">c \geq 1</script> with <script type="math/tex">cg \geq f</script>.  We then</p>
+
+<ol>
+  <li>Sample from <script type="math/tex">g</script> to construct a uniform sample under <script type="math/tex">c g</script>.</li>
+  <li>Apply rejection sampling to get a uniform sample under <script type="math/tex">f</script>.</li>
+  <li>The x-coordinate of the uniform sample under <script type="math/tex">f</script> is a sample from <script type="math/tex">f</script>.</li>
+</ol>
+
+<p><img src="/assets/img/accept_reject2.png" alt="" /></p>
+
+<p>The acceptance rate is <script type="math/tex">1/c</script>, the area under <script type="math/tex">f</script> over the area under <script type="math/tex">cg</script>.  The more <script type="math/tex">g</script> is like <script type="math/tex">f</script>, the more efficient the rejection sampling algorithm.</p>
+
+<p>Constructing a proposal density <script type="math/tex">g</script> that is 1) easy to sample from and 2) closely resembles <script type="math/tex">f</script> can be challenging.  Let’s walk through an example with the standard normal density <script type="math/tex">f(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2}</script>.  Since <script type="math/tex">f</script> is log-concave, we can construct a piecewise exponential curve <script type="math/tex">g</script> that upper bounds (and well approximates) <script type="math/tex">f</script>.  This piecewise exponential curve can be sampled from quickly using the inverse CDF method.</p>
+
+<h2 id="adaptive-rejection-sampling">Adaptive rejection sampling</h2>
+<p>Adaptive rejection sampling is a variant of rejection sampling that learns the proposal density <script type="math/tex">g</script> as it runs.  The method applies to log-concave densities and constructs a piecewise exponential <script type="math/tex">g</script> by constructing a piecewise linear function that approximates (and upper bounds) <script type="math/tex">h(x) = \log f(x)</script>.</p>
+
+<p><img src="/assets/img/adaptive_sampling.png" alt="" /></p>
+
+<h2 id="issues-in-high-dimensions">Issues in high dimensions</h2>
+<p>Rejection sampling is generally inefficient in high dimensions.  To explain, suppose I sample from standard normal by using a normal with variance <script type="math/tex">\sigma^2 \geq 1</script> as the proposal density.  (This example is just to illustrate a point.  We can get a standard normal sample from any other normal sample by “standardizing,” and do not need to use rejection sampling.)  The standard normal has density <script type="math/tex">f(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2}</script> and the proposal density is <script type="math/tex">g(x) = \frac{1}{\sqrt{2\pi} \sigma} e^{-x^2/(2\sigma^2)}</script>.  Suppose <script type="math/tex">\sigma = 1.001</script>.  In this case, we can set <script type="math/tex">c = \sigma</script> so that <script type="math/tex">cg \geq f</script> and the acceptance probability is <script type="math/tex">1 / c \approx 99.9\%</script>.  Now let <script type="math/tex">f</script> be the density of a 5000-dimensional normal random vector with covariance matrix <script type="math/tex">I</script> and suppose <script type="math/tex">g</script> has covariance matrix <script type="math/tex">\sigma^2I</script>.  In this case <script type="math/tex">c = \sigma^{5000}</script> and the acceptance rate <script type="math/tex">1 / c</script> is less than a percent.</p>
+
+<p>In high dimensional problems that arise in Bayesian sampling, methods based off Markov chains such as MCMC or Gibbs sampling are used.</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li><em>Adaptive Rejection Sampling for Gibbs Sampling</em> by W. R. Gilks and P. Wild</li>
+</ul>
+
+
+<span class="post-date">
+  Written on
+  
+  May
+  12th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Sampling from distributions&amp;url=/sampling-from-distributions.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/sampling-from-distributions.html&amp;title=Sampling from distributions" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/sampling-from-distributions.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Distinguishing proportions: the risk ratio | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Distinguishing proportions: the risk ratio | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Distinguishing proportions: the risk ratio" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Suppose I conduct an experiment to determine whether to use font A or font B in an online ad.  After running the experiment, I find that there is a 1% chance that a user clicks on the font A ad, and a 0.8% chance that the user clicks on the font B ad." />
+<meta property="og:description" content="Suppose I conduct an experiment to determine whether to use font A or font B in an online ad.  After running the experiment, I find that there is a 1% chance that a user clicks on the font A ad, and a 0.8% chance that the user clicks on the font B ad." />
+<link rel="canonical" href="http://localhost:4000/distinguishing-proportions-the-risk-ratio.html" />
+<meta property="og:url" content="http://localhost:4000/distinguishing-proportions-the-risk-ratio.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/payperclick.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-13T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"Suppose I conduct an experiment to determine whether to use font A or font B in an online ad.  After running the experiment, I find that there is a 1% chance that a user clicks on the font A ad, and a 0.8% chance that the user clicks on the font B ad.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/distinguishing-proportions-the-risk-ratio.html","image":"http://localhost:4000/payperclick.jpg","headline":"Distinguishing proportions: the risk ratio","dateModified":"2018-04-13T00:00:00-07:00","datePublished":"2018-04-13T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/distinguishing-proportions-the-risk-ratio.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Distinguishing proportions: the risk ratio
+</h1>
+
+
+  <img src="/assets/img/payperclick.jpg">
+
+
+<p>Suppose I conduct an experiment to determine whether to use font A or font B in an online ad.  After running the experiment, I find that there is a 1% chance that a user clicks on the font A ad, and a 0.8% chance that the user clicks on the font B ad.</p>
+
+<p>We can can compare these click rates on an absolute scale (font A increases the click rate by 0.2%) or compare on a relative scale (the click rate for font A is 1.25 times higher).  The relative comparison (the probability of clicking on a font A ad over the probability of clicking on a font B ad) is called the risk ratio in some fields.  To determine statistical significance, we can see if the difference is significantly different than 0 or if the ratio is significantly different than 1.  I’d highly recommend comparing the difference to 0 (in fact, we’ll handle the ratio by taking the log and turning it into a difference), but the ratio is nice for reporting purposes and so I’ll discuss computing a confidence interval for it.</p>
+
+<p>Suppose I show <script type="math/tex">n</script> impressions of the ad with font A, and let <script type="math/tex">X_1, \ldots, X_n</script> be the outcomes (<script type="math/tex">X_1 = 1</script> means the user clicked on the ad and <script type="math/tex">X_1=0</script> means the user did not click on the ad).  Similarly, let <script type="math/tex">Y_1, \ldots, Y_m</script> be the outcomes of the <script type="math/tex">m</script> impressions of the ad with font B I show.</p>
+
+<p>The estimated probability of clicking on the font A ad is <script type="math/tex">\hat{p}_A = \sum X_i / n</script>.  By the central limit theorem, <script type="math/tex">\hat{p}_A</script> is approximately distributed <script type="math/tex">N(p_A,\ p_A(1-p_A) / n)</script>, where <script type="math/tex">p_A</script> is the true probability.  Similarly, <script type="math/tex">\hat{p}_B</script> is approximately distributed <script type="math/tex">N(p_B,\ p_B(1-p_B) / m)</script>.</p>
+
+<p>Thus the difference is approximately distributed</p>
+
+<script type="math/tex; mode=display">\hat{p}_A - \hat{p}_B\ \dot\sim\ N(p_A - p_B,\ p_A(1-p_A) / n + p_B(1-p_B) / m).</script>
+
+<p>Under the null hypothesis, we assume <script type="math/tex">p_A = p_B</script>.  If we let <script type="math/tex">p</script> denote this common value, we have</p>
+
+<script type="math/tex; mode=display">\frac{\hat{p}_A - \hat{p}_B}{\sqrt{p(1-p) \left(\frac{1}{n} + \frac{1}{m}\right)}} \ \dot\sim\ N(0, 1).</script>
+
+<p>Slutsky’s theorem lets us replace <script type="math/tex">p</script> with the pooled estimate <script type="math/tex">\hat{p} = (\sum X_i + \sum Y_i) / (n + m)</script>.  In summary, to test if the difference <script type="math/tex">\hat{p}_A - \hat{p}_B</script> is significantly different than <script type="math/tex">0</script>, we compute the <script type="math/tex">Z</script>-score</p>
+
+<script type="math/tex; mode=display">\frac{\hat{p}_A - \hat{p}_B}{\sqrt{\hat{p}(1-\hat{p}) \left(\frac{1}{n} + \frac{1}{m}\right)}}</script>
+
+<p>and see how extreme it is for a draw from standard normal.</p>
+
+<p>As an aside, an alternative statistic to use to test significance is</p>
+
+<script type="math/tex; mode=display">Z = \frac{\hat{p}_A - \hat{p}_B}{\sqrt{\hat{p}_A(1-\hat{p}_A) / n + \hat{p}_B(1-\hat{p}_B) / m}}.</script>
+
+<p>One nice feature of this statistic is that the test for being significant at level <script type="math/tex">\alpha</script> using it is equivalent to the <script type="math/tex">(1-\alpha)</script> confidence interval for the difference <script type="math/tex">\hat{p}_A - \hat{p}_B</script> containing 0.</p>
+
+<p>How can we find a confidence interval for the risk ratio?  The distribution of the ratio of two independent normals is complicated (unless both normals have zero mean, in which case the ratio is distributed Cauchy).  The trick is to turn the ratio into a difference by taking a log, use propagation of error, and then transform back.</p>
+
+<p>Propagation of error approximately describes how the mean and variance of a random variable change under a transformation.  More precisely, <script type="math/tex">\textbf{E}(f(X)) \approx f(\textbf{E}(X))</script> and <script type="math/tex">\textbf{Var}(f(X)) \approx f'(\textbf{E}(X))^2\ \textbf{Var}(X)</script>.  Propagation of error is often used in conjunction with the central limit theorem: if <script type="math/tex">\sqrt{n}(X_n - \mu)</script> converges in distribution to <script type="math/tex">N(0, \sigma^2)</script>, then <script type="math/tex">\sqrt{n}(f(X_n) - f(\mu))</script> converges to <script type="math/tex">N(0, f'(\mu)^2 \sigma^2)</script>.</p>
+
+<p>By propagation of error, <script type="math/tex">\log \hat{p}_A</script> is approximately distributed <script type="math/tex">N(\log(p_A), \frac{1-p_A}{n p_A})</script>.  The standard error for the difference in log hat probabilities is thus</p>
+
+<script type="math/tex; mode=display">SE = \sqrt{\frac{1-\hat{p}_A}{n \hat{p}_A} +\frac{1-\hat{p}_B}{m\hat{p}_B}},</script>
+
+<p>and the <script type="math/tex">95\%</script> confidence interval for the difference is <script type="math/tex">\pm 1.96\ SE</script>.  We exponentiate to get the confidence interval for the risk ratio:</p>
+
+<script type="math/tex; mode=display">\frac{\hat{p}_A}{\hat{p}_B}\ e^{\pm 1.96\ SE}.</script>
+
+<p>Note the confidence interval is asymmetric!</p>
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  13th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Distinguishing proportions: the risk ratio&amp;url=/distinguishing-proportions-the-risk-ratio.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/distinguishing-proportions-the-risk-ratio.html&amp;title=Distinguishing proportions: the risk ratio" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/distinguishing-proportions-the-risk-ratio.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<channel>
+		<title>statsandstuff</title>
+		<description>a blog on statistics and machine learning</description>
+		<link></link>
+		<atom:link href="/rss-feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>Controlling error when testing many hypotheses</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;In a hypothesis test, we compute some test statistic &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sun, 18 Nov 2018 00:00:00 -0800</pubDate>
+				<link>http://localhost:4000/controlling-error-when-testing-many-hypotheses.html</link>
+				<guid isPermaLink="true">http://localhost:4000/controlling-error-when-testing-many-hypotheses.html</guid>
+			</item>
+		
+			<item>
+				<title>Calibration in logistic regression and other generalized linear models</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;In general, scores returned by machine learning models are not necessarily well-calibrated probabilities (see my post on &lt;a href=&quot;/ROC-space-and-AUC.html&quot;&gt;ROC space and AUC&lt;/a&gt;).  The probability estimates from a logistic regression model (without regularization) are partially calibrated, though.  In fact, many generalized linear models, including linear regression, logistic regression, binomial regression, and Poisson regression, give calibrated predicted values.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Tue, 21 Aug 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/calibration-in-logistic-regression-and-other-generalized-linear-models.html</link>
+				<guid isPermaLink="true">http://localhost:4000/calibration-in-logistic-regression-and-other-generalized-linear-models.html</guid>
+			</item>
+		
+			<item>
+				<title>Geometric interpretations of linear regression and ANOVA</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;In this post, I explore the connection of linear regression to geometry.  In particular, I discuss the geometric meaning of fitted values, residuals, and degrees of freedom.  Using geometry, I derive coefficient interpretations and discuss omitted variable bias.  I finish by connecting ANOVA (both hypothesis testing and power analysis) to the underlying geometry.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sun, 05 Aug 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/geometric-interpretations-of-linear-regression-and-ANOVA.html</link>
+				<guid isPermaLink="true">http://localhost:4000/geometric-interpretations-of-linear-regression-and-ANOVA.html</guid>
+			</item>
+		
+			<item>
+				<title>Inference based on entropy maximization</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;h2 id=&quot;entropy&quot;&gt;Entropy&lt;/h2&gt;
+&lt;p&gt;For a discrete random variable, the surprisal (or information content) of an outcome with probability &lt;script type=&quot;math/tex&quot;&gt;p&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;-\log p&lt;/script&gt;.  Rare events have a lot surprisal.  For a discrete random variable with &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; outcomes that occur with probabilities &lt;script type=&quot;math/tex&quot;&gt;p_1, \ldots, p_n&lt;/script&gt;, the entropy &lt;script type=&quot;math/tex&quot;&gt;H&lt;/script&gt; is the average surprisal&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Fri, 18 May 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/inference-based-on-entropy-maximization.html</link>
+				<guid isPermaLink="true">http://localhost:4000/inference-based-on-entropy-maximization.html</guid>
+			</item>
+		
+			<item>
+				<title>Sampling from distributions</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sat, 12 May 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/sampling-from-distributions.html</link>
+				<guid isPermaLink="true">http://localhost:4000/sampling-from-distributions.html</guid>
+			</item>
+		
+			<item>
+				<title>ROC space and AUC</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Before discussing ROC curves and AUC, let’s fix some terminology around the confusion matrix:&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sun, 29 Apr 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/ROC-space-and-AUC.html</link>
+				<guid isPermaLink="true">http://localhost:4000/ROC-space-and-AUC.html</guid>
+			</item>
+		
+			<item>
+				<title>Propagation of error</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sat, 28 Apr 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/propogation-of-error.html</link>
+				<guid isPermaLink="true">http://localhost:4000/propogation-of-error.html</guid>
+			</item>
+		
+			<item>
+				<title>Maximum likelihood estimation with censored data</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Fri, 20 Apr 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html</link>
+				<guid isPermaLink="true">http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html</guid>
+			</item>
+		
+			<item>
+				<title>To precision or to variance?</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Fri, 13 Apr 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/to-precision-or-to-variance.html</link>
+				<guid isPermaLink="true">http://localhost:4000/to-precision-or-to-variance.html</guid>
+			</item>
+		
+			<item>
+				<title>Randomized response</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Randomized response is a technique, introduced in the mid-1960s, to survey people about sensitive topics.  Suppose a teacher decides to survey his students on whether they cheat.  Rather than directly asking each student “Have you cheated?,” a question cheaters are unlikely to answer truthfully, the teacher can employ randomized response.  Randomized response creates a privacy layer between the interviewer and the interviewee.  Here’s how it works.  The teacher asks each student if he has cheated, but before the student answers, the teacher tells the student to flip a coin and keep the outcome of the flip secret.  If the coin comes up heads, the teacher tells the student to answer truthfully, but if the coin comes up tails, the student is instructed to answer “Yes.”  So, if the student answers “Yes” to the question “Have you cheated?,” it is either because 1) the student has cheated, or 2) the coin showed tails.  The teacher has no way to know why the student answered yes (there is a “privacy” layer).  If the student answers “No,” the teacher knows the student did not cheat.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Fri, 13 Apr 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/randomized-response.html</link>
+				<guid isPermaLink="true">http://localhost:4000/randomized-response.html</guid>
+			</item>
+		
+	</channel>
+</rss>

@@ -1,0 +1,387 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Controlling error when testing many hypotheses | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Controlling error when testing many hypotheses | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Controlling error when testing many hypotheses" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In a hypothesis test, we compute some test statistic that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)" />
+<meta property="og:description" content="In a hypothesis test, we compute some test statistic that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)" />
+<link rel="canonical" href="http://localhost:4000/controlling-error-when-testing-many-hypotheses.html" />
+<meta property="og:url" content="http://localhost:4000/controlling-error-when-testing-many-hypotheses.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/pvalue_hist.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-11-18T00:00:00-08:00" />
+<script type="application/ld+json">
+{"description":"In a hypothesis test, we compute some test statistic that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/controlling-error-when-testing-many-hypotheses.html","image":"http://localhost:4000/pvalue_hist.png","headline":"Controlling error when testing many hypotheses","dateModified":"2018-11-18T00:00:00-08:00","datePublished":"2018-11-18T00:00:00-08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/controlling-error-when-testing-many-hypotheses.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Controlling error when testing many hypotheses
+</h1>
+
+
+  <img src="/assets/img/pvalue_hist.png">
+
+
+<p>In a hypothesis test, we compute some test statistic <script type="math/tex">T</script> that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)</p>
+
+<p>When we perform many tests (for example, testing association with disease on thousands of genes), we are likely to get false positives, even if each individual test has a small probability of error (see <a href="/multiple-hypothesis-tests.html">Multiple hypothesis tests</a>).  With careful analysis, though, we can understand (and therefore control) the number of false positives our battery of tests yields.</p>
+
+<p>The most important insight into analyzing the “multiple testing problem” is the observation that under the null hypothesis, the p-values are uniformly distributed.  To see this, suppose that under the null, the test statistic is distributed <script type="math/tex">T \sim f</script>.  The p-value <script type="math/tex">p(T)</script> is at most <script type="math/tex">\alpha</script> if the test statistic <script type="math/tex">T</script> falls in the <script type="math/tex">\alpha</script>-tail of the distribution <script type="math/tex">f</script>.  By definition, this happens with probability <script type="math/tex">\alpha</script>, and so <script type="math/tex">\textbf{P}(p(T) \leq \alpha) = \alpha</script> and <script type="math/tex">p(T) \sim \text{Uniform}(0,1)</script>. (This is more or less the same reasoning used in the inverse CDF method; see <a href="/sampling-from-distributions.html">Sampling from distributions</a>.)</p>
+
+<p>Throughout we assume that we test <script type="math/tex">m</script> independent hypotheses, <script type="math/tex">m_0</script> of which are null and <script type="math/tex">m_1 = m - m_0</script> of which are alternative.  We do not know the number of null hypotheses <script type="math/tex">m_0</script> a priori. (If <script type="math/tex">m_0</script> is large, we can estimate it from a p-value histogram because <script type="math/tex">m_0</script> of the p-values are uniformly distributed.)  We reject a hypothesis if its p-value is less than some threshold <script type="math/tex">t</script>.  We let V denote the number null hypotheses we rejected.</p>
+
+<h2 id="bonferroni-correction">Bonferroni correction</h2>
+<p>The Bonferroni correction sets a rejection threshold <script type="math/tex">t</script> so that the probability of having a false positive is controlled at level <script type="math/tex">\alpha</script>: <script type="math/tex">\textbf{P}(V \geq 1) \leq \alpha</script>.  At significance level <script type="math/tex">t</script>, what is the probability that we reject some null hypothesis?  It is easier to compute the probability of the complement event that we do not reject any null hypotheses.  This happens if <script type="math/tex">m_0</script> i.i.d. uniform p-values land in the interval <script type="math/tex">[t,1]</script>, which occurs with probability <script type="math/tex">(1-t)^{m_0}</script>.  We thus have:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\textbf{P}(V \geq 1) = 1 - (1-t)^{m_0} \leq \alpha \quad &\Leftrightarrow \quad t \leq 1 - (1-\alpha)^{1/m_0}.
+\end{aligned} %]]></script>
+
+<p>The threshold <script type="math/tex">t(\alpha) = 1 - (1-\alpha)^{1/m_0}</script> caps the family-wise error rate (FWER) <script type="math/tex">\textbf{P}(V \geq 1)</script> at <script type="math/tex">\alpha</script>.  We do not know <script type="math/tex">m_0</script> a priori, but replacing <script type="math/tex">m_0</script> with <script type="math/tex">m</script> only makes the threshold smaller, and therefore still controls the FWER.  If we have a better upper estimate of <script type="math/tex">m_0</script> (from a histogram of p-values, for example), we can use it instead of <script type="math/tex">m</script>.</p>
+
+<p>The formula for the threshold <script type="math/tex">t(\alpha)</script> is quite ugly, but is convex and can therefore be underestimated with its tangent line <script type="math/tex">l(\alpha) = \alpha/m_0</script>  at <script type="math/tex">\alpha=0</script>.  The approximation is near perfect for practical values of <script type="math/tex">\alpha \leq 0.1</script>.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/assets/img/FWER.png" alt="" /></td>
+      <td><img src="/assets/img/FWER2.png" alt="" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The Bonferroni correction controls the FWER at <script type="math/tex">\alpha</script> and then tests for significance at level <script type="math/tex">\alpha/m</script> (it is usually proved in a simpler way using a union bound).  For a large numbers of tests, the Bonferroni correction is too strict and often results in no positive findings.</p>
+
+<p>A slight improvement that still controls the FWER at level <script type="math/tex">\alpha</script> is the <strong>Holm-Bonferroni method</strong>.  This procedure gradually increases the significance level.  The smallest p-value <script type="math/tex">p_{(1)}</script> is tested at threshold <script type="math/tex">\alpha / m</script> (the same as the Bonferroni method), but the next smallest p-value <script type="math/tex">p_{(2)}</script> is tested with threshold <script type="math/tex">\alpha / (m-1)</script>, and the next smallest is tested at level <script type="math/tex">\alpha / (m-2)</script>, and so on.  The procedure stops when a p-value is not rejected.  The Holm-Bonferroni method is still very strict when <script type="math/tex">m</script> is large.  (Both the Bonferroni method and the Holm-Bonferroni procedure can be made more powerful by replacing <script type="math/tex">m</script> with a better overestimate of <script type="math/tex">m_0</script>.)</p>
+
+<p>The methods we discuss next allow some false positives, but control the number of false positives.</p>
+
+<h2 id="controlling-k-fwer">Controlling k-FWER</h2>
+<p>Suppose we’re willing to allow <script type="math/tex">k</script> false positives, but control the probability <script type="math/tex">\textbf{P}(V \geq k+1)</script> of having more than <script type="math/tex">k</script> false positives (called the k-FWER).  Notice that we have more than <script type="math/tex">k</script> false positives if the <script type="math/tex">(k+1)</script>th largest null p-value is less than the significance threshold <script type="math/tex">t</script>.  Since the null p-values are uniformly distributed, the <script type="math/tex">(k+1)</script>th largest null p-value is distributed <script type="math/tex">\text{Beta}(k+1, m_0 - k)</script>.  We simply find the threshold <script type="math/tex">t</script> such that <script type="math/tex">\textbf{P}( \text{Beta}(k+1, m_0 - k) \leq t) = \alpha</script>.  Here is a plot.</p>
+
+<p><img src="/assets/img/kFWER.png" alt="" /></p>
+
+<p>Controlling the false discovery rate
+Roughly speaking, the false discovery rate (FDR) is <script type="math/tex">\textbf{P}(\text{test is null} \vert  \text{test is rejected})</script>.  This is the reverse of the false positive rate <script type="math/tex">\textbf{P}(\text{test is rejected} \vert  \text{test is null})</script>, the quantity that is traditionally controlled in hypothesis testing.  Limiting the FDR and the FPR controls the number of false positives, but the denominators used to compute the two rates differ.  The FDR uses the number of rejections in the denominator, whereas the the FPR uses the number of null tests.  The difference between the two is much like the difference between precision and recall.</p>
+
+<p>Below is the p-value histogram for 10,000 t-tests for a difference in two means.  The two means were equal in about 70% of the tests (70% of the tests were null).  The p-value distribution is a mixture of a uniform distribution (from the null tests) and a distribution concentrated near 0 (from the non-null tests).  A priori we do not know which p-values correspond to the null tests (we observe the black histogram on the left); since this data is simulated, though, I show which p-values correspond to null tests in the red/blue histogram on the right.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/assets/img/pvalue_hist_black.png" alt="" /></td>
+      <td><img src="/assets/img/pvalue_hist.png" alt="" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The FDR at significance threshold <script type="math/tex">t</script> is the number of null p-values to the left of <script type="math/tex">t</script> over the total number of p-values to the left of <script type="math/tex">t</script> (the proportion of blue area to the left of <script type="math/tex">t</script> in the histogram.)  In most cases, the FDR decreases with the significance threshold <script type="math/tex">t</script>.  Below we zoom in on the histogram in the <script type="math/tex">[0, 0.05]</script> region.</p>
+
+<p><img src="/assets/img/pvalue_hist2.png" alt="" /></p>
+
+<p>A priori we do not know which p-values correspond to null tests (the blue portion of the p-value histogram).  Nonetheless we can assume that all p-values bigger than, for example, 0.5 correspond to null tests.  In this case, we estimate the number of null tests via the relation <script type="math/tex">0.5 m_0 = \# \{ \text{p-values} \geq 0.5\}</script>, where <script type="math/tex">m_0</script> is the (unknown) number of null tests.  Rather than use 0.5, we can parametrize with <script type="math/tex">s</script> and estimate the fraction of null tests <script type="math/tex">\frac{m_0}{m}</script> with <script type="math/tex">\hat{\pi}_0(s) = \frac{\# \{ \text{p-values} \geq s\}}{s m}</script>.  The estimate is best (but noisy) for values of <script type="math/tex">s</script> near 1 (<script type="math/tex">s</script> controls the bias-variance tradeoff).  Here is a plot of <script type="math/tex">\hat{\pi}_0(s)</script> versus <script type="math/tex">s</script>.</p>
+
+<p><img src="/assets/img/pi0.png" alt="" /></p>
+
+<p>Storey and Tibshirani suggest fitting a weighted cubic spline to the curve <script type="math/tex">s \mapsto \hat{\pi}_0(s)</script> and evaluating the spline at 1.</p>
+
+<p>The estimated FDR at threshold <script type="math/tex">t</script> is</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} \text{FDR}(t) &= \frac{m \hat{\pi}_0 t}{\# \{ \text{p-values} \leq t\}}. \end{aligned} %]]></script>
+
+<p>We plot this over <script type="math/tex">t</script>.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="/assets/img/fdr.png" alt="" /></td>
+      <td><img src="/assets/img/fdr2.png" alt="" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Suppose we set <script type="math/tex">t</script> to the <script type="math/tex">k</script>th largest p-value <script type="math/tex">p_{(k)}</script> so that we reject the <script type="math/tex">k</script> smallest p-values.  Then</p>
+
+<script type="math/tex; mode=display">\text{FDR}(p_{(k)}) = \frac{m \hat{\pi}_0 p_{(k)}}{k}.</script>
+
+<p>The q-value <script type="math/tex">q_{(k)}</script> corresponding to the <script type="math/tex">k</script>th largest p-value <script type="math/tex">p_{(k)}</script> is the smallest FDR you can get if you reject the first <script type="math/tex">k</script> p-values.  In other words, it is</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} q_{(k)} &= \min_{j=k}^m \text{FDR}(p_{(j)}) \\ &= \min_{j=k}^m \frac{m \hat{\pi}_0 p_{(j)}}{j} \\ &= \min \left( \frac{m \hat{\pi}_0 p_{(k)}}{k},\ q_{(k+1)} \right),
+\end{aligned} %]]></script>
+
+<p>where <script type="math/tex">q_{(m+1)} = \infty</script>.  To control the FDR at level <script type="math/tex">\alpha</script>, we reject all hypotheses with q-value at most <script type="math/tex">\alpha</script>.  (The q-value gets its name from the fact that the letter q is a reflection of p and, roughly speaking, the q-value is <script type="math/tex">\textbf{P}(\text{test is null} \vert  \text{test is rejected})</script> and the p-value is <script type="math/tex">\textbf{P}(\text{test is rejected} \vert  \text{test is null})</script>.)</p>
+
+<p>The <strong>Benjamini-Hochberg procedure</strong> uses the same “q-values,” (discussed in Multiple hypothesis tests) but with the crude estimate <script type="math/tex">\hat{\pi}_0 = 1</script>.</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li><em>Statistical Significance for Genome-Wide Experiments</em> by Storey and Tibshirani</li>
+  <li><em>The positive false discovery rate: A Bayesian interpretation and the q-value</em> by Storey</li>
+</ul>
+
+
+<span class="post-date">
+  Written on
+  
+  November
+  18th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Controlling error when testing many hypotheses&amp;url=/controlling-error-when-testing-many-hypotheses.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/controlling-error-when-testing-many-hypotheses.html&amp;title=Controlling error when testing many hypotheses" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/controlling-error-when-testing-many-hypotheses.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/multiple-hypothesis-tests.html">
+                Multiple Hypothesis Tests
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>April 13, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/ROC-space-and-AUC.html">
+                ROC space and AUC
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>April 29, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

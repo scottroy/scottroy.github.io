@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Alligators, Dinosaurs, and Scaling | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Alligators, Dinosaurs, and Scaling | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Alligators, Dinosaurs, and Scaling" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I was walking around a book store in Fremont and found an elementary math education book.  While flipping through the book, I found the following neat problem." />
+<meta property="og:description" content="I was walking around a book store in Fremont and found an elementary math education book.  While flipping through the book, I found the following neat problem." />
+<link rel="canonical" href="http://localhost:4000/alligators-dinosaurs-and-scaling.html" />
+<meta property="og:url" content="http://localhost:4000/alligators-dinosaurs-and-scaling.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/alligator.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-13T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"I was walking around a book store in Fremont and found an elementary math education book.  While flipping through the book, I found the following neat problem.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/alligators-dinosaurs-and-scaling.html","image":"http://localhost:4000/alligator.jpg","headline":"Alligators, Dinosaurs, and Scaling","dateModified":"2018-04-13T00:00:00-07:00","datePublished":"2018-04-13T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/alligators-dinosaurs-and-scaling.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Alligators, Dinosaurs, and Scaling
+</h1>
+
+
+  <img src="/assets/img/alligator.jpg">
+
+
+<p>I was walking around a book store in Fremont and found an elementary math education book.  While flipping through the book, I found the following neat problem.</p>
+
+<p>Suppose you find a dinosaur skeleton that looks like an alligator, except that it is twice as big.  A typical alligator weighs 500 pounds.  Estimate how much the dinosaur weighed?</p>
+
+<p>The answer is not 1000 pounds!  This is not how things scale.  If I double a length, areas increase by 4, and volumes increase 8 times (imagine doubling the side length of a square or cube).  In <script type="math/tex">d</script> dimensions, if lengths are scaled by <script type="math/tex">s</script>, volumes will scale by <script type="math/tex">s^d</script>.</p>
+
+<p>Weight is proportional to volume, and the dinosaur had <script type="math/tex">2^3 = 8</script> times the volume as the alligator.  Thus the dinosaur weighed 4000 pounds.  Another way to see why 1000 pounds is incorrect is to consider the following: if I scale the alligator by 2, not only is the length doubled, but the width and height are also doubled.  Three dimensions doubled, which leads to an 8-fold increase in volume.</p>
+
+<p>We can use these ideas to determine the dimension of a dataset.  High-dimensional data often lies in a low-dimensional manifold.  The dimension of this manifold is the “true” dimension of the data.  Imagine I make a ball around one of the data points, and count the number of points in the ball.  If I double the radius of the ball, the number of points will increase by <script type="math/tex">2^d</script>, where <script type="math/tex">d</script> is the “true” dimension of the data.  We can estimate <script type="math/tex">d</script> with</p>
+
+<script type="math/tex; mode=display">\hat{d} = \log_2 \left( \frac{\text{# points in big ball}}{\text{# points in small ball}} \right).</script>
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  13th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Alligators, Dinosaurs, and Scaling&amp;url=/alligators-dinosaurs-and-scaling.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/alligators-dinosaurs-and-scaling.html&amp;title=Alligators, Dinosaurs, and Scaling" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/alligators-dinosaurs-and-scaling.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

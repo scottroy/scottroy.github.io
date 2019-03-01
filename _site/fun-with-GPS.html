@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Fun with GPS | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Fun with GPS | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Fun with GPS" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this post, I want to discuss the number of GPS satellites you need to determine your location. I illustrate with an example." />
+<meta property="og:description" content="In this post, I want to discuss the number of GPS satellites you need to determine your location. I illustrate with an example." />
+<link rel="canonical" href="http://localhost:4000/fun-with-GPS.html" />
+<meta property="og:url" content="http://localhost:4000/fun-with-GPS.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/GPS.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-13T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"In this post, I want to discuss the number of GPS satellites you need to determine your location. I illustrate with an example.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/fun-with-GPS.html","image":"http://localhost:4000/GPS.png","headline":"Fun with GPS","dateModified":"2018-04-13T00:00:00-07:00","datePublished":"2018-04-13T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/fun-with-GPS.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Fun with GPS
+</h1>
+
+
+  <img src="/assets/img/GPS.png">
+
+
+<p>In this post, I want to discuss the number of GPS satellites you need to determine your location.  I illustrate with an example.</p>
+
+<p>Suppose Joe is lost in London, but knows where certain landmarks are, e.g., he knows where the library is, and where the museum and Buckingham palace are.  Joe stops me in the street to find his bearings.  I tell him, “Oh, you’re 5000 feet from the library.”  Joe now knows that he lies on a circle of radius 5000 around the library.  I then tell Joe that he is 3500 feet from the museum.  At this point Joe knows that he is 1) on a circle of radius 5000 around the library, and 2) on a circle of radius 3500 around the museum.  These two circles meet at 2 points, so Joe can narrow his location down to 2 possibilities.  If I then tell Joe he is 1000 feet from Buckingham palace, he will know exactly where he is.  To summarize, if I tell Joe his distance from 3 landmarks, he can determine his exact location.</p>
+
+<p>How does this work in 3 dimensions (e.g., if we want to determine our elevation)?  In three dimensions, 2 spheres intersect in a circle, 3 spheres intersect at two points, and 4 spheres intersect at 1 point.  By knowing your distance to 4 landmarks, you can determine your exact position in space.</p>
+
+<p>So you need 4 GPS satellites!  Not quite.  There are twenty something GPS satellites so that at any point on earth, at least 4 are visible.</p>
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  13th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Fun with GPS&amp;url=/fun-with-GPS.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/fun-with-GPS.html&amp;title=Fun with GPS" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/fun-with-GPS.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

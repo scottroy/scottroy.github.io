@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Maximum likelihood estimation with censored data | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Maximum likelihood estimation with censored data | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Maximum likelihood estimation with censored data" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored." />
+<meta property="og:description" content="Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored." />
+<link rel="canonical" href="http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html" />
+<meta property="og:url" content="http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/censored_data.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-20T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html","image":"http://localhost:4000/censored_data.png","headline":"Maximum likelihood estimation with censored data","dateModified":"2018-04-20T00:00:00-07:00","datePublished":"2018-04-20T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Maximum likelihood estimation with censored data
+</h1>
+
+
+  <img src="/assets/img/censored_data.png">
+
+
+<p>Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.</p>
+
+<p>I decide to fit an exponential model to the failure times, and I fit the parameter with maximum likelihood estimation. The exponential distribution with rate parameter <script type="math/tex">\beta</script> has density <script type="math/tex">f(x \vert  \beta) = \beta e^{-\beta x}</script>. To keep things simple, suppose I observe failures for the first 75 hard drives (with failure times <script type="math/tex">x_1,\ldots, x_{75}</script> in years),  and the last 25 hard drives have censored failure times.  The likelihood is</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+f(x\vert \beta) &= \left( \prod_{i=1}^{75} f(x_i \vert  \beta) \right) \textbf{P}(X \geq 2 \vert  \beta)^{25} \\
+&= \left(\prod_{i=1}^{75} \beta e^{-\beta x_i} \right) \left( e^{-2 \beta} \right)^{25}.
+\end{aligned} %]]></script>
+
+<p>The negative log likelihood is</p>
+
+<script type="math/tex; mode=display">l(x\vert \beta) = \left(\sum_{i=1}^{75} x_i + 25 \times 2 \right) \beta - 75 \log (\beta),</script>
+
+<p>which means the MLE is</p>
+
+<script type="math/tex; mode=display">\hat{\beta} = \frac{75}{\sum_{i=1}^{75} x_i + 25 \times 2}.</script>
+
+<p>I want to compare this to the estimates I get if I improperly handle the censored data in each of the following ways:</p>
+
+<ul>
+  <li>Discard the censored observations.</li>
+  <li>Record the censored observations as 2 years.</li>
+</ul>
+
+<p>If I discard the censored observations, the negative log likelihood and MLE are:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+l(x \vert  \beta) &= \left(\sum_{i=1}^{75} x_i \right) \beta - 75 \log (\beta) \\
+\hat{\beta} &= \frac{75}{\sum_{i=1}^{75} x_i}.
+\end{aligned} %]]></script>
+
+<p>In this case, I over-estimate the exponential rate <script type="math/tex">\beta</script> (i.e., under-estimate the mean <script type="math/tex">\frac{1}{\beta}</script>).  I also under-estimate the mean if I replace the censored observations with 2 years:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+l(x \vert  \beta) &= \left(\sum_{i=1}^{75} x_i + 25 \times 2 \right) \beta - 100 \log (\beta) \\
+\hat{\beta} &= \frac{100}{\sum_{i=1}^{75} x_i+ 25 \times 2}.
+\end{aligned} %]]></script>
+
+<p>We can deal with other kinds of censoring in MLE calculations, too. Suppose we don’t know what <script type="math/tex">x_i</script> is, but we just know that it lies between 3 and 4. We would then use <script type="math/tex">\textbf{P}( 3 \leq X \leq 4 \vert  \beta)</script> instead of <script type="math/tex">f(x_i \vert  \beta)</script> in the likelihood product.</p>
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  20th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Maximum likelihood estimation with censored data&amp;url=/maximum-likelihood-estimation-with-censored-data.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/maximum-likelihood-estimation-with-censored-data.html&amp;title=Maximum likelihood estimation with censored data" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/maximum-likelihood-estimation-with-censored-data.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+          <li>
+            <h3>
+              <a href="/inference-based-on-entropy-maximization.html">
+                Inference based on entropy maximization
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>May 18, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

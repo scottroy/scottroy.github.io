@@ -1,0 +1,301 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Geometric interpretations of linear regression and ANOVA | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Geometric interpretations of linear regression and ANOVA | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Geometric interpretations of linear regression and ANOVA" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this post, I explore the connection of linear regression to geometry.  In particular, I discuss the geometric meaning of fitted values, residuals, and degrees of freedom.  Using geometry, I derive coefficient interpretations and discuss omitted variable bias.  I finish by connecting ANOVA (both hypothesis testing and power analysis) to the underlying geometry." />
+<meta property="og:description" content="In this post, I explore the connection of linear regression to geometry.  In particular, I discuss the geometric meaning of fitted values, residuals, and degrees of freedom.  Using geometry, I derive coefficient interpretations and discuss omitted variable bias.  I finish by connecting ANOVA (both hypothesis testing and power analysis) to the underlying geometry." />
+<link rel="canonical" href="http://localhost:4000/geometric-interpretations-of-linear-regression-and-ANOVA.html" />
+<meta property="og:url" content="http://localhost:4000/geometric-interpretations-of-linear-regression-and-ANOVA.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/linreg_geometry.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-08-05T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"In this post, I explore the connection of linear regression to geometry.  In particular, I discuss the geometric meaning of fitted values, residuals, and degrees of freedom.  Using geometry, I derive coefficient interpretations and discuss omitted variable bias.  I finish by connecting ANOVA (both hypothesis testing and power analysis) to the underlying geometry.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/geometric-interpretations-of-linear-regression-and-ANOVA.html","image":"http://localhost:4000/linreg_geometry.png","headline":"Geometric interpretations of linear regression and ANOVA","dateModified":"2018-08-05T00:00:00-07:00","datePublished":"2018-08-05T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/geometric-interpretations-of-linear-regression-and-ANOVA.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Geometric interpretations of linear regression and ANOVA
+</h1>
+
+
+  <img src="/assets/img/linreg_geometry.png">
+
+
+<p>In this post, I explore the connection of linear regression to geometry.  In particular, I discuss the geometric meaning of fitted values, residuals, and degrees of freedom.  Using geometry, I derive coefficient interpretations and discuss omitted variable bias.  I finish by connecting ANOVA (both hypothesis testing and power analysis) to the underlying geometry.</p>
+
+<h2 id="fitted-values-are-projections">Fitted values are projections</h2>
+<p>The fundamental geometric insight is that the predicted values <script type="math/tex">\hat{Y}</script> in a linear regression are the projection of the response <script type="math/tex">Y</script> onto the linear span of the covariates <script type="math/tex">X_0, X_1, \ldots, X_n</script>.  I’ll call this the <strong>covariate space</strong>.  The residuals <script type="math/tex">Y - \hat{Y}</script> are therefore the projection of <script type="math/tex">Y</script> onto the orthogonal complement of the covariate space.  I’ll call this the <strong>residual space</strong>. The residual space contains the part of the data that is unexplained by the model.  To summarize, we can break <script type="math/tex">Y</script> into two orthogonal pieces: a component in the covariate space (the fitted values from the regression of <script type="math/tex">Y \sim X_0 + \ldots + X_n</script>) and a component in the residual space (the residuals of the regression <script type="math/tex">Y \sim X_0 + \ldots + X_n</script>).</p>
+
+<p>The fitted values are an orthogonal projection onto the covariate space because the two-norm between <script type="math/tex">Y</script> and <script type="math/tex">\hat{Y}</script> is minimized in the fitting process (the two-norm distance from a point to a surface is minimized when the point is orthogonal to the surface).  I’ll also note that the linear regression equations are the same as the projection equations from linear algebra.  In regression, the parameter <script type="math/tex">\hat{\beta}</script> satisfies <script type="math/tex">X^T X \hat{\beta} = X^T Y</script> and so <script type="math/tex">\hat{Y} = X \hat{\beta} = X (X^T X)^{-1} X^T Y</script>.  From linear algebra, <script type="math/tex">P = X (X^T X)^{-1} X^T</script> is the matrix that projects onto the column space of <script type="math/tex">X</script>.  The connection to orthogonal projections is because of the two-norm: robust regression using a Huber penalty or lasso regression using a one-norm penalty do not have the same geometric interpretation.</p>
+
+<h2 id="the-geometry-of-nested-models">The geometry of nested models</h2>
+<p>Consider a nested model: a small model and a big model, with the covariate space <script type="math/tex">L_{\text{small}}</script> of the small model contained in the covariate space <script type="math/tex">L_{\text{big}}</script> of the big model.  For example, the small model might be the regression <script type="math/tex">Y \sim X_0 + X_1</script> and the big model might be the regression <script type="math/tex">Y \sim X_0 + X_1 + X_2</script>.  Define the delta covariate space <script type="math/tex">L_{\text{delta}}</script> to be the orthogonal complement of <script type="math/tex">L_{\text{small}}</script> in <script type="math/tex">L_{\text{big}}</script>.  The picture below shows the small model covariate space, the delta covariate space (orthogonal to the small model covariate space), the big model covariate space (composed of the small model covariate space and the delta covariate space), and the residual space (orthogonal to everything).</p>
+
+<p><img src="/assets/img/linreg_geometry.png" alt="" /></p>
+
+<p>From properties of orthogonal projections, it is clear the fitted values (aka projections of <script type="math/tex">Y</script>) in the small and big model are related by <script type="math/tex">\hat{Y}_{\text{big}} = \hat{Y}_{\text{small}} + \hat{Y}_{\text{delta}}</script>.  This simple geometric equation 1) implies that one-dimensional linear regression is sufficient when covariates are orthogonal, 2) shows that the coefficient on (for example) <script type="math/tex">X_n</script> in the multivariate linear regression <script type="math/tex">Y \sim X_0 + \ldots X_n</script> is the effect of <script type="math/tex">X_n</script> on <script type="math/tex">Y</script> after controlling for the other covariates, and 3) quantifies omitted variable bias.</p>
+
+<h2 id="coefficient-interpretation-and-omitted-variable-bias">Coefficient interpretation and omitted variable bias</h2>
+<p>Consider the small model <script type="math/tex">Y \sim X_0 + \ldots X_{n-1}</script> and the large model <script type="math/tex">Y \sim X_0 + X_2 + \ldots X_n</script>, which has one additional covariate <script type="math/tex">X_n</script>.  From the geometric relation <script type="math/tex">\hat{Y}_{\text{big}} = \hat{Y}_{\text{small}} + \hat{Y}_{\text{delta}}</script>, we’ll derive coefficient interpretation and omitted variable bias.  Write the fitted values from the small model as <script type="math/tex">\hat{Y}_{\text{small}} = s_0 X_0 + \ldots s_{n-1} X_{n-1}</script>, where the coefficients <script type="math/tex">s_i</script> are from the regression <script type="math/tex">Y \sim  X_0 + \ldots X_{n-1}</script>.  We consider two cases: one where the added covariate is orthogonal to the previous covariates and one where it is not.</p>
+
+<h3 id="added-covariate-x_n-is-orthogonal-to-previous-covariates">Added covariate <script type="math/tex">X_n</script> is orthogonal to previous covariates </h3>
+
+<p>If the added covariate <script type="math/tex">X_n</script> is orthogonal to the previous covariates <script type="math/tex">X_0, \ldots, X_{n-1}</script>, then the delta covariate space is the line spanned by <script type="math/tex">X_n</script> (i.e., the delta covariate space space is simply the space spanned by the additional covariate).  In this case, <script type="math/tex">\hat{Y}_{\text{delta}} = b_n X_n</script>, where <script type="math/tex">b_n</script> is the coefficient from the regression <script type="math/tex">Y \sim X_n</script>.  (<script type="math/tex">b_n = \frac{Y \cdot X_n}{ X_n \cdot X_n}</script>.)  Thus <script type="math/tex">\hat{Y}_{\text{big}} = \hat{Y}_{\text{small}} + \hat{Y}_{\text{delta}} =s_0 X_0 + \ldots s_{n-1} X_{n-1} + b_n X_n</script>.  The coefficients for the big regression <script type="math/tex">Y \sim X_0 + \ldots + X_n</script> are <script type="math/tex">b_0 = s_0, b_1 = s_1, \ldots, b_{n-1}=s_{n-1}</script> and <script type="math/tex">b_n</script>.  In this case, the coefficients in the big model are uncoupled in that the coefficients corresponding to small model covariates can be computed separately from the coefficient on the new covariate <script type="math/tex">X_n</script>.</p>
+
+<p>In general, orthogonal groups of coefficients are uncoupled and can be handled separately in regression.  In the special case where all covariates are pairwise orthogonal, the coefficients in the big model can be computed by running <script type="math/tex">n</script> simple linear regressions <script type="math/tex">Y \sim X_i</script>.</p>
+
+<p>Finally, I want to discuss what happens when the regression includes an intercept term.  In this case, “orthogonal” is replaced by “uncorrelated.”  Groups of uncorrelated variables can be handled separately, and if all covariates in a multivariate linear regression are pairwise uncorrelated, each coefficient can be computed as the slope in a simple linear regression <script type="math/tex">Y \sim 1 + X_i</script>.  To see why, consider the projection of <script type="math/tex">Y</script> onto the covariate space spanned by <script type="math/tex">1, X_1, \ldots, X_n</script>, where the covariates <script type="math/tex">X_1, \ldots, X_n</script> are pairwise uncorrelated.  The covariate space doesn’t change when we center each covariate by subtracting off its mean (i.e., its projection onto 1).  Uncorrelated means the centered covariates are pairwise orthogonal, and each centered covariate is orthogonal to 1 as well.  The coefficient on the centered covariate <script type="math/tex">X_i - \bar{X_i}</script> comes from the projection of <script type="math/tex">Y</script> onto <script type="math/tex">X_i - \bar{X_i}</script>.  Equivalently, it is the slope on <script type="math/tex">X_i</script> in the regression <script type="math/tex">Y \sim 1 + X_i</script> (think about why this is geometrically).  To summarize, the regression <script type="math/tex">Y \sim 1 + X_1 + \ldots + X_n</script> where the covariates <script type="math/tex">X_i</script> are pairwise uncorrelated can be computed by running <script type="math/tex">n</script> simple linear regressions <script type="math/tex">Y \sim 1 + X_i</script>.  This slope is <script type="math/tex">\frac{Y \cdot (X_i - \bar{X_i})}{(X_i - \bar{X_i}) \cdot(X_i - \bar{X_i})} =\frac{(Y - \bar{Y}) \cdot (X_i - \bar{X_i})}{(X_i - \bar{X_i}) \cdot(X_i - \bar{X_i})} = \frac{\text{Cov}(Y,X_i)}{\text{Var}(X_i)}</script>.</p>
+
+<h3 id="added-covariate-x_n-is-not-orthogonal-to-previous-covariates">Added covariate <script type="math/tex">X_n</script> is not orthogonal to previous covariates </h3>
+
+<p>Now consider the case where <script type="math/tex">X_n</script> is not orthogonal to the previous covariates.  The delta covariate space is spanned by <script type="math/tex">X_n</script> minus the projection of <script type="math/tex">X_n</script> onto the covariate space of the previous covariates.  In other words, the delta covariate space is spanned by the residuals <script type="math/tex">\tilde X_n</script> in the regression <script type="math/tex">X_n \sim X_0 + \ldots X_{n-1}</script> (write <script type="math/tex">\tilde{X_n} = X_n - a_0 X_0 - \ldots a_{n-1} X_{n-1}</script>).  The projection onto the delta covariate space <script type="math/tex">\hat Y_{\text{delta}} = b_n \tilde X_n</script> where <script type="math/tex">b_n</script> is the coefficient in the regression <script type="math/tex">Y \sim \tilde X_n</script>.  Thus</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} \hat{Y}_{\text{big}} &= \hat{Y}_{\text{small}} + \hat{Y}_{\text{delta}} \\ &= (s_0 X_0 + \ldots + s_{n-1} X_{n-1}) + b_n \tilde X_n\\ &= (s_0 -  b_n a_0) X_0 + \ldots + (s_{n-1} - b_n a_{n-1}) X_{n-1} + b_n X_n \\ &:= b_0 X_0 + \ldots b_n X_n \end{aligned} %]]></script>
+
+<p>This explains both 2) and 3) above.  The coefficient <script type="math/tex">b_n</script> on a covariate in a regression model can be obtained by regressing <script type="math/tex">Y</script> on the residuals <script type="math/tex">\tilde X_n</script> from the regression of <script type="math/tex">X_n</script> on the other covariates.  This is often summarized by saying <script type="math/tex">b_n</script> is the effect of <script type="math/tex">X_n</script> on <script type="math/tex">Y</script> after controlling for the other covariates.  Rather than regress <script type="math/tex">Y \sim \tilde{X_n}</script>, we could instead regress <script type="math/tex">Y \sim X_0 + \tilde{X_n}</script> and grab the coefficient on <script type="math/tex">\tilde{X_n}</script>.  This works because <script type="math/tex">\tilde{X_n}</script> is orthogonal to <script type="math/tex">X_0</script>.  In models that include an intercept <script type="math/tex">X_0 = 1</script>, this is what is often done (but is unnecessary).</p>
+
+<p>Often the residuals <script type="math/tex">\tilde Y</script> (from the regression <script type="math/tex">Y \sim X_0 + \ldots + X_{n-1}</script>) are regressed on the residuals <script type="math/tex">\tilde X_{n}</script> to find <script type="math/tex">b_n</script> (see my earlier post on <a href="/interpreting-regression-coefficients.html">Interpreting regression coefficients</a>), rather than just regressing <script type="math/tex">Y</script> on <script type="math/tex">\tilde X_{n}</script>.  These two regressions estimate the same slope.  (Geometrically this is easy to see: in one case, we are projecting <script type="math/tex">Y</script> onto the delta covariate space spanned by <script type="math/tex">\tilde X_{n}</script> and in the other, we are projecting <script type="math/tex">\tilde Y</script>.  Both projections are the same because <script type="math/tex">Y</script> and <script type="math/tex">\tilde Y</script> differ by a vector in the small covariate space, which is orthogonal to the delta covariate space we’re projecting onto.)</p>
+
+<p>We also see how including a new covariate updates the coefficients in the model: <script type="math/tex">b_{n-1} = s_{n-1} - b_n a_{n-1}</script>.  The estimated effect <script type="math/tex">s_{n-1}</script> in the small model does not control for the <strong>omitted variable</strong> <script type="math/tex">X_n</script> and must be reduced by <script type="math/tex">b_n a_{n-1}</script> in the big model.  The <strong>omitted variable bias</strong> <script type="math/tex">b_n a_{n-1}</script> is the effect of the included variable <script type="math/tex">X_{n-1}</script> on the response <script type="math/tex">Y</script> acting through the omitted variable <script type="math/tex">X_n</script> (effect of included on omitted (<script type="math/tex">a_{n-1}</script>) times the effect of omitted on response (<script type="math/tex">b_n</script>)).</p>
+
+<h2 id="anova">ANOVA</h2>
+<p>ANOVA was first developed as a way to partition variance in experimental design and later extended to a method to compare linear models (classical ANOVA in experiment design is a special case of the “model comparison” ANOVA where treatments are encoded with dummy factors in a regression model).  Suppose we have two nested models: a small model (with degrees of freedom <script type="math/tex">\text{df}_{\text{small}}</script>) contained in a larger one (with degrees of freedom <script type="math/tex">\text{df}_{\text{big}}</script>).  (The <strong>degrees of freedom</strong> in a linear model is the dimension of its covariate space or equivalently the number of independent covariates.  If the model includes an intercept (which is not considered a covariate in statistics), the degrees of freedom is the number of independent covariates plus 1 (because the intercept is a covariate from a geometric perspective)).  The larger model will have smaller residuals, but the question is if they are so much smaller that we reject the small model.</p>
+
+<h2 id="model-comparison">Model comparison</h2>
+<p>The “regression sum of squares” is the difference in sum squared residuals between the small and large models:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} \text{SS}_{\text{regression}} &= \text{SS}_{\text{small}} - \text{SS}_{\text{big}} \\&=  \| Y - \hat{Y}_{\text{small}} \|^2 -  \| Y - \hat Y_{\text{big}} \|^2.  \end{aligned} %]]></script>
+
+<p>The F-statistic (named after statistician R. A. Fisher) compares regression sum of squares (additional variation explained by the larger model) to the residuals in the larger model (unexplained variation by the larger model):</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} F &= \frac{\text{SS}_{\text{regression}} / (\text{df}_{\text{big}} - \text{df}_{\text{small}}) }{\text{SS}_{\text{big}} / (n-\text{df}_{\text{big}}) } \\ &=  \frac{(\text{SS}_{\text{small}} - \text{SS}_{\text{big}}) /(\text{df}_{\text{big}} - \text{df}_{\text{small}}) }{\text{SS}_{\text{big}} / (n-\text{df}_{\text{big}}) }. \end{aligned} %]]></script>
+
+<p>The regression sum of squares is the square length of the projection of <script type="math/tex">Y</script> onto the delta covariate space.  Recall the geometric equation <script type="math/tex">\hat{Y}_{\text{big}} = \hat{Y}_{\text{small}} + \hat{Y}_{\text{delta}}</script>.  In terms of residuals: the residuals in the small model can be decomposed into the residuals in the big model plus the fitted values in the delta model.  Thus <script type="math/tex">\text{SS}_{\text{small}} = \| Y - \hat{Y}_{\text{small}} \|^2 = \| (Y - \hat{Y}_{\text{big}}) + \hat{Y}_{\text{delta}} \|^2</script>.  The residuals in the big model are orthogonal to <script type="math/tex">\hat{Y}_{\text{delta}}</script>, which is contained in the big model.  By the Pythagorean Theorem, we have <script type="math/tex">\text{SS}_{\text{small}} = \text{SS}_{\text{big}} + \| \hat{Y}_{\text{delta}} \|^2</script> and so <script type="math/tex">\text{SS}_{\text{regression}} = \| \hat{Y}_{\text{delta}} \|^2</script>.  In words, the sum of squares of regression is the square length of the projection of <script type="math/tex">Y</script> onto the delta covariate space between the small and big models.  The <script type="math/tex">F</script> statistic is therefore also equal to</p>
+
+<script type="math/tex; mode=display">F = \frac{\| \hat{Y}_{\text{delta}} \|^2 / (\text{df}_{\text{big}} - \text{df}_{\text{small}}) }{\text{SS}_{\text{big}} /(n-\text{df}_{\text{big}}) }.</script>
+
+<p>Intuitively, if the F-statistic is near 1, then the big model is not much of an improvement over the small model because the difference in errors between the two models is on the order of the error in the data.  To analyze the F-statistic, we need to assume a statistical model that generates the data.  In the regression framework, we assume <script type="math/tex">Y \sim N(\mu, \sigma^2 I)</script>, where <script type="math/tex">\mu</script> lies in some linear subspace.  The small model is correct if <script type="math/tex">\mu</script> belongs to the covariate space of the small model.  The approach is as follows: under the assumption that the small model is correct (null model), we compute the distribution of the F-statistic (spoiler: it follows an F-distribution).  This is called the null distribution of the F-statistic.  We then compare the observed F-statistic to the null distribution and reject the small model if the observed F-statistic is “extreme.”</p>
+
+<p>Projections (and indeed any linear transformation) of normal random variables are normal. The regression sum of squares is the square length of the normal random variable <script type="math/tex">\hat Y_{\text{delta}} = \text{proj}_{L_{\text{delta}}}(Y)</script>.  Let <script type="math/tex">P</script> be the projection matrix so that <script type="math/tex">\hat Y_{\text{delta}} = P Y</script>.  If the small model is correct, <script type="math/tex">Y \sim N(\mu, \sigma^2 I)</script> with <script type="math/tex">\mu \in L_{\text{small}}</script>.  Then <script type="math/tex">P \hat Y_{\text{delta}} \sim N(P \mu, \sigma^2 P P^T) = N(P \mu, \sigma^2 P)</script> (projection matrices satisfy <script type="math/tex">P = P^T</script> and <script type="math/tex">P^2 = P</script>).  By the spectral theorem from linear algebra, we can write <script type="math/tex">P = Q \Lambda Q^T</script> with <script type="math/tex">Q</script> orthogonal and <script type="math/tex">\Lambda = \text{Diag}(1,1,\ldots, 1, 0, \ldots, 0)</script>, a diagonal matrix with <script type="math/tex">\text{df}_{\text{big}} - \text{df}_{\text{small}}</script> 1s followed by 0s on the main diagonal.  Geometrically, we are expressing the projection in three steps: first rotate so the space onto which we are projecting is the standard subspace <script type="math/tex">\mathbb{R}^{\text{df}_{\text{big}} - \text{df}_{\text{small}}}</script>, do the simple projection onto <script type="math/tex">\mathbb{R}^{\text{df}_{\text{big}} - \text{df}_{\text{small}}}</script> by taking the first <script type="math/tex">\text{df}_{\text{big}} - \text{df}_{\text{small}}</script> coordinates and setting the rest to 0, and then rotate back.</p>
+
+<p>The rotated vector <script type="math/tex">Q^T \hat{Y}_{\text{delta}}</script> is distributed <script type="math/tex">N(Q^T P \mu, \sigma^2 \Lambda)</script>.  Under the assumption that the small model holds and <script type="math/tex">\mu \in L_{\text{small}}</script>, the projection of <script type="math/tex">\mu</script> onto <script type="math/tex">L_{\text{delta}}</script> is 0 and so <script type="math/tex">Q^T \hat{Y}_{\text{delta}} / \sigma \sim N(0, \Lambda)</script>.  The square length <script type="math/tex">\| \hat{Y}_{\text{delta}} \|^2 / \sigma^2</script> is distributed <script type="math/tex">\chi^2_{\text{df}_{\text{big}} - \text{df}_{\text{small}}}</script> (a <script type="math/tex">\chi^2_d</script> random variable with <script type="math/tex">d</script> degrees of freedom is the sum of squares of <script type="math/tex">d</script> independent standard normal random variables).</p>
+
+<p>The denominator in the F-statistic is <script type="math/tex">\text{SS}_{\text{big}}</script>, the square length of the residuals in the big model.  The residuals in the big model is the projection of <script type="math/tex">Y</script> onto the orthogonal complement of <script type="math/tex">L_{\text{big}}</script> (which I called the residual space before).  Both the small model covariate space and delta covariate space are contained in the big model covariate space.  The residual space is therefore orthogonal to all these spaces.  The variance normalized residuals <script type="math/tex">\text{SS}_{\text{big}} / \sigma^2</script> for the big model follow a <script type="math/tex">\chi^2_{n - \text{df}_{\text{big}}}</script> distribution.</p>
+
+<p>The F-statistic is a ratio of a <script type="math/tex">\chi^2_{ \text{df}_{\text{big}} -\text{df}_{\text{small}} } / (\text{df}_{\text{big}} -\text{df}_{\text{small}})</script> random variable to a <script type="math/tex">\chi^2_{n - \text{df}_{\text{big}}} / (n - \text{df}_{\text{big}})</script> random variable.  This is the definition of an <script type="math/tex">F_{\text{df}_{\text{big}} - \text{df}_{\text{small}},\ n - \text{df}_{\text{big}}}</script> distribution.  (A careful reader will notice that to be F distributed, the numerator and denominator <script type="math/tex">\chi^2</script> distributions must be independent.  This is the case because the two come from independent normal random variables: the numerator from the projection onto the delta covariate space and the denominator from the projection onto the residual space.  These two spaces are orthogonal, and orthogonal zero-mean vectors are uncorrelated.  In the case of normal random variables, uncorrelated means independent.)</p>
+
+<p>ANOVA is often organized in an ANOVA table.  In practice, you consider a sequence of nested linear models <script type="math/tex">M_0 \subset M_1 \subset M_2 \subset M_3 \subset \ldots \subset M_k</script>.  The inner-most model <script type="math/tex">M_0</script> is always the intercept model, in which <script type="math/tex">Y</script> is estimated with its mean <script type="math/tex">\bar{Y}</script>.  The table has one row for each model <script type="math/tex">M_i</script> (excluding <script type="math/tex">M_0</script>) and a final row for the residuals.  The row for <script type="math/tex">M_i</script> contains information about the numerator of the F-statistic where the big model is <script type="math/tex">M_i</script> and the small model is the previous model <script type="math/tex">M_{i-1}</script>.  It contains the regression sum of squares <script type="math/tex">\text{SS}_{\text{regression}} = \text{SS}_{M_{i}} - \text{SS}_{M_{i-1}}</script>, the degrees of freedom <script type="math/tex">\text{df}_{\text{regression}} = \text{df}_{M_i} - \text{df}_{M_{i-1}}</script>, the mean square error <script type="math/tex">\text{SS}_{\text{regression}} / \text{df}_{\text{regression}}</script>, the F-statistic, and a P-value.  Unlike we discussed in the previous paragraphs, the F-statistic in the <script type="math/tex">i</script>th row of an ANOVA table does not divide the mean square error for regression by the mean square error for the residuals in the big model <script type="math/tex">M_i</script>.  The denominator instead uses the residuals from the biggest model in the table <script type="math/tex">M_k</script>, which are stored in the last row of the table.  The last row contains the residual sum of squares <script type="math/tex">\text{SS}_{M_k}</script>, the residual degrees of freedom <script type="math/tex">n - \text{df}_{M_k}</script>, and the residual mean square error <script type="math/tex">\text{SS}_{M_k} / (n - \text{df}_{M_k})</script>, an estimate of <script type="math/tex">\sigma^2</script>.  Here is an example.</p>
+
+<p><img src="/assets/img/anova_table.png" alt="" /></p>
+
+<p>The ANOVA table above is a sequential ANOVA table, in which the models are nested by successively adding new covariates.  The intercept model <script type="math/tex">M_0</script> (not a row in the table) is <script type="math/tex">\text{tip} \sim 1</script>, the first model <script type="math/tex">M_1</script> is <script type="math/tex">\text{tip} \sim 1 + \text{total_bill}</script>, the second model is <script type="math/tex">M_2</script> is <script type="math/tex">\text{tip} \sim 1 + \text{total_bill} + \text{sex}</script>, and so forth.</p>
+
+<h2 id="power-analysis">Power analysis</h2>
+<p>We just discussed the distribution of the F-statistic under the small model.  We can reject the small model if the observed F-statistic is extreme for what we expect the F-statistic to look like under the small model.  If we don’t reject the small model, it doesn’t mean that the small model is correct; it just means that we have insufficient evidence to reject it.  The power of a test is the probability that the test rejects the small model (null model) when the big model is true (the alternative model is true).  The probability that we reject the small model if the big model is true will depend on how far the true mean is from the small model covariate space.  Rejection is harder if the true mean is near, but not in, the small model covariate space.</p>
+
+<p>To do power analysis, we assume that the mean <script type="math/tex">\mu \in L_{\text{big}} \setminus L_{\text{small}}</script> and work out the distribution of the F-statistic.  The denominator of the F-statistic (square norm of the projection of <script type="math/tex">Y</script> onto the residual space) is still a <script type="math/tex">\chi^2</script> distribution because <script type="math/tex">\mu</script> is orthogonal to the residual space.  The numerator of the F-statistic is the square norm of <script type="math/tex">Q^T \hat{Y}_{\text{delta}}</script>, which is distributed <script type="math/tex">N(Q^T P \mu, \sigma^2 \Lambda)</script>.  Under the big model, <script type="math/tex">Q^T P \mu</script> is no longer 0 and we don’t get a <script type="math/tex">\chi^2</script> distribution.  Instead we get a noncentral <script type="math/tex">\chi^2_{\text{df}_{\text{big}} - \text{df}_{\text{small}}}( \| P \mu \|^2)</script> distribution with <script type="math/tex">\text{df}_{\text{big}} - \text{df}_{\text{small}}</script> degrees of freedom and noncentrality parameter <script type="math/tex">\| P \mu \|^2</script>.  Notice that <script type="math/tex">\| P \mu \|^2</script> is just the square distance of <script type="math/tex">\mu</script> to the small model covariate space.  The F-statistic follows a noncentral F distribution.</p>
+
+
+
+<span class="post-date">
+  Written on
+  
+  August
+  5th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Geometric interpretations of linear regression and ANOVA&amp;url=/geometric-interpretations-of-linear-regression-and-ANOVA.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/geometric-interpretations-of-linear-regression-and-ANOVA.html&amp;title=Geometric interpretations of linear regression and ANOVA" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/geometric-interpretations-of-linear-regression-and-ANOVA.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/interpreting-regression-coefficients.html">
+                Interpreting regression coefficients
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>April 13, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

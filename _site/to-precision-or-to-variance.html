@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      To precision or to variance? | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>To precision or to variance? | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="To precision or to variance?" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution." />
+<meta property="og:description" content="Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution." />
+<link rel="canonical" href="http://localhost:4000/to-precision-or-to-variance.html" />
+<meta property="og:url" content="http://localhost:4000/to-precision-or-to-variance.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/normal.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2018-04-13T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/to-precision-or-to-variance.html","image":"http://localhost:4000/normal.png","headline":"To precision or to variance?","dateModified":"2018-04-13T00:00:00-07:00","datePublished":"2018-04-13T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/to-precision-or-to-variance.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  To precision or to variance?
+</h1>
+
+
+  <img src="/assets/img/normal.png">
+
+
+<p>Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.</p>
+
+<p>In this post, I want to discuss marginalization and conditioning.  In particular, I want to point out that computing the marginal distribution is easy when we parametrize with the covariance matrix, and computing the conditional distribution is easy when we parametrize with the precision matrix.</p>
+
+<p>Suppose <script type="math/tex">(X, Y)</script> is distributed multivariate normal</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{bmatrix} X \\ Y \end{bmatrix} \sim N \left( \begin{bmatrix} \mu_x \\ \mu_y \end{bmatrix}, \begin{bmatrix}  \Sigma_{xx} & \Sigma_{xy} \\ \Sigma_{yx} & \Sigma_{yy} \end{bmatrix} \right). %]]></script>
+
+<p>The marginal distribution of <script type="math/tex">X</script> is really easy to compute:</p>
+
+<script type="math/tex; mode=display">X \sim N \left( \mu_x, \Sigma_{xx} \right).</script>
+
+<p>The conditional distribution <script type="math/tex">X \vert Y</script> is again multivariate normal, but with mean and covariance given by</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\mu_{x\vert y} &= \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1} (Y - \mu_y) \\
+\Sigma_{x\vert y} &= \Sigma_{xx \cdot y} := \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx}.
+\end{aligned} %]]></script>
+
+<p>What do these formulas look like when we parametrize by precision matrix?  (The precision matrix <script type="math/tex">K</script> is the inverse of the covariance matrix: <script type="math/tex">K = \Sigma^{-1}</script>.)</p>
+
+<p>If we write</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+K = \begin{bmatrix} K_{xx} & K_{xy} \\ K_{yx} & K_{yy}, \end{bmatrix} %]]></script>
+
+<p>then we have the following relations:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+K_{xx} &= \Sigma_{xx \cdot y}^{-1} \\
+K_{yy} &= \Sigma_{yy \cdot x}^{-1} := (\Sigma_{yy} - \Sigma_{yx} \Sigma_{xx}^{-1} \Sigma_{xy})^{-1} \\
+K_{xy} &= -\Sigma_{xx}^{-1} \Sigma_{xy} K_{yy} \\
+K_{yx} &= -\Sigma_{yy}^{-1} \Sigma_{yx} K_{xx}.
+\end{aligned} %]]></script>
+
+<p>In terms of <script type="math/tex">K</script>, the marginal distribution of <script type="math/tex">X</script> has precision matrix <script type="math/tex">K_{xx \cdot y}</script>, and the conditional distribution <script type="math/tex">X \vert Y</script> has precision matrix <script type="math/tex">K_{xx}</script>.  Notice the duality!  The marginal distribution <script type="math/tex">X</script> has covariance <script type="math/tex">\Sigma_{xx}</script> and precision <script type="math/tex">K_{xx \cdot y}</script>, and the conditional distribution <script type="math/tex">X \vert  Y</script> has covariance <script type="math/tex">\Sigma_{xx \cdot y}</script> and precision <script type="math/tex">K_{xx}</script>.</p>
+
+<p>Choosing the parametrization (covariance or precision) depends on whether your application requires computing marginal or conditional distributions.  In Gaussian Markov random fields, for example, conditional distributions are important, so using a precision parametrization makes life easier.</p>
+
+
+<span class="post-date">
+  Written on
+  
+  April
+  13th,
+  2018
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=To precision or to variance?&amp;url=/to-precision-or-to-variance.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/to-precision-or-to-variance.html&amp;title=To precision or to variance?" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/to-precision-or-to-variance.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>
