@@ -42,7 +42,7 @@ Suppose we're willing to allow $$k$$ false positives, but control the probabilit
 
 ![](/assets/img/kFWER.png)
 
-Controlling the false discovery rate
+## Controlling the false discovery rate
 Roughly speaking, the false discovery rate (FDR) is $$\textbf{P}(\text{test is null} \vert  \text{test is rejected})$$.  This is the reverse of the false positive rate $$\textbf{P}(\text{test is rejected} \vert  \text{test is null})$$, the quantity that is traditionally controlled in hypothesis testing.  Limiting the FDR and the FPR controls the number of false positives, but the denominators used to compute the two rates differ.  The FDR uses the number of rejections in the denominator, whereas the the FPR uses the number of null tests.  The difference between the two is much like the difference between precision and recall.
 
 Below is the p-value histogram for 10,000 t-tests for a difference in two means.  The two means were equal in about 70% of the tests (70% of the tests were null).  The p-value distribution is a mixture of a uniform distribution (from the null tests) and a distribution concentrated near 0 (from the non-null tests).  A priori we do not know which p-values correspond to the null tests (we observe the black histogram on the left); since this data is simulated, though, I show which p-values correspond to null tests in the red/blue histogram on the right.

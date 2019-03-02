@@ -159,8 +159,8 @@
 
 <p><img src="/assets/img/kFWER.png" alt="" /></p>
 
-<p>Controlling the false discovery rate
-Roughly speaking, the false discovery rate (FDR) is <script type="math/tex">\textbf{P}(\text{test is null} \vert  \text{test is rejected})</script>.  This is the reverse of the false positive rate <script type="math/tex">\textbf{P}(\text{test is rejected} \vert  \text{test is null})</script>, the quantity that is traditionally controlled in hypothesis testing.  Limiting the FDR and the FPR controls the number of false positives, but the denominators used to compute the two rates differ.  The FDR uses the number of rejections in the denominator, whereas the the FPR uses the number of null tests.  The difference between the two is much like the difference between precision and recall.</p>
+<h2 id="controlling-the-false-discovery-rate">Controlling the false discovery rate</h2>
+<p>Roughly speaking, the false discovery rate (FDR) is <script type="math/tex">\textbf{P}(\text{test is null} \vert  \text{test is rejected})</script>.  This is the reverse of the false positive rate <script type="math/tex">\textbf{P}(\text{test is rejected} \vert  \text{test is null})</script>, the quantity that is traditionally controlled in hypothesis testing.  Limiting the FDR and the FPR controls the number of false positives, but the denominators used to compute the two rates differ.  The FDR uses the number of rejections in the denominator, whereas the the FPR uses the number of null tests.  The difference between the two is much like the difference between precision and recall.</p>
 
 <p>Below is the p-value histogram for 10,000 t-tests for a difference in two means.  The two means were equal in about 70% of the tests (70% of the tests were null).  The p-value distribution is a mixture of a uniform distribution (from the null tests) and a distribution concentrated near 0 (from the non-null tests).  A priori we do not know which p-values correspond to the null tests (we observe the black histogram on the left); since this data is simulated, though, I show which p-values correspond to null tests in the red/blue histogram on the right.</p>
 
