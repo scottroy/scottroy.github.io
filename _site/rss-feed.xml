@@ -7,6 +7,22 @@
 		<atom:link href="/rss-feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>The relationship between correlation, mutual information, and p-values</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Feature selection is often necessary before building a machine learning or statistical model, especially when there are many, many irrelevant features.  To be more concrete, suppose we want to predict/explain some response &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; using some features &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_k&lt;/script&gt;.  A natural first step is to find the features that are “most related” to the response and build a model with those.
+There are many ways we could interpret “most related”:&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sun, 03 Mar 2019 00:00:00 -0800</pubDate>
+				<link>http://localhost:4000/journal/the-relationship-between-correlation-mutual-information-and-p-values.html</link>
+				<guid isPermaLink="true">http://localhost:4000/journal/the-relationship-between-correlation-mutual-information-and-p-values.html</guid>
+			</item>
+		
+			<item>
 				<title>Controlling error when testing many hypotheses</title>
 				
 					<dc:creator>Scott Roy</dc:creator>
@@ -140,21 +156,6 @@
 				<pubDate>Fri, 13 Apr 2018 00:00:00 -0700</pubDate>
 				<link>http://localhost:4000/to-precision-or-to-variance.html</link>
 				<guid isPermaLink="true">http://localhost:4000/to-precision-or-to-variance.html</guid>
-			</item>
-		
-			<item>
-				<title>Randomized response</title>
-				
-					<dc:creator>Scott Roy</dc:creator>
-				
-				
-					<description>&lt;p&gt;Randomized response is a technique, introduced in the mid-1960s, to survey people about sensitive topics.  Suppose a teacher decides to survey his students on whether they cheat.  Rather than directly asking each student “Have you cheated?,” a question cheaters are unlikely to answer truthfully, the teacher can employ randomized response.  Randomized response creates a privacy layer between the interviewer and the interviewee.  Here’s how it works.  The teacher asks each student if he has cheated, but before the student answers, the teacher tells the student to flip a coin and keep the outcome of the flip secret.  If the coin comes up heads, the teacher tells the student to answer truthfully, but if the coin comes up tails, the student is instructed to answer “Yes.”  So, if the student answers “Yes” to the question “Have you cheated?,” it is either because 1) the student has cheated, or 2) the coin showed tails.  The teacher has no way to know why the student answered yes (there is a “privacy” layer).  If the student answers “No,” the teacher knows the student did not cheat.&lt;/p&gt;
-
-</description>
-				
-				<pubDate>Fri, 13 Apr 2018 00:00:00 -0700</pubDate>
-				<link>http://localhost:4000/randomized-response.html</link>
-				<guid isPermaLink="true">http://localhost:4000/randomized-response.html</guid>
 			</item>
 		
 	</channel>

@@ -1,4 +1,195 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-03-01T20:43:33-08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">statsandstuff</title><subtitle>a blog on statistics and machine learning</subtitle><author><name>Scott Roy</name></author><entry><title type="html">Controlling error when testing many hypotheses</title><link href="http://localhost:4000/controlling-error-when-testing-many-hypotheses.html" rel="alternate" type="text/html" title="Controlling error when testing many hypotheses" /><published>2018-11-18T00:00:00-08:00</published><updated>2018-11-18T00:00:00-08:00</updated><id>http://localhost:4000/controlling-error-when-testing-many-hypotheses</id><content type="html" xml:base="http://localhost:4000/controlling-error-when-testing-many-hypotheses.html">&lt;p&gt;In a hypothesis test, we compute some test statistic &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-03-03T17:22:34-08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">statsandstuff</title><subtitle>a blog on statistics and machine learning</subtitle><author><name>Scott Roy</name></author><entry><title type="html">The relationship between correlation, mutual information, and p-values</title><link href="http://localhost:4000/journal/the-relationship-between-correlation-mutual-information-and-p-values.html" rel="alternate" type="text/html" title="The relationship between correlation, mutual information, and p-values" /><published>2019-03-03T00:00:00-08:00</published><updated>2019-03-03T00:00:00-08:00</updated><id>http://localhost:4000/journal/the-relationship-between-correlation-mutual-information-and-p-values</id><content type="html" xml:base="http://localhost:4000/journal/the-relationship-between-correlation-mutual-information-and-p-values.html">&lt;p&gt;Feature selection is often necessary before building a machine learning or statistical model, especially when there are many, many irrelevant features.  To be more concrete, suppose we want to predict/explain some response &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; using some features &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_k&lt;/script&gt;.  A natural first step is to find the features that are “most related” to the response and build a model with those.
+There are many ways we could interpret “most related”:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The features most correlated with the response&lt;/li&gt;
+  &lt;li&gt;The features with the highest mutual information with the response&lt;/li&gt;
+  &lt;li&gt;The features that are the most “statistically significant” in explaining the response&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In this post, I want to discuss why any of the above approaches should work well.  The basic insight is that:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The correlation is a reparametrization of p-values obtained via t-tests, F-tests, proportion tests, and chi-squared tests, meaning that ranking features by p-value is equivalent to ranking them by correlation (for fixed sample size &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt;)&lt;/li&gt;
+  &lt;li&gt;The mutual information is a reparametrization of the p-values obtained by a G-test.  Moreover, the chi-squared statistic is a second order Taylor approximation of the G statistic, and so the ranking by mutual information and correlation is often similar in practice.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The post is organized into three scenarios:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Both the response and feature are binary&lt;/li&gt;
+  &lt;li&gt;Either the response or feature is binary&lt;/li&gt;
+  &lt;li&gt;Both the response and feature is real-valued&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;both-variables-are-binary&quot;&gt;Both variables are binary&lt;/h2&gt;
+
+&lt;p&gt;In this section, we assume both the feature &lt;script type=&quot;math/tex&quot;&gt;X \in \{0,1\}^N&lt;/script&gt; and response &lt;script type=&quot;math/tex&quot;&gt;Y \in \{0, 1\}^N&lt;/script&gt; are binary.  We focus on one feature to highlight the relation between the chi-squared test, the correlation, the G-test, and mutual information.
+We can summarize the relation between binary variables in a contingency table:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/contingency22.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In the table &lt;script type=&quot;math/tex&quot;&gt;O_{ij}&lt;/script&gt; denotes the number of observations where &lt;script type=&quot;math/tex&quot;&gt;X = i&lt;/script&gt; and  &lt;script type=&quot;math/tex&quot;&gt;Y = j&lt;/script&gt;.  In addition, we let &lt;script type=&quot;math/tex&quot;&gt;\cdot&lt;/script&gt; denote summation over an index; so &lt;script type=&quot;math/tex&quot;&gt;O_{i \cdot}&lt;/script&gt; is the sum of the &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt;th row and &lt;script type=&quot;math/tex&quot;&gt;O_{\cdot j}&lt;/script&gt; is the sum of the &lt;script type=&quot;math/tex&quot;&gt;j&lt;/script&gt;th column. &lt;/p&gt;
+
+&lt;h3 id=&quot;correlation-and-the-chi-squared-test&quot;&gt;Correlation and the chi-squared test&lt;/h3&gt;
+&lt;p&gt;In the context of binary variables, the Pearson correlation is often called the “phi coefficient” and can be computed from the contingency table itself:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\phi = \frac{O_{00} O_{11} - O_{01} O_{10}}{\sqrt{O_{0\cdot} O_{\cdot 0} O_{1 \cdot} O_{\cdot 1}}}.&lt;/script&gt;
+
+&lt;p&gt;The phi coefficient is a measure of association between &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt;; it is a product of counts where &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; agree minus a product of counts where they disagree, normalized by row and column sums so that the value is between -1 and 1.&lt;/p&gt;
+
+&lt;p&gt;Another common way to measure the association between two binary variables is the chi-squared test of independence, introduced by Karl Pearson in 1900.  As a reminder, the chi-squared test statistic is&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\chi^2 = \sum \frac{(O_{ij} - E_{ij})^2}{E_{ij}},&lt;/script&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;E_{ij} = N \left( \frac{O_{i \cdot}}{N} \right) \left( \frac{O_{\cdot j}}{N} \right) := N r_i c_j&lt;/script&gt;
+
+&lt;p&gt;is the expected number observations in cell &lt;script type=&quot;math/tex&quot;&gt;(i,j)&lt;/script&gt; under the assumption that &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; are independent.&lt;/p&gt;
+
+&lt;p&gt;For fixed sample size &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt;, the phi coefficient is just a reparametrization of the the chi-squared statistic:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\phi = \sqrt{\frac{\chi^2}{n}}.&lt;/script&gt;
+
+&lt;p&gt;This is easy to show by expanding the chi-squared statistic.  (For those who want to work out the algebra, the following relation is useful:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;O_{i \cdot} O_{\cdot j} = n O_{ij} + s_{ij} \Delta,&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;s_{ij}&lt;/script&gt; is either 1 (if &lt;script type=&quot;math/tex&quot;&gt;i \neq j&lt;/script&gt; ) or -1 (&lt;script type=&quot;math/tex&quot;&gt;i = j&lt;/script&gt; ) and &lt;script type=&quot;math/tex&quot;&gt;\Delta = O_{00} O_{11} - O_{01} O_{10}&lt;/script&gt; is the determinant of the contingency table.)&lt;/p&gt;
+
+&lt;p&gt;Tying this to the theme of the post, suppose we have a binary response &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; and binary features &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_k&lt;/script&gt;.  Ranking the features by p-value from a chi-squared test with the response is equivalent to ranking the features by absolute correlation with the response.  For fixed sample size &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt;, the p-value itself is a measure of association strength.&lt;/p&gt;
+
+&lt;h3 id=&quot;difference-in-proportions-test&quot;&gt;Difference in proportions test&lt;/h3&gt;
+
+&lt;p&gt;When both &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; are binary, we can view &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; as defining group membership and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; as defining an outcome.  For example, suppose &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; indicates whether someone smokes and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; indicates if they have lung cancer.
+In this case, the association between &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; is captured in the difference in the proportion &lt;script type=&quot;math/tex&quot;&gt;p_1&lt;/script&gt; of smokers who get lung cancer and the proportion &lt;script type=&quot;math/tex&quot;&gt;p_0&lt;/script&gt; of non-smokers who do.  The difference in proportions test statistic&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;T = \frac{p_1 - p_0}{\sqrt{p(1-p) \left( \frac{1}{N_1} + \frac{1}{N_0} \right)}}&lt;/script&gt;
+
+&lt;p&gt;tests if &lt;script type=&quot;math/tex&quot;&gt;p_1&lt;/script&gt; is different than &lt;script type=&quot;math/tex&quot;&gt;p_0&lt;/script&gt; and is approximately distributed standard normal under the null hypothesis &lt;script type=&quot;math/tex&quot;&gt;H_0 : p_0 = p_1&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;The statistic &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; is just the square root of the chi-squared test statistic &lt;script type=&quot;math/tex&quot;&gt;\chi^2&lt;/script&gt; and so the two tests are equivalent.  (An easy way to see this is to show that &lt;script type=&quot;math/tex&quot;&gt;T = \sqrt{N} \phi&lt;/script&gt; by writing &lt;script type=&quot;math/tex&quot;&gt;p_0&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;p_1&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;p&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;N_0&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;N_1&lt;/script&gt; in terms of the cells &lt;script type=&quot;math/tex&quot;&gt;O_{ij}&lt;/script&gt; of the contingency table.)&lt;/p&gt;
+
+&lt;h3 id=&quot;mutual-information-and-the-g-test&quot;&gt;Mutual information and the G-test&lt;/h3&gt;
+
+&lt;p&gt;The likelihood ratio test (LRT) is an alternative to the chi-squared test of independence.  The resulting test statistic is the so-called G-statistic:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;G = 2 \sum O_{ij} \log \left( \frac{O_{ij}}{E_{ij}} \right).&lt;/script&gt;
+
+&lt;p&gt;The relation&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;G = 2 N \ \text{MI}(X, Y)&lt;/script&gt;
+
+&lt;p&gt;between &lt;script type=&quot;math/tex&quot;&gt;G&lt;/script&gt; and the mutual information between &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; 
+and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; is immediate (&lt;script type=&quot;math/tex&quot;&gt;\text{MI}(X, Y)&lt;/script&gt; is the Kullback-Leibler divergence of the product of the marginal distributions from the joint distribution).  It follows that the ranking among features induced by mutual information with the response is the same as the ranking induced by p-values computed via a G-test.&lt;/p&gt;
+
+&lt;p&gt;In practice this is often similar to the rankings induced by correlation/proportion tests/chi-squared tests because the chi-squared test statistic is the second-order Taylor approximation of the G-statistic (expand the log term about 1).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/mutual_info_vs_corr.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;one-variable-is-binary&quot;&gt;One variable is binary&lt;/h2&gt;
+
+&lt;p&gt;In this section, we assume the feature &lt;script type=&quot;math/tex&quot;&gt;X \in \{0,1\}^N&lt;/script&gt; is a binary vector and the response &lt;script type=&quot;math/tex&quot;&gt;Y \in \mathbb{R}^N&lt;/script&gt; is real-valued.  (We could instead assume &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; is binary and &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; is real-valued.)  As with the difference in proportions test, we can view &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; as defining two groups (e.g., a treatment and control group in an experiment) and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; as defining some continuous outcome.  A measure of association between &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; is captured in the difference between the mean outcome &lt;script type=&quot;math/tex&quot;&gt;\bar{Y}_1&lt;/script&gt; in treatment and the mean outcome in control &lt;script type=&quot;math/tex&quot;&gt;\bar{Y}_0&lt;/script&gt;.  This difference is often assessed with a two-sample t-test using the test statistic&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;T = \frac{\bar{Y}_{1\cdot} - \bar{Y}_{0\cdot}}{\sqrt{S_p^2 \left(\frac{1}{N_1} + \frac{1}{N_0} \right)}}.&lt;/script&gt;
+
+&lt;p&gt;Here &lt;script type=&quot;math/tex&quot;&gt;S^2_p&lt;/script&gt; denotes the pooled sampled variance&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;S^2_p = \frac{\sum_{i=0}^1 \sum_{j=1}^{N_j} (Y_{ij} - \bar{Y}_{i\cdot})^2}{N-2}.&lt;/script&gt;
+
+&lt;p&gt;As with the chi-squared/difference in proportions tests before, the t-statistic &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; is a reparametrization of the Pearson sample correlation &lt;script type=&quot;math/tex&quot;&gt;r&lt;/script&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;r = \frac{T}{\sqrt{N-2 + T^2}}.&lt;/script&gt;
+
+&lt;p&gt;Before we walk through the derivation, we define some notation.  The vector &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; splits the observations &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; into two groups: &lt;script type=&quot;math/tex&quot;&gt;\{ Y_i : X_i = 0 \}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\{ Y_i : X_i = 1 \}&lt;/script&gt; .  Let &lt;script type=&quot;math/tex&quot;&gt;N_0&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;N_1&lt;/script&gt; be the respective sizes of these groups.  We reindex the observations &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; using notation from ANOVA.  We let &lt;script type=&quot;math/tex&quot;&gt;Y_{ij}&lt;/script&gt; denote the &lt;script type=&quot;math/tex&quot;&gt;j&lt;/script&gt; th observation (&lt;script type=&quot;math/tex&quot;&gt;j = 1\ldots N_j&lt;/script&gt; ) from the &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt; th group (&lt;script type=&quot;math/tex&quot;&gt;i = 0, 1&lt;/script&gt; ).  The notation &lt;script type=&quot;math/tex&quot;&gt;\bar{Y}_{i\cdot}&lt;/script&gt; denotes the mean of &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; over the &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt; th group and &lt;script type=&quot;math/tex&quot;&gt;\bar{Y}_{\cdot \cdot}&lt;/script&gt; denotes the overall mean of &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;We can write&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;r = \frac{\bar{Y}_{1\cdot} - \bar{Y}_{0\cdot}}{\sqrt{(N-1) S^2 \left(\frac{1}{N_1} + \frac{1}{N_0} \right)}},&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;S^2 = \frac{1}{n-1} \sum_{i=1}^N (Y_i - \bar{Y})^2&lt;/script&gt; is the sample variance.  This resembles the two sample t-statistic (which hints at the connection), but has the sample variance &lt;script type=&quot;math/tex&quot;&gt;S^2&lt;/script&gt; instead of the pooled variance &lt;script type=&quot;math/tex&quot;&gt;S^2_p&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;We relate &lt;script type=&quot;math/tex&quot;&gt;S^2&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;S^2_p&lt;/script&gt; with the following sum of squares partition (derivation in the appendix):&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;(N-1) S^2 \left( \frac{1}{N_1} + \frac{1}{N_0} \right) = (N-2) S_p^2 \left( \frac{1}{N_1} + \frac{1}{N_0} \right) + (\bar{Y}_{1\cdot} - \bar{Y}_{0\cdot})^2.&lt;/script&gt;
+
+&lt;p&gt;Using this partition to rewrite the denominator in the correlation expression and dividing numerator and denominator by &lt;script type=&quot;math/tex&quot;&gt;\sqrt{S_p^2 \left( \frac{1}{N_1} + \frac{1}{N_0} \right)}&lt;/script&gt; yields&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned} r &amp;= \frac{\bar{Y}_{1\cdot} - \bar{Y}_{0\cdot}}{\sqrt{(N-1) S^2 \left(\frac{1}{N_1} + \frac{1}{N_0} \right)}} \\ &amp;= \frac{(\bar{Y}_{1\cdot} - \bar{Y}_{0\cdot}) / \sqrt{S_p^2 \left( \frac{1}{N_1} + \frac{1}{N_0} \right)}}{\sqrt{N-2 + (\bar{Y}_{1\cdot} - \bar{Y}_{0\cdot})^2 / \left(S_p^2 \left( \frac{1}{N_1} + \frac{1}{N_0} \right)\right)}} \\ &amp;= \frac{T}{\sqrt{N-2 + T^2}}. \end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;both-variables-are-real-valued&quot;&gt;Both variables are real-valued&lt;/h2&gt;
+
+&lt;p&gt;Suppose we regress &lt;script type=&quot;math/tex&quot;&gt;Y \sim 1 + X&lt;/script&gt; and get slope &lt;script type=&quot;math/tex&quot;&gt;\hat{\beta}&lt;/script&gt;.
+We can use a t-test to test if the slope is different than 0.  The p-value we get is just a reparametrization of correlation.&lt;/p&gt;
+
+&lt;p&gt;To make matters simple, let &lt;script type=&quot;math/tex&quot;&gt;SXX = \sum_{i=1}^N (X_i - \bar{X})^2&lt;/script&gt; be the sum of squares for &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; (and similarly for &lt;script type=&quot;math/tex&quot;&gt;SYY&lt;/script&gt; ), &lt;script type=&quot;math/tex&quot;&gt;SXY = \sum_{i=1}^N (X_i - \bar{X}) (Y_i - \bar{Y})&lt;/script&gt; , and &lt;script type=&quot;math/tex&quot;&gt;RSS = \sum_{i=1}^N (Y_i - \hat{Y}_i)^2&lt;/script&gt; be the residual sum of squares.&lt;/p&gt;
+
+&lt;p&gt;We can write the slope &lt;script type=&quot;math/tex&quot;&gt;\hat{\beta} = \frac{SXY}{SXX}&lt;/script&gt; and the correlation between &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; as &lt;script type=&quot;math/tex&quot;&gt;r = \hat{\beta} \sqrt{\frac{SXX}{SYY}}.&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;To test whether &lt;script type=&quot;math/tex&quot;&gt;\hat{\beta}&lt;/script&gt; is nonzero, we see how many standard errors it is from 0.  The standard error of &lt;script type=&quot;math/tex&quot;&gt;\hat{\beta}&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;\text{se}(\hat{\beta}) = \sqrt{\frac{RSS}{(N-2) SXX}}&lt;/script&gt; and the test statistic is&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;T = \frac{\hat{\beta}}{\text{se}(\hat{\beta})} = \hat{\beta} \sqrt{\frac{SXX}{RSS / (N-2)}}.&lt;/script&gt;
+
+&lt;p&gt;This reduces to the two-sample t-statistic when &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; is binary and follows a t-distribution with &lt;script type=&quot;math/tex&quot;&gt;N-2&lt;/script&gt; degrees of freedom.&lt;/p&gt;
+
+&lt;p&gt;Dividing numerator and denominator in the expression for &lt;script type=&quot;math/tex&quot;&gt;r&lt;/script&gt; by &lt;script type=&quot;math/tex&quot;&gt;\sqrt{RSS / (N-2)}&lt;/script&gt; (after rewriting &lt;script type=&quot;math/tex&quot;&gt;SYY = RSS + \hat{\beta}^2 SXX&lt;/script&gt; ) we get&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned} r &amp;= \hat{\beta} \sqrt{\frac{SXX}{SYY}} \\ &amp;= \frac{\hat{\beta} \sqrt{\frac{SXX}{RSS / (N-2)}}}{\sqrt{N-2 + \hat{\beta}^2 \frac{SXX}{RSS / (N-2)} }} \\ &amp;= \frac{T}{\sqrt{N-2 + T^2}}.  \end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+
+&lt;p&gt;In this post, we discussed various ways of measuring association between a response &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; and predictors &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_p&lt;/script&gt; in the context of feature selection.  We showed that all the methods are more or less equivalent, which we summarize in the following diagram.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/correlation_pval_mutual_info.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A solid connector indicates the two quantities are reparametrizations of each other (i.e., there is an increasing function that maps one to the other).  The dashed line between the G-statistic and the chi-squared statistic indicates that these quantities are approximately equivalent and so give similar rankings in practice.&lt;/p&gt;
+
+&lt;h2 id=&quot;appendix-partitioning-the-sum-of-squares&quot;&gt;Appendix: partitioning the sum of squares&lt;/h2&gt;
+&lt;p&gt;Partitioning the variation is fundamental in ANOVA and regression analysis and is a simple consequence of the Pythagorean theorem.  Define the following three vectors&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;Y = \begin{bmatrix} \begin{pmatrix} Y_{11} \\ Y_{12} \\ \vdots \\ Y_{1 N_1} \end{pmatrix} \\ \begin{pmatrix} Y_{21} \\ Y_{22} \\ \vdots \\ Y_{2 N_2} \end{pmatrix} \end{bmatrix} \quad Y_{\text{trt}} = \begin{bmatrix} \begin{pmatrix} \bar{Y}_{1 \cdot} \\ \bar{Y}_{1 \cdot} \\ \vdots \\ \bar{Y}_{1 \cdot} \end{pmatrix} \\ \begin{pmatrix} \bar{Y}_{2 \cdot} \\ \bar{Y}_{2 \cdot} \\ \vdots \\ \bar{Y}_{2 \cdot} \end{pmatrix} \end{bmatrix} \quad  \bar{Y}_{\cdot \cdot} = \begin{bmatrix} \begin{pmatrix} \bar{Y}_{\cdot \cdot} \\ \bar{Y}_{\cdot \cdot} \\ \vdots \\ \bar{Y}_{\cdot \cdot} \end{pmatrix} \\ \begin{pmatrix} \bar{Y}_{\cdot \cdot} \\ \bar{Y}_{\cdot \cdot} \\ \vdots \\ \bar{Y}_{\cdot \cdot} \end{pmatrix} \end{bmatrix}&lt;/script&gt;
+
+&lt;p&gt;The vectors &lt;script type=&quot;math/tex&quot;&gt;(Y_{\text{trt}} - \bar{Y}_{\cdot \cdot})&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;(Y - Y_{\text{trt}})&lt;/script&gt; are orthogonal.  Applying the Pythagorean theorem to the decomposition &lt;script type=&quot;math/tex&quot;&gt;Y - \bar{Y}_{\cdot \cdot} = (Y - Y_{\text{trt}}) + (Y_{\text{trt}} - \bar{Y}_{\cdot \cdot})&lt;/script&gt; gives the sum of squares decomposition used above.&lt;/p&gt;
+
+&lt;h2 id=&quot;tangent-r2-and-f-tests&quot;&gt;Tangent: &lt;script type=&quot;math/tex&quot;&gt;R^2&lt;/script&gt; and F tests&lt;/h2&gt;
+&lt;p&gt;In this section I discuss the relationship between the F statistic and &lt;script type=&quot;math/tex&quot;&gt;R^2&lt;/script&gt;, the coefficient of determination.
+The F statistic is a generalization of the t-test for an OLS slope, but does not fit into the “feature selection” narrative of the post.&lt;/p&gt;
+
+&lt;p&gt;The &lt;script type=&quot;math/tex&quot;&gt;R^2&lt;/script&gt; is the fraction of variance explained by a linear model&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;R^2 = \frac{\text{SS}_{\text{reg}}}{SYY} = \frac{\text{SYY} - \text{RSS}}{\text{SYY}} = 1 - \frac{\text{RSS}}{\text{SYY}}.&lt;/script&gt;
+
+&lt;p&gt;The F statistic to test the fit of a multivariate linear model (compared to a simple intercept model) is:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+F &amp;= \frac{\text{SS}_{\text{reg}} / k}{\text{RSS} / (n-k-1)} \\
+&amp;= \frac{(\text{SYY} - \text{RSS}) / k}{\text{RSS} / (n-k-1)} \\
+&amp;= \left( \frac{n-k-1}{k} \right) \left( \frac{\text{SYY}}{\text{RSS}} - 1 \right).
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;(See &lt;a href=&quot;/geometric-interpretations-of-linear-regression-and-ANOVA.html&quot;&gt;Geometric interpretations of linear regression and ANOVA&lt;/a&gt; for a discussion of the F statistic.)&lt;/p&gt;
+
+&lt;p&gt;We can write the F statistic as an increasing function of &lt;script type=&quot;math/tex&quot;&gt;R^2 = 1 - \frac{\text{RSS}}{\text{SYY}}&lt;/script&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;F = \left( \frac{n-k-1}{k} \right) \left( \frac{R^2}{1-R^2} \right).&lt;/script&gt;
+
+&lt;p&gt;The &lt;script type=&quot;math/tex&quot;&gt;R^2&lt;/script&gt; is expressable as the square correlation between predicted and observed values:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;R^2 = \text{corr}\left(Y, \hat{Y} \right)^2.&lt;/script&gt;
+
+&lt;p&gt;It follows that an F-statistic p-value of a multivariate regression model is an increasing function of the absolute correlation between the observed values &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; and the model’s predicted values &lt;script type=&quot;math/tex&quot;&gt;\hat{Y}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Phi_coefficient&quot;&gt;Phi coefficient&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/G-test&quot;&gt;G-test&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Applied Linear Regression&lt;/em&gt; by Sanford Weisberg&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Scott Roy</name></author><summary type="html">Feature selection is often necessary before building a machine learning or statistical model, especially when there are many, many irrelevant features. To be more concrete, suppose we want to predict/explain some response using some features . A natural first step is to find the features that are “most related” to the response and build a model with those. There are many ways we could interpret “most related”:</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/correlation_pval_mutual_info.png" /></entry><entry><title type="html">Controlling error when testing many hypotheses</title><link href="http://localhost:4000/controlling-error-when-testing-many-hypotheses.html" rel="alternate" type="text/html" title="Controlling error when testing many hypotheses" /><published>2018-11-18T00:00:00-08:00</published><updated>2018-11-18T00:00:00-08:00</updated><id>http://localhost:4000/controlling-error-when-testing-many-hypotheses</id><content type="html" xml:base="http://localhost:4000/controlling-error-when-testing-many-hypotheses.html">&lt;p&gt;In a hypothesis test, we compute some test statistic &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; that is designed to distinguish between a null and alternative hypothesis.  We then compute the probability p(T) of observing a test statistic as large or more extreme as T under the null hypothesis, and reject the null hypothesis if the p-value p(T) is sufficiently small. (As an aside, the p-value can alternatively be viewed as the probability, under the null hypothesis, of observing data as rare or rarer than the data we actually saw.  This perspective does not require coming up with a test statistic first.)&lt;/p&gt;
 
 &lt;p&gt;When we perform many tests (for example, testing association with disease on thousands of genes), we are likely to get false positives, even if each individual test has a small probability of error (see &lt;a href=&quot;/multiple-hypothesis-tests.html&quot;&gt;Multiple hypothesis tests&lt;/a&gt;).  With careful analysis, though, we can understand (and therefore control) the number of false positives our battery of tests yields.&lt;/p&gt;
 
@@ -591,56 +782,44 @@ l(x \vert  \beta) &amp;= \left(\sum_{i=1}^{75} x_i + 25 \times 2 \right) \beta
 \hat{\beta} &amp;= \frac{100}{\sum_{i=1}^{75} x_i+ 25 \times 2}.
 \end{aligned} %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;We can deal with other kinds of censoring in MLE calculations, too. Suppose we don’t know what &lt;script type=&quot;math/tex&quot;&gt;x_i&lt;/script&gt; is, but we just know that it lies between 3 and 4. We would then use &lt;script type=&quot;math/tex&quot;&gt;\textbf{P}( 3 \leq X \leq 4 \vert  \beta)&lt;/script&gt; instead of &lt;script type=&quot;math/tex&quot;&gt;f(x_i \vert  \beta)&lt;/script&gt; in the likelihood product.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="censored data" /><category term="maximum likelihood estimation" /><category term="MLE" /><summary type="html">Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/censored_data.png" /></entry><entry><title type="html">Autoencoders</title><link href="http://localhost:4000/autoencoders.html" rel="alternate" type="text/html" title="Autoencoders" /><published>2018-04-13T00:00:00-07:00</published><updated>2018-04-13T00:00:00-07:00</updated><id>http://localhost:4000/autoencoders</id><content type="html" xml:base="http://localhost:4000/autoencoders.html">&lt;p&gt;High dimensional data is usually very structured, and this structure allows us to map the data to a smaller dimensional space without losing much information.  For example, if this post is encoded with ASCII, it lives in a &lt;script type=&quot;math/tex&quot;&gt;(256)^{\text{length post}}&lt;/script&gt; point space.  But since I’m writing in English, the sequence of characters “Life is a tale told by an idiot, full of sound and fury, signifying nothing” is far more likely than the sequence “fjkla;8#knxHJD38lkdf dfjkal.”  Thus my post really lives in a very low-dimensional “English subspace” of the full &lt;script type=&quot;math/tex&quot;&gt;(256)^{\text{length post}}&lt;/script&gt; point space.  The same principle applies to lots of other data.  For example, strictly speaking a 10 megapixel image is described by about 30 million numbers (about 10 million RGB triples), but since people take pictures of predictable things such as cats, dogs, faces, rocks, etc., you can describe the picture using much fewer than 30 million numbers.  Dimensionality reduction is used for image compression, audio compression, and video compression.  In learning algorithms, we have high dimensional feature vectors (e.g., the features could be the RGB values in an image), but the algorithms behave better if we first map the features to a low-dimensional space.&lt;/p&gt;
+&lt;p&gt;We can deal with other kinds of censoring in MLE calculations, too. Suppose we don’t know what &lt;script type=&quot;math/tex&quot;&gt;x_i&lt;/script&gt; is, but we just know that it lies between 3 and 4. We would then use &lt;script type=&quot;math/tex&quot;&gt;\textbf{P}( 3 \leq X \leq 4 \vert  \beta)&lt;/script&gt; instead of &lt;script type=&quot;math/tex&quot;&gt;f(x_i \vert  \beta)&lt;/script&gt; in the likelihood product.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="censored data" /><category term="maximum likelihood estimation" /><category term="MLE" /><summary type="html">Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/censored_data.png" /></entry><entry><title type="html">To precision or to variance?</title><link href="http://localhost:4000/to-precision-or-to-variance.html" rel="alternate" type="text/html" title="To precision or to variance?" /><published>2018-04-13T00:00:00-07:00</published><updated>2018-04-13T00:00:00-07:00</updated><id>http://localhost:4000/to-precision-or-to-variance</id><content type="html" xml:base="http://localhost:4000/to-precision-or-to-variance.html">&lt;p&gt;Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.&lt;/p&gt;
 
-&lt;p&gt;The problem is to map &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; dimensional data to a &lt;script type=&quot;math/tex&quot;&gt;d&lt;/script&gt; dimensional code, and the goal is to learn an encoder &lt;script type=&quot;math/tex&quot;&gt;f : \mathbb{R}^N \to \mathbb{R}^d&lt;/script&gt; and a decoder &lt;script type=&quot;math/tex&quot;&gt;g : \mathbb{R}^d \to \mathbb{R}^N&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;g(f(x)) \approx x&lt;/script&gt;.  PCA (principal component analysis) is historically the most popular method of dimensionality reduction.  In PCA, both the encoder and decoder are linear maps and geometrically it’s finding a &lt;script type=&quot;math/tex&quot;&gt;d&lt;/script&gt; dimensional hyperplane that the &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; dimensional data hovers around.  A more modern approach uses autoencoders.&lt;/p&gt;
+&lt;p&gt;In this post, I want to discuss marginalization and conditioning.  In particular, I want to point out that computing the marginal distribution is easy when we parametrize with the covariance matrix, and computing the conditional distribution is easy when we parametrize with the precision matrix.&lt;/p&gt;
 
-&lt;p&gt;An autoencoder is a feed-forward neural network that we train so that the &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; dimensional output layer reconstructs the &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt;-dimensional input layer.  Internally there is a hidden “code” layer with &lt;script type=&quot;math/tex&quot;&gt;d&lt;/script&gt; nodes.  The encoder is the “bottom” part of the network mapping the &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; dimensional input layer to the &lt;script type=&quot;math/tex&quot;&gt;d&lt;/script&gt; dimensional code layer, and the decoder is the “top” part of the network mapping the &lt;script type=&quot;math/tex&quot;&gt;d&lt;/script&gt; dimensional code layer to the &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; dimensional output layer.  In training the autoencoder, we minimize&lt;/p&gt;
+&lt;p&gt;Suppose &lt;script type=&quot;math/tex&quot;&gt;(X, Y)&lt;/script&gt; is distributed multivariate normal&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;L(x, g(f(x))),&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{bmatrix} X \\ Y \end{bmatrix} \sim N \left( \begin{bmatrix} \mu_x \\ \mu_y \end{bmatrix}, \begin{bmatrix}  \Sigma_{xx} &amp; \Sigma_{xy} \\ \Sigma_{yx} &amp; \Sigma_{yy} \end{bmatrix} \right). %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;where the loss &lt;script type=&quot;math/tex&quot;&gt;L&lt;/script&gt; tries to force the reconstruction &lt;script type=&quot;math/tex&quot;&gt;g(f(x))&lt;/script&gt; to be close the input &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt;.  To prevent the autoencoder from learning the identity, we impose a structural constraint in the network by making &lt;script type=&quot;math/tex&quot;&gt;d \ll N&lt;/script&gt;, or we add regularization to the loss function and try to minimize&lt;/p&gt;
+&lt;p&gt;The marginal distribution of &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; is really easy to compute:&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;L(x, g(f(x))) + \Omega(h),&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;X \sim N \left( \mu_x, \Sigma_{xx} \right).&lt;/script&gt;
 
-&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;h = f(x)&lt;/script&gt; is the hidden code layer, and &lt;script type=&quot;math/tex&quot;&gt;\Omega&lt;/script&gt; imposes some structure on &lt;script type=&quot;math/tex&quot;&gt;h&lt;/script&gt;, e.g., sparsity.&lt;/p&gt;</content><author><name>Scott Roy</name></author><summary type="html">High dimensional data is usually very structured, and this structure allows us to map the data to a smaller dimensional space without losing much information.  For example, if this post is encoded with ASCII, it lives in a point space.  But since I’m writing in English, the sequence of characters “Life is a tale told by an idiot, full of sound and fury, signifying nothing” is far more likely than the sequence “fjkla;8#knxHJD38lkdf dfjkal.”  Thus my post really lives in a very low-dimensional “English subspace” of the full  point space.  The same principle applies to lots of other data.  For example, strictly speaking a 10 megapixel image is described by about 30 million numbers (about 10 million RGB triples), but since people take pictures of predictable things such as cats, dogs, faces, rocks, etc., you can describe the picture using much fewer than 30 million numbers.  Dimensionality reduction is used for image compression, audio compression, and video compression.  In learning algorithms, we have high dimensional feature vectors (e.g., the features could be the RGB values in an image), but the algorithms behave better if we first map the features to a low-dimensional space.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/autoencoder.png" /></entry><entry><title type="html">Distinguishing proportions: the risk ratio</title><link href="http://localhost:4000/distinguishing-proportions-the-risk-ratio.html" rel="alternate" type="text/html" title="Distinguishing proportions: the risk ratio" /><published>2018-04-13T00:00:00-07:00</published><updated>2018-04-13T00:00:00-07:00</updated><id>http://localhost:4000/distinguishing-proportions-the-risk-ratio</id><content type="html" xml:base="http://localhost:4000/distinguishing-proportions-the-risk-ratio.html">&lt;p&gt;Suppose I conduct an experiment to determine whether to use font A or font B in an online ad.  After running the experiment, I find that there is a 1% chance that a user clicks on the font A ad, and a 0.8% chance that the user clicks on the font B ad.&lt;/p&gt;
+&lt;p&gt;The conditional distribution &lt;script type=&quot;math/tex&quot;&gt;X \vert Y&lt;/script&gt; is again multivariate normal, but with mean and covariance given by&lt;/p&gt;
 
-&lt;p&gt;We can can compare these click rates on an absolute scale (font A increases the click rate by 0.2%) or compare on a relative scale (the click rate for font A is 1.25 times higher).  The relative comparison (the probability of clicking on a font A ad over the probability of clicking on a font B ad) is called the risk ratio in some fields.  To determine statistical significance, we can see if the difference is significantly different than 0 or if the ratio is significantly different than 1.  I’d highly recommend comparing the difference to 0 (in fact, we’ll handle the ratio by taking the log and turning it into a difference), but the ratio is nice for reporting purposes and so I’ll discuss computing a confidence interval for it.&lt;/p&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\mu_{x\vert y} &amp;= \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1} (Y - \mu_y) \\
+\Sigma_{x\vert y} &amp;= \Sigma_{xx \cdot y} := \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx}.
+\end{aligned} %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;Suppose I show &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; impressions of the ad with font A, and let &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_n&lt;/script&gt; be the outcomes (&lt;script type=&quot;math/tex&quot;&gt;X_1 = 1&lt;/script&gt; means the user clicked on the ad and &lt;script type=&quot;math/tex&quot;&gt;X_1=0&lt;/script&gt; means the user did not click on the ad).  Similarly, let &lt;script type=&quot;math/tex&quot;&gt;Y_1, \ldots, Y_m&lt;/script&gt; be the outcomes of the &lt;script type=&quot;math/tex&quot;&gt;m&lt;/script&gt; impressions of the ad with font B I show.&lt;/p&gt;
+&lt;p&gt;What do these formulas look like when we parametrize by precision matrix?  (The precision matrix &lt;script type=&quot;math/tex&quot;&gt;K&lt;/script&gt; is the inverse of the covariance matrix: &lt;script type=&quot;math/tex&quot;&gt;K = \Sigma^{-1}&lt;/script&gt;.)&lt;/p&gt;
 
-&lt;p&gt;The estimated probability of clicking on the font A ad is &lt;script type=&quot;math/tex&quot;&gt;\hat{p}_A = \sum X_i / n&lt;/script&gt;.  By the central limit theorem, &lt;script type=&quot;math/tex&quot;&gt;\hat{p}_A&lt;/script&gt; is approximately distributed &lt;script type=&quot;math/tex&quot;&gt;N(p_A,\ p_A(1-p_A) / n)&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;p_A&lt;/script&gt; is the true probability.  Similarly, &lt;script type=&quot;math/tex&quot;&gt;\hat{p}_B&lt;/script&gt; is approximately distributed &lt;script type=&quot;math/tex&quot;&gt;N(p_B,\ p_B(1-p_B) / m)&lt;/script&gt;.&lt;/p&gt;
+&lt;p&gt;If we write&lt;/p&gt;
 
-&lt;p&gt;Thus the difference is approximately distributed&lt;/p&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+K = \begin{bmatrix} K_{xx} &amp; K_{xy} \\ K_{yx} &amp; K_{yy}, \end{bmatrix} %]]&gt;&lt;/script&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\hat{p}_A - \hat{p}_B\ \dot\sim\ N(p_A - p_B,\ p_A(1-p_A) / n + p_B(1-p_B) / m).&lt;/script&gt;
+&lt;p&gt;then we have the following relations:&lt;/p&gt;
 
-&lt;p&gt;Under the null hypothesis, we assume &lt;script type=&quot;math/tex&quot;&gt;p_A = p_B&lt;/script&gt;.  If we let &lt;script type=&quot;math/tex&quot;&gt;p&lt;/script&gt; denote this common value, we have&lt;/p&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+K_{xx} &amp;= \Sigma_{xx \cdot y}^{-1} \\
+K_{yy} &amp;= \Sigma_{yy \cdot x}^{-1} := (\Sigma_{yy} - \Sigma_{yx} \Sigma_{xx}^{-1} \Sigma_{xy})^{-1} \\
+K_{xy} &amp;= -\Sigma_{xx}^{-1} \Sigma_{xy} K_{yy} \\
+K_{yx} &amp;= -\Sigma_{yy}^{-1} \Sigma_{yx} K_{xx}.
+\end{aligned} %]]&gt;&lt;/script&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{\hat{p}_A - \hat{p}_B}{\sqrt{p(1-p) \left(\frac{1}{n} + \frac{1}{m}\right)}} \ \dot\sim\ N(0, 1).&lt;/script&gt;
+&lt;p&gt;In terms of &lt;script type=&quot;math/tex&quot;&gt;K&lt;/script&gt;, the marginal distribution of &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; has precision matrix &lt;script type=&quot;math/tex&quot;&gt;K_{xx \cdot y}&lt;/script&gt;, and the conditional distribution &lt;script type=&quot;math/tex&quot;&gt;X \vert Y&lt;/script&gt; has precision matrix &lt;script type=&quot;math/tex&quot;&gt;K_{xx}&lt;/script&gt;.  Notice the duality!  The marginal distribution &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; has covariance &lt;script type=&quot;math/tex&quot;&gt;\Sigma_{xx}&lt;/script&gt; and precision &lt;script type=&quot;math/tex&quot;&gt;K_{xx \cdot y}&lt;/script&gt;, and the conditional distribution &lt;script type=&quot;math/tex&quot;&gt;X \vert  Y&lt;/script&gt; has covariance &lt;script type=&quot;math/tex&quot;&gt;\Sigma_{xx \cdot y}&lt;/script&gt; and precision &lt;script type=&quot;math/tex&quot;&gt;K_{xx}&lt;/script&gt;.&lt;/p&gt;
 
-&lt;p&gt;Slutsky’s theorem lets us replace &lt;script type=&quot;math/tex&quot;&gt;p&lt;/script&gt; with the pooled estimate &lt;script type=&quot;math/tex&quot;&gt;\hat{p} = (\sum X_i + \sum Y_i) / (n + m)&lt;/script&gt;.  In summary, to test if the difference &lt;script type=&quot;math/tex&quot;&gt;\hat{p}_A - \hat{p}_B&lt;/script&gt; is significantly different than &lt;script type=&quot;math/tex&quot;&gt;0&lt;/script&gt;, we compute the &lt;script type=&quot;math/tex&quot;&gt;Z&lt;/script&gt;-score&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{\hat{p}_A - \hat{p}_B}{\sqrt{\hat{p}(1-\hat{p}) \left(\frac{1}{n} + \frac{1}{m}\right)}}&lt;/script&gt;
-
-&lt;p&gt;and see how extreme it is for a draw from standard normal.&lt;/p&gt;
-
-&lt;p&gt;As an aside, an alternative statistic to use to test significance is&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;Z = \frac{\hat{p}_A - \hat{p}_B}{\sqrt{\hat{p}_A(1-\hat{p}_A) / n + \hat{p}_B(1-\hat{p}_B) / m}}.&lt;/script&gt;
-
-&lt;p&gt;One nice feature of this statistic is that the test for being significant at level &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt; using it is equivalent to the &lt;script type=&quot;math/tex&quot;&gt;(1-\alpha)&lt;/script&gt; confidence interval for the difference &lt;script type=&quot;math/tex&quot;&gt;\hat{p}_A - \hat{p}_B&lt;/script&gt; containing 0.&lt;/p&gt;
-
-&lt;p&gt;How can we find a confidence interval for the risk ratio?  The distribution of the ratio of two independent normals is complicated (unless both normals have zero mean, in which case the ratio is distributed Cauchy).  The trick is to turn the ratio into a difference by taking a log, use propagation of error, and then transform back.&lt;/p&gt;
-
-&lt;p&gt;Propagation of error approximately describes how the mean and variance of a random variable change under a transformation.  More precisely, &lt;script type=&quot;math/tex&quot;&gt;\textbf{E}(f(X)) \approx f(\textbf{E}(X))&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\textbf{Var}(f(X)) \approx f'(\textbf{E}(X))^2\ \textbf{Var}(X)&lt;/script&gt;.  Propagation of error is often used in conjunction with the central limit theorem: if &lt;script type=&quot;math/tex&quot;&gt;\sqrt{n}(X_n - \mu)&lt;/script&gt; converges in distribution to &lt;script type=&quot;math/tex&quot;&gt;N(0, \sigma^2)&lt;/script&gt;, then &lt;script type=&quot;math/tex&quot;&gt;\sqrt{n}(f(X_n) - f(\mu))&lt;/script&gt; converges to &lt;script type=&quot;math/tex&quot;&gt;N(0, f'(\mu)^2 \sigma^2)&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;By propagation of error, &lt;script type=&quot;math/tex&quot;&gt;\log \hat{p}_A&lt;/script&gt; is approximately distributed &lt;script type=&quot;math/tex&quot;&gt;N(\log(p_A), \frac{1-p_A}{n p_A})&lt;/script&gt;.  The standard error for the difference in log hat probabilities is thus&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;SE = \sqrt{\frac{1-\hat{p}_A}{n \hat{p}_A} +\frac{1-\hat{p}_B}{m\hat{p}_B}},&lt;/script&gt;
-
-&lt;p&gt;and the &lt;script type=&quot;math/tex&quot;&gt;95\%&lt;/script&gt; confidence interval for the difference is &lt;script type=&quot;math/tex&quot;&gt;\pm 1.96\ SE&lt;/script&gt;.  We exponentiate to get the confidence interval for the risk ratio:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\frac{\hat{p}_A}{\hat{p}_B}\ e^{\pm 1.96\ SE}.&lt;/script&gt;
-
-&lt;p&gt;Note the confidence interval is asymmetric!&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="confidence interval" /><category term="difference in proportions" /><category term="propagation of error" /><category term="ratio of proportions" /><category term="risk ratio" /><summary type="html">Suppose I conduct an experiment to determine whether to use font A or font B in an online ad.  After running the experiment, I find that there is a 1% chance that a user clicks on the font A ad, and a 0.8% chance that the user clicks on the font B ad.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/payperclick.jpg" /></entry></feed>
+&lt;p&gt;Choosing the parametrization (covariance or precision) depends on whether your application requires computing marginal or conditional distributions.  In Gaussian Markov random fields, for example, conditional distributions are important, so using a precision parametrization makes life easier.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="conditional distribution of multivariate normal" /><category term="covariance matrix" /><category term="precision matrix" /><category term="marginal distribution of multivariate normal" /><summary type="html">Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/normal.png" /></entry></feed>
