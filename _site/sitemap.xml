@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>http://localhost:4000/journal/text-formatting-examples.html</loc>
-<lastmod>2014-01-01T00:00:00-08:00</lastmod>
-</url>
-<url>
 <loc>http://localhost:4000/alligators-dinosaurs-and-scaling.html</loc>
 <lastmod>2018-04-13T00:00:00-07:00</lastmod>
 </url>
@@ -69,7 +65,7 @@
 <lastmod>2018-11-18T00:00:00-08:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/journal/the-relationship-between-correlation-mutual-information-and-p-values.html</loc>
+<loc>http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values.html</loc>
 <lastmod>2019-03-03T00:00:00-08:00</lastmod>
 </url>
 <url>

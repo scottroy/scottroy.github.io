@@ -2,8 +2,8 @@
 layout: post
 title: "The relationship between correlation, mutual information, and p-values"
 author: "Scott Roy"
-categories: journal
-tags: []
+categories:
+tags: [mutual information, p-values, correlation, feature selection, F test, proportion test, chi-squared test, G-test, t-test]
 image: correlation_pval_mutual_info.png
 ---
 
