@@ -22,21 +22,6 @@
 			</item>
 		
 			<item>
-				<title>Introduction to neural networks</title>
-				
-					<dc:creator>Scott Roy</dc:creator>
-				
-				
-					<description>&lt;p&gt;In this post, I’ll walk through some basics of neural networks.&lt;/p&gt;
-
-</description>
-				
-				<pubDate>Thu, 08 Aug 2019 00:00:00 -0700</pubDate>
-				<link>http://localhost:4000/from-logistic-regression-to-a-neural-network.html</link>
-				<guid isPermaLink="true">http://localhost:4000/from-logistic-regression-to-a-neural-network.html</guid>
-			</item>
-		
-			<item>
 				<title>The relationship between correlation, mutual information, and p-values</title>
 				
 					<dc:creator>Scott Roy</dc:creator>
@@ -156,6 +141,21 @@ There are many ways we could interpret “most related”:&lt;/p&gt;
 				<pubDate>Sat, 28 Apr 2018 00:00:00 -0700</pubDate>
 				<link>http://localhost:4000/propogation-of-error.html</link>
 				<guid isPermaLink="true">http://localhost:4000/propogation-of-error.html</guid>
+			</item>
+		
+			<item>
+				<title>Maximum likelihood estimation with censored data</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Fri, 20 Apr 2018 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html</link>
+				<guid isPermaLink="true">http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html</guid>
 			</item>
 		
 	</channel>
