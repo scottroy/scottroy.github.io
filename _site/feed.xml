@@ -1,4 +1,195 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-03-03T17:34:28-08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">statsandstuff</title><subtitle>a blog on statistics and machine learning</subtitle><author><name>Scott Roy</name></author><entry><title type="html">The relationship between correlation, mutual information, and p-values</title><link href="http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values.html" rel="alternate" type="text/html" title="The relationship between correlation, mutual information, and p-values" /><published>2019-03-03T00:00:00-08:00</published><updated>2019-03-03T00:00:00-08:00</updated><id>http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values</id><content type="html" xml:base="http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values.html">&lt;p&gt;Feature selection is often necessary before building a machine learning or statistical model, especially when there are many, many irrelevant features.  To be more concrete, suppose we want to predict/explain some response &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; using some features &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_k&lt;/script&gt;.  A natural first step is to find the features that are “most related” to the response and build a model with those.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-08-11T19:32:01-07:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">statsandstuff</title><subtitle>a blog on statistics and machine learning</subtitle><author><name>Scott Roy</name></author><entry><title type="html">Introduction to neural networks</title><link href="http://localhost:4000/introduction-to-neural-networks.html" rel="alternate" type="text/html" title="Introduction to neural networks" /><published>2019-08-11T00:00:00-07:00</published><updated>2019-08-11T00:00:00-07:00</updated><id>http://localhost:4000/introduction-to-neural-networks</id><content type="html" xml:base="http://localhost:4000/introduction-to-neural-networks.html">&lt;p&gt;In this post, I walk through some basics of neural networks.  I assume the reader is already familar with some basic ML concepts such as logistic regression, linear regression, and classifier decision boundaries.&lt;/p&gt;
+
+&lt;h2 id=&quot;single-neuron&quot;&gt;Single neuron&lt;/h2&gt;
+&lt;p&gt;Neural networks are made up of neurons.  A single neuron in a neural network takes inputs &lt;script type=&quot;math/tex&quot;&gt;x_1, x_2, \ldots, x_p&lt;/script&gt;, applies a linear transformation to these inputs to compute &lt;script type=&quot;math/tex&quot;&gt;z = b + w_1 x_1 + \ldots + w_p x_p&lt;/script&gt;, and then applies a (nonlinear) activation function to &lt;script type=&quot;math/tex&quot;&gt;z&lt;/script&gt; to compute an output &lt;script type=&quot;math/tex&quot;&gt;a = g(z)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/neuron.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Different activation functions result in different generalized linear models.  For example, if &lt;script type=&quot;math/tex&quot;&gt;g(z) = 1 / (1 + e^z)&lt;/script&gt; is the sigmoid function (also called the logistic function), the neuron is essentially a logistic regression, provided we fit the model using cross-entropy loss/maximum likelihood estimation.  Similarly, if &lt;script type=&quot;math/tex&quot;&gt;g(z) = z&lt;/script&gt; is the identity function, the neuron is a linear regression as long as we fit the model using square loss.  Popular activation functions are&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;sigmoid (&lt;script type=&quot;math/tex&quot;&gt;g(z) = 1 / (1 + e^{-z})&lt;/script&gt;)&lt;/li&gt;
+  &lt;li&gt;tanh (&lt;script type=&quot;math/tex&quot;&gt;g(z) = (e^z - e^{-z}) / (e^{z} + e^{-z})&lt;/script&gt;)&lt;/li&gt;
+  &lt;li&gt;RELU (&lt;script type=&quot;math/tex&quot;&gt;g(z) = \max(0, z)&lt;/script&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The tanh (plotted below) and sigmoid functions have the same shape, but the sigmoid takes values in &lt;script type=&quot;math/tex&quot;&gt;(0,1)&lt;/script&gt;, whereas tanh takes values in &lt;script type=&quot;math/tex&quot;&gt;(-1,1)&lt;/script&gt;.  The precise relationship between the two is given by &lt;script type=&quot;math/tex&quot;&gt;\tanh(z) =  2\text{sigmoid}(2z) - 1&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tanh.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A single neuron divides space with a hyperplane and can therefore learn to classify linearly separable data.  As an example, consider a two dimensional feature space and a single neuron with a hyperbolic tangent activation function.  The output of the neuron is&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;a = \tanh(w_1 x_1 + w_2 x_2 + b).&lt;/script&gt;
+
+&lt;p&gt;Notice the neuron fires &lt;script type=&quot;math/tex&quot;&gt;a = 0&lt;/script&gt; on the decision boundary &lt;script type=&quot;math/tex&quot;&gt;w_1 x_1 + w_2 x_2 + b = 0&lt;/script&gt;, is positive on one side of the boundary, and is negative on the other.  By multiplying &lt;script type=&quot;math/tex&quot;&gt;w_1&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;w_2&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;b&lt;/script&gt; by a sufficiently large scalar, the boundary &lt;script type=&quot;math/tex&quot;&gt;w_1 x_1 + w_2 x_2 + b = 0&lt;/script&gt; remains the same, but the transition from &lt;script type=&quot;math/tex&quot;&gt;a = -1&lt;/script&gt; to &lt;script type=&quot;math/tex&quot;&gt;a = 1&lt;/script&gt; as you move across the boundary essentially becomes a step function so that &lt;script type=&quot;math/tex&quot;&gt;a = -1&lt;/script&gt; on one side, &lt;script type=&quot;math/tex&quot;&gt;a = 0&lt;/script&gt; on the boundary, and &lt;script type=&quot;math/tex&quot;&gt;a = 1&lt;/script&gt; on the other side.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/linear-separation.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The key point is that one neuron can divide the plane in two.  We use this observation later when we discuss decision boundaries of neural networks.&lt;/p&gt;
+
+&lt;h2 id=&quot;neural-network-overview&quot;&gt;Neural network overview&lt;/h2&gt;
+&lt;p&gt;A neural network is a collection of connected neurons, where the output of each neuron is either an input to another neuron or a final output of the network.  As a reminder, each neuron has some parameters that describe how to linearly transform its inputs and an activation function.  The most basic neural network is the feed-forward neural network, in which the neurons are arranged in sequential layers, where the outputs of neurons from one layer are the inputs to the neurons in the next layer.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/ffnn-neuron-view.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The zeroth layer contains the input features (3 features in the picture above) and is usually not counted as a layer when describing a neural network.  The above network thus has 3 layers: the first layer has 4 nodes, the second has 2 nodes, and the third (output) layer has 1 node.  Working through the depicted example:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;A new observation with 3 features is loaded in the input layer.&lt;/li&gt;
+  &lt;li&gt;Each node in the first layer takes as input the 3 features in the input layer, applies a linear transformation to these features, and then applies a nonlinear activation function to return a &lt;em&gt;single&lt;/em&gt; output.  After the output from each node in the first layer is computed, the second layer is evaluated.&lt;/li&gt;
+  &lt;li&gt;Similar to the first layer, each node in the second layer takes the outputs of the previous layer as input (4 outputs in this example) and returns a single output.&lt;/li&gt;
+  &lt;li&gt;The single node in the third (and final) layer takes the 2 outputs from the second layer as input and returns one output.  For regression and binary classification tasks, the output layer always has 1 node because the network returns one number for each observation.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Layers 1 and 2 are called hidden layers to distinguish them from the output layer.  Nodes are sometimes called units and so the nodes in the hidden layers are called hidden units.&lt;/p&gt;
+
+&lt;p&gt;The neuron view above is complicated and obfuscates the bigger picture.  For more complicated networks, we often draw a layer view.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/ffnn-layer-view.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The layer view emphasizes how many nodes are in each layer (its size) and some other information, such as which activation function is used for all nodes in the layer.&lt;/p&gt;
+
+&lt;h2 id=&quot;decision-boundaries&quot;&gt;Decision boundaries&lt;/h2&gt;
+
+&lt;p&gt;The primary task in supervised machine learning is given a set of points &lt;script type=&quot;math/tex&quot;&gt;(x_i, y_i)&lt;/script&gt;, ‘‘learn’’ a function &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;y_i \approx f(x_i)&lt;/script&gt;.  Neural networks provide a very rich class of functions from which to learn &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;To understand the kind of data we can fit with a neural network, recall that a single neuron can linearly separate data.  Suppose we have three neurons (with tanh activations) in the first layer of a neural network, each dividing the two-dimensional feature plane in a different way.  Let &lt;script type=&quot;math/tex&quot;&gt;a_1&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;a_2&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;a_3&lt;/script&gt; be outputs of these neurons and let &lt;script type=&quot;math/tex&quot;&gt;a = a_1 + a_2 + a_3&lt;/script&gt; be the sum (computed by a neuron in the second layer).  The figure below depicts three lines corresponding to decision boundaries of the neurons in the first layer.  The shaded regions correspond to different values of &lt;script type=&quot;math/tex&quot;&gt;a&lt;/script&gt;, the output of the second layer.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/deep-learning-half-spaces.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice that &lt;script type=&quot;math/tex&quot;&gt;a = 3&lt;/script&gt; on the dark blue triangle in the center, but is 2 or less in all other regions.  We can thus test if a point belongs to the center triangle by checking whether &lt;script type=&quot;math/tex&quot;&gt;a \geq 2.5&lt;/script&gt;.  We just showed how a two-layer neural network can learn a triangular decision region.  Similar arguments show that neural networks can capture intersections and unions of half spaces, which allows them to model arbitrarily complex decision boundaries.&lt;/p&gt;
+
+&lt;p&gt;In fact, shallow two-layer neural networks can model bounded continuous functions arbitrarily well.  Deep learning is crucial, though, because shallow networks do not necessarily model complex functions efficiently.  Indeed, there are functions that require exponentially more nodes to model with a shallow network than with a deep network.  A more intuitive explanation for why deep learning works better in practice is that the layers in a deep network gradually learn more and more complex structure.  For example, the first layer in an image recognition model might learn to recognize edges, the next layer might learn to recognize basic shapes, and so forth.&lt;/p&gt;
+
+&lt;h2 id=&quot;composition-view&quot;&gt;Composition view&lt;/h2&gt;
+
+&lt;p&gt;A feed forward neural network is just a composition of a lot of functions.  Indeed, the final output of the network is a composition of &lt;script type=&quot;math/tex&quot;&gt;L&lt;/script&gt; layer transformations&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;a^{[L]}(a^{[L-1]}(a^{[L-2]}(...a^{[2]}(a^{[1]}(x))))),&lt;/script&gt;
+
+&lt;p&gt;where the transformation in the &lt;script type=&quot;math/tex&quot;&gt;l&lt;/script&gt;th layer &lt;script type=&quot;math/tex&quot;&gt;a^{[l]}(\cdot) = g^{[l]}(l^{[l]}(\cdot))&lt;/script&gt; consists of a linear function &lt;script type=&quot;math/tex&quot;&gt;l^{[l]}(x) = W^{[l]} x + b^{[l]}&lt;/script&gt; followed by a nonlinear activation &lt;script type=&quot;math/tex&quot;&gt;g^{[l]}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;To evaluate the network at a point &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt;, we work from the inside outwards in the composition, first computing &lt;script type=&quot;math/tex&quot;&gt;a^{[1]} = a^{[1]}(x)&lt;/script&gt;, then using &lt;script type=&quot;math/tex&quot;&gt;a^{[1]}&lt;/script&gt; to compute &lt;script type=&quot;math/tex&quot;&gt;a^{[2]} = a^{[2]}(a^{[1]})&lt;/script&gt;, and so forth.  In the layer diagram, this corresponds to going through the network from left to right and is called forward propagation.&lt;/p&gt;
+
+&lt;p&gt;The coefficients &lt;script type=&quot;math/tex&quot;&gt;W&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;b&lt;/script&gt; in the linear functions are the parameters of the network.  A neural network is usually fit with mini-batch gradient descent or some other first order optimization scheme.  This requires computing the derivative of some loss &lt;script type=&quot;math/tex&quot;&gt;\ell&lt;/script&gt; with respect to the network’s parameters.&lt;/p&gt;
+
+&lt;p&gt;The loss is also a large composition&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ell \circ a^{[L]} \circ a^{[L-1]} \circ \cdots \circ a^{[1]}.&lt;/script&gt;
+
+&lt;p&gt;Assuming each layer has one node for simplicity, the chain rule gives the following:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\frac{d \ell}{d a^{[l]}} &amp;= \frac{d \ell}{d a^{[L]}} \frac{d a^{[L]}}{d a^{[L-1]}} \cdots \frac{d a^{[l+2]}}{d a^{[l+1]}} \frac{d a^{[l+1]}}{d a^{[l]}} \\
+
+\frac{d \ell}{d W^{[l]}} &amp;= \frac{d \ell}{d a^{[l]}} \frac{d a^{[l]}}{d W^{[l]}} \\
+\frac{d \ell}{d b^{[l]}} &amp;= \frac{d \ell}{d a^{[l]}} \frac{d a^{[l]}}{d b^{[l]}}.
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;To compute the loss derivative with respect to the &lt;script type=&quot;math/tex&quot;&gt;l&lt;/script&gt;th layer’s parameters, we work from right to left in the network, first computing &lt;script type=&quot;math/tex&quot;&gt;\frac{d \ell}{d a^{[L]}}&lt;/script&gt;, then computing &lt;script type=&quot;math/tex&quot;&gt;\frac{da^{[l]}}{da^{[L-1]}}&lt;/script&gt;, and so on.  This is called back propagation.&lt;/p&gt;
+
+&lt;p&gt;To summarize&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A neural network is a composition of many functions&lt;/li&gt;
+  &lt;li&gt;Forward propagation is a graphical way of evaluating the composition&lt;/li&gt;
+  &lt;li&gt;Back propagation is a graphical way of applying the chain rule to evaluate the derivative of the composition&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I will discuss forward and back propagation in more detail in the next post, where I’ll walk through implementing a deep neural network.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="logistic regression" /><category term="forward propagation" /><category term="back propagation" /><category term="decision boundary" /><category term="neural network" /><category term="deep learning" /><summary type="html">In this post, I walk through some basics of neural networks. I assume the reader is already familar with some basic ML concepts such as logistic regression, linear regression, and classifier decision boundaries.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/ffnn-neuron-view.png" /></entry><entry><title type="html">Introduction to neural networks</title><link href="http://localhost:4000/from-logistic-regression-to-a-neural-network.html" rel="alternate" type="text/html" title="Introduction to neural networks" /><published>2019-08-08T00:00:00-07:00</published><updated>2019-08-08T00:00:00-07:00</updated><id>http://localhost:4000/from-logistic-regression-to-a-neural-network</id><content type="html" xml:base="http://localhost:4000/from-logistic-regression-to-a-neural-network.html">&lt;p&gt;In this post, I’ll walk through some basics of neural networks.&lt;/p&gt;
+
+&lt;h2 id=&quot;single-neuron&quot;&gt;Single neuron&lt;/h2&gt;
+&lt;p&gt;Neural networks are made up of neurons.  A single neuron in a neural network takes inputs &lt;script type=&quot;math/tex&quot;&gt;x_1, x_2, \ldots, x_p&lt;/script&gt;, applies a linear transformation to these inputs to compute &lt;script type=&quot;math/tex&quot;&gt;z = b + w_1 x_1 + \ldots + w_p x_p&lt;/script&gt;, and then applies a (nonlinear) activation function to &lt;script type=&quot;math/tex&quot;&gt;z&lt;/script&gt; to compute an output &lt;script type=&quot;math/tex&quot;&gt;a = g(z)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/neuron.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Different activation functions result in different generalized linear models.  For example, if &lt;script type=&quot;math/tex&quot;&gt;g(z) = 1 / (1 + e^z)&lt;/script&gt; is the sigmoid function (also called the logistic function), the neuron is essentially a logistic regression, provided we fit the output using cross-entropy loss/maximum likelihood estimation.  Similarly, if &lt;script type=&quot;math/tex&quot;&gt;g(z) = z&lt;/script&gt; is the identity function, the neuron is a linear regression as long as we fit the output using square loss.  Popular activation functions are&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;sigmoid (&lt;script type=&quot;math/tex&quot;&gt;g(z) = 1 / (1 + e^{-z})&lt;/script&gt;)&lt;/li&gt;
+  &lt;li&gt;tanh (&lt;script type=&quot;math/tex&quot;&gt;g(z) = (e^z - e^{-z}) / (e^{z} + e^{-z})&lt;/script&gt;)&lt;/li&gt;
+  &lt;li&gt;RELU (&lt;script type=&quot;math/tex&quot;&gt;g(z) = \max(0, z)&lt;/script&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The tanh (plotted below) and sigmoid functions have the same shape, but the sigmoid takes values in &lt;script type=&quot;math/tex&quot;&gt;(0,1)&lt;/script&gt;, whereas tanh takes values in &lt;script type=&quot;math/tex&quot;&gt;(-1,1)&lt;/script&gt;.  The precise relationship between the two is given by &lt;script type=&quot;math/tex&quot;&gt;\tanh(z) =  2\text{sigmoid}(2z) - 1&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/tanh.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A single neuron divides space with a hyperplane and can therefore learn to classify linearly separable data.  As an example, consider a two dimensional feature space and a single neuron with a hyperbolic tangent activation function.  The output of the neuron is&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;a = \tanh(w_1 x_1 + w_2 x_2 + b).&lt;/script&gt;
+
+&lt;p&gt;Notice the neuron fires &lt;script type=&quot;math/tex&quot;&gt;a = 0&lt;/script&gt; on the decision boundary &lt;script type=&quot;math/tex&quot;&gt;w_1 x_1 + w_2 x_2 + b = 0&lt;/script&gt;, is positive on one side of the boundary, and is negative on the other.  By multiplying &lt;script type=&quot;math/tex&quot;&gt;w_1&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;w_2&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;b&lt;/script&gt; by a sufficiently large scalar, the boundary &lt;script type=&quot;math/tex&quot;&gt;w_1 x_1 + w_2 x_2 + b = 0&lt;/script&gt; remains the same, but the transition from &lt;script type=&quot;math/tex&quot;&gt;a = -1&lt;/script&gt; to &lt;script type=&quot;math/tex&quot;&gt;a = 1&lt;/script&gt; as you move across the boundary essentially becomes a step function so that &lt;script type=&quot;math/tex&quot;&gt;a = -1&lt;/script&gt; on one side, &lt;script type=&quot;math/tex&quot;&gt;a = 0&lt;/script&gt; on the boundary, and &lt;script type=&quot;math/tex&quot;&gt;a = 1&lt;/script&gt; on the other side.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/linear-separation.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The key point is that one neuron can divide the plane in two.  We will use this observation later when we discuss the kinds of decision boundaries a neural network can model.&lt;/p&gt;
+
+&lt;h2 id=&quot;neural-network-overview&quot;&gt;Neural network overview&lt;/h2&gt;
+&lt;p&gt;A neural network is a collection of connected neurons, where the output of each neuron is either an input to another neuron or a final output of the network.  The most basic neural network is the feed-forward neural network, in which the neurons are arranged in sequential layers, where the outputs of neurons from one layer are the inputs to the neurons in the next layer.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/ffnn-neuron-view.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The zeroth layer contains the input features (3 features in the picture above) and is usually not counted as a layer when describing a neural network.  The above network thus has 3 layers: the first layer has 4 nodes, the second has 2 nodes, and the third (output) layer has 1 node.  For regression and binary classification tasks, the output layer always has 1 node because for each observation, the network returns one number.&lt;/p&gt;
+
+&lt;p&gt;Layers 1 and 2 are called hidden layers to distinguish them from the output layer.  Nodes are sometimes called units and so the nodes in the hidden layers are also called as hidden units.&lt;/p&gt;
+
+&lt;p&gt;The neuron view above is complicated and obfuscates the bigger picture.  For more complicated networks, we often draw a layer view.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/ffnn-layer-view.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The layer view emphasizes how many nodes are in each layer (its size) and some other information, such as which activation function is used for all nodes in the layer.&lt;/p&gt;
+
+&lt;h2 id=&quot;decision-boundaries&quot;&gt;Decision boundaries&lt;/h2&gt;
+
+&lt;p&gt;The primary task in supervised machine learning is given a set of points &lt;script type=&quot;math/tex&quot;&gt;(x_i, y_i)&lt;/script&gt;, ‘‘learn’’ a function &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;y_i \approx f(x_i)&lt;/script&gt;.  Neural networks provide a very rich class of functions from which to learn &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;To understand the kind of data we can fit with a neural network, recall that single neuron can linearly separate data.  Suppose we have three neurons (with tanh activations) in the first layer of a neural network, each dividing the two-dimensional feature plane in a different way.  Let &lt;script type=&quot;math/tex&quot;&gt;a_1&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;a_2&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;a_3&lt;/script&gt; be outputs of these neurons and let &lt;script type=&quot;math/tex&quot;&gt;a = a_1 + a_2 + a_3&lt;/script&gt; be the sum (computed by a neuron in the second layer).  The figure below depicts three lines corresponding to decision boundaries of the neurons in the first layer.  The shaded regions correspond to different values of &lt;script type=&quot;math/tex&quot;&gt;a&lt;/script&gt;, the output of the second layer.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/deep-learning-half-spaces.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice that &lt;script type=&quot;math/tex&quot;&gt;a = 3&lt;/script&gt; on the triangular region.  We just showed how a two-layer neural network can learn a triangular decision region.  Similar arguments show that neural networks can capture intersections and unions of half spaces, which allows them to model arbitrarily complex decision boundaries.&lt;/p&gt;
+
+&lt;p&gt;In fact, a shallow two-layer neural networks can model bounded continuous functions arbitrarily well.  Deep learning is crucial, though, because shallow networks do not necessarily model complex functions efficiently.  Indeed, there are functions that require exponentially more nodes to model with a shallow network than a deep network.  The layers in a deep network can gradually learn more and more complex structure.  For example, the first layer in an image recognition model might learn to recognize edges, the next layer might learn to recognize basic shapes, and so forth.&lt;/p&gt;
+
+&lt;h2 id=&quot;composition-view&quot;&gt;Composition view&lt;/h2&gt;
+
+&lt;p&gt;In this section, I discuss a ‘‘composition’’ view of neural networks.  A feed forward neural network is just a composition of a lot of functions.  Indeed, the final output of the network is a composition of &lt;script type=&quot;math/tex&quot;&gt;L&lt;/script&gt; layer transformations&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;a^{[L]}(a^{[L-1]}(a^{[L-2]}(...a^{[2]}(a^{[1]}(x))))),&lt;/script&gt;
+
+&lt;p&gt;where the transformation in the &lt;script type=&quot;math/tex&quot;&gt;l&lt;/script&gt;th layer &lt;script type=&quot;math/tex&quot;&gt;a^{[l]}(\cdot) = g^{[l]}(l^{[l]}(\cdot))&lt;/script&gt; consists of a linear function &lt;script type=&quot;math/tex&quot;&gt;l^{[l]}(x) = W^{[l]} x + b^{[l]}&lt;/script&gt; followed by a nonlinear activation &lt;script type=&quot;math/tex&quot;&gt;g^{[l]}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;To evaluate the network at a point &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt;, we work from the inside outwards in the composition, first computing &lt;script type=&quot;math/tex&quot;&gt;a^{[1]} = a^{[1]}(x)&lt;/script&gt;, then using &lt;script type=&quot;math/tex&quot;&gt;a^{[1]}&lt;/script&gt; to compute &lt;script type=&quot;math/tex&quot;&gt;a^{[2]} = a^{[2]}(a^{[1]})&lt;/script&gt;, and so forth.  In the layer diagram, this corresponds to going through the network from left to right and is called forward propagation.&lt;/p&gt;
+
+&lt;p&gt;The coefficients &lt;script type=&quot;math/tex&quot;&gt;W&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;b&lt;/script&gt; in the linear functions are the parameters of the network.  A neural network is usually fit with stochastic gradient descent or some other first order optimization scheme.  This requires computing the derivative of some loss &lt;script type=&quot;math/tex&quot;&gt;\ell&lt;/script&gt; with respect to the network’s parameters.&lt;/p&gt;
+
+&lt;p&gt;The loss is also a large composition&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\ell \circ a^{[L]} \circ a^{[L-1]} \circ \cdots \circ a^{[1]}.&lt;/script&gt;
+
+&lt;p&gt;Assuming each layer has one node for simplicity, the chain rule gives&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\frac{d \ell}{d a^{[l]}} &amp;= \frac{d \ell}{d a^{[L]}} \frac{d a^{[L]}}{d a^{[L-1]}} \cdots \frac{d a^{[l+2]}}{d a^{[l+1]}} \frac{d a^{[l+1]}}{d a^{[l]}} \\
+
+\frac{d \ell}{d W^{[l]}} &amp;= \frac{d \ell}{d a^{[l]}} \frac{d a^{[l]}}{d W^{[l]}} \\
+\frac{d \ell}{d b^{[l]}} &amp;= \frac{d \ell}{d a^{[l]}} \frac{d a^{[l]}}{d b^{[l]}}.
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;To compute the loss derivative with respect to the &lt;script type=&quot;math/tex&quot;&gt;l&lt;/script&gt;th layer’s parameters, we work from right to left in the network, first computing &lt;script type=&quot;math/tex&quot;&gt;\frac{d \ell}{d a^{[L]}}&lt;/script&gt;, then computing &lt;script type=&quot;math/tex&quot;&gt;\frac{da^{[l]}}{da^{[L-1]}}&lt;/script&gt;, and so on.  This is called back propagation.&lt;/p&gt;
+
+&lt;p&gt;To summarize&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A neural network is a composition of many functions&lt;/li&gt;
+  &lt;li&gt;Forward propagation is a graphical way of evaluating the composition&lt;/li&gt;
+  &lt;li&gt;Back propagation is a graphical way of applying the chain rule to evaluate the derivative of the composition&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I will discuss forward and back propagation in more detail in the next post, where I’ll walk through implementing a deep neural network&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="logistic regression" /><category term="forward propagation" /><category term="back propagation" /><category term="decision boundary" /><category term="neural network" /><category term="deep learning" /><summary type="html">In this post, I’ll walk through some basics of neural networks.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/ffnn-neuron-view.png" /></entry><entry><title type="html">The relationship between correlation, mutual information, and p-values</title><link href="http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values.html" rel="alternate" type="text/html" title="The relationship between correlation, mutual information, and p-values" /><published>2019-03-03T00:00:00-08:00</published><updated>2019-03-03T00:00:00-08:00</updated><id>http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values</id><content type="html" xml:base="http://localhost:4000/the-relationship-between-correlation-mutual-information-and-p-values.html">&lt;p&gt;Feature selection is often necessary before building a machine learning or statistical model, especially when there are many, many irrelevant features.  To be more concrete, suppose we want to predict/explain some response &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; using some features &lt;script type=&quot;math/tex&quot;&gt;X_1, \ldots, X_k&lt;/script&gt;.  A natural first step is to find the features that are “most related” to the response and build a model with those.
 There are many ways we could interpret “most related”:&lt;/p&gt;
 
 &lt;ul&gt;
@@ -741,85 +932,4 @@ Let &lt;script type=&quot;math/tex&quot;&gt;f_{+}(x)&lt;/script&gt; be the score
 \nabla f(\theta) &amp;= 703 \begin{bmatrix} 1/\mu_h^2 \\ -2 \mu_w / \mu_h^3 \end{bmatrix} = \begin{bmatrix} 0.14 \\ -0.66 \end{bmatrix}.
 \end{aligned} %]]&gt;&lt;/script&gt;
 
-&lt;p&gt;By propagation of error combined with the central limit theorem, the mean BMI of &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; people is approximately normally distributed with mean &lt;script type=&quot;math/tex&quot;&gt;f(\theta) = (703)(164.39) / (70.45^2) = 23.28&lt;/script&gt; and variance &lt;script type=&quot;math/tex&quot;&gt;\nabla f(\theta)^T \Sigma \nabla f(\theta)) / n = 9.82 / n&lt;/script&gt;.  The approximation is better the larger &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; is.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="central limit theorem" /><category term="propogration of error" /><summary type="html">Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/bmi.png" /></entry><entry><title type="html">Maximum likelihood estimation with censored data</title><link href="http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html" rel="alternate" type="text/html" title="Maximum likelihood estimation with censored data" /><published>2018-04-20T00:00:00-07:00</published><updated>2018-04-20T00:00:00-07:00</updated><id>http://localhost:4000/maximum-likelihood-estimation-with-censored-data</id><content type="html" xml:base="http://localhost:4000/maximum-likelihood-estimation-with-censored-data.html">&lt;p&gt;Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.&lt;/p&gt;
-
-&lt;p&gt;I decide to fit an exponential model to the failure times, and I fit the parameter with maximum likelihood estimation. The exponential distribution with rate parameter &lt;script type=&quot;math/tex&quot;&gt;\beta&lt;/script&gt; has density &lt;script type=&quot;math/tex&quot;&gt;f(x \vert  \beta) = \beta e^{-\beta x}&lt;/script&gt;. To keep things simple, suppose I observe failures for the first 75 hard drives (with failure times &lt;script type=&quot;math/tex&quot;&gt;x_1,\ldots, x_{75}&lt;/script&gt; in years),  and the last 25 hard drives have censored failure times.  The likelihood is&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{aligned}
-f(x\vert \beta) &amp;= \left( \prod_{i=1}^{75} f(x_i \vert  \beta) \right) \textbf{P}(X \geq 2 \vert  \beta)^{25} \\
-&amp;= \left(\prod_{i=1}^{75} \beta e^{-\beta x_i} \right) \left( e^{-2 \beta} \right)^{25}.
-\end{aligned} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;The negative log likelihood is&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;l(x\vert \beta) = \left(\sum_{i=1}^{75} x_i + 25 \times 2 \right) \beta - 75 \log (\beta),&lt;/script&gt;
-
-&lt;p&gt;which means the MLE is&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;\hat{\beta} = \frac{75}{\sum_{i=1}^{75} x_i + 25 \times 2}.&lt;/script&gt;
-
-&lt;p&gt;I want to compare this to the estimates I get if I improperly handle the censored data in each of the following ways:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Discard the censored observations.&lt;/li&gt;
-  &lt;li&gt;Record the censored observations as 2 years.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If I discard the censored observations, the negative log likelihood and MLE are:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{aligned}
-l(x \vert  \beta) &amp;= \left(\sum_{i=1}^{75} x_i \right) \beta - 75 \log (\beta) \\
-\hat{\beta} &amp;= \frac{75}{\sum_{i=1}^{75} x_i}.
-\end{aligned} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;In this case, I over-estimate the exponential rate &lt;script type=&quot;math/tex&quot;&gt;\beta&lt;/script&gt; (i.e., under-estimate the mean &lt;script type=&quot;math/tex&quot;&gt;\frac{1}{\beta}&lt;/script&gt;).  I also under-estimate the mean if I replace the censored observations with 2 years:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{aligned}
-l(x \vert  \beta) &amp;= \left(\sum_{i=1}^{75} x_i + 25 \times 2 \right) \beta - 100 \log (\beta) \\
-\hat{\beta} &amp;= \frac{100}{\sum_{i=1}^{75} x_i+ 25 \times 2}.
-\end{aligned} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;We can deal with other kinds of censoring in MLE calculations, too. Suppose we don’t know what &lt;script type=&quot;math/tex&quot;&gt;x_i&lt;/script&gt; is, but we just know that it lies between 3 and 4. We would then use &lt;script type=&quot;math/tex&quot;&gt;\textbf{P}( 3 \leq X \leq 4 \vert  \beta)&lt;/script&gt; instead of &lt;script type=&quot;math/tex&quot;&gt;f(x_i \vert  \beta)&lt;/script&gt; in the likelihood product.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="censored data" /><category term="maximum likelihood estimation" /><category term="MLE" /><summary type="html">Suppose I’m tasked with analyzing failure times for hard drives in a datacenter.  I track 100 hard drives over a 2 year period, and if a hard drive fails, I record when. If the hard drive has not failed by the 2 year mark, I don’t when when it will fail, just that its failure time is more than 2 years. We say the failure times for the hard drives remaining at the 2 year mark are censored.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/censored_data.png" /></entry><entry><title type="html">To precision or to variance?</title><link href="http://localhost:4000/to-precision-or-to-variance.html" rel="alternate" type="text/html" title="To precision or to variance?" /><published>2018-04-13T00:00:00-07:00</published><updated>2018-04-13T00:00:00-07:00</updated><id>http://localhost:4000/to-precision-or-to-variance</id><content type="html" xml:base="http://localhost:4000/to-precision-or-to-variance.html">&lt;p&gt;Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.&lt;/p&gt;
-
-&lt;p&gt;In this post, I want to discuss marginalization and conditioning.  In particular, I want to point out that computing the marginal distribution is easy when we parametrize with the covariance matrix, and computing the conditional distribution is easy when we parametrize with the precision matrix.&lt;/p&gt;
-
-&lt;p&gt;Suppose &lt;script type=&quot;math/tex&quot;&gt;(X, Y)&lt;/script&gt; is distributed multivariate normal&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{bmatrix} X \\ Y \end{bmatrix} \sim N \left( \begin{bmatrix} \mu_x \\ \mu_y \end{bmatrix}, \begin{bmatrix}  \Sigma_{xx} &amp; \Sigma_{xy} \\ \Sigma_{yx} &amp; \Sigma_{yy} \end{bmatrix} \right). %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;The marginal distribution of &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; is really easy to compute:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;X \sim N \left( \mu_x, \Sigma_{xx} \right).&lt;/script&gt;
-
-&lt;p&gt;The conditional distribution &lt;script type=&quot;math/tex&quot;&gt;X \vert Y&lt;/script&gt; is again multivariate normal, but with mean and covariance given by&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{aligned}
-\mu_{x\vert y} &amp;= \mu_x + \Sigma_{xy} \Sigma_{yy}^{-1} (Y - \mu_y) \\
-\Sigma_{x\vert y} &amp;= \Sigma_{xx \cdot y} := \Sigma_{xx} - \Sigma_{xy} \Sigma_{yy}^{-1} \Sigma_{yx}.
-\end{aligned} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;What do these formulas look like when we parametrize by precision matrix?  (The precision matrix &lt;script type=&quot;math/tex&quot;&gt;K&lt;/script&gt; is the inverse of the covariance matrix: &lt;script type=&quot;math/tex&quot;&gt;K = \Sigma^{-1}&lt;/script&gt;.)&lt;/p&gt;
-
-&lt;p&gt;If we write&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-K = \begin{bmatrix} K_{xx} &amp; K_{xy} \\ K_{yx} &amp; K_{yy}, \end{bmatrix} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;then we have the following relations:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{aligned}
-K_{xx} &amp;= \Sigma_{xx \cdot y}^{-1} \\
-K_{yy} &amp;= \Sigma_{yy \cdot x}^{-1} := (\Sigma_{yy} - \Sigma_{yx} \Sigma_{xx}^{-1} \Sigma_{xy})^{-1} \\
-K_{xy} &amp;= -\Sigma_{xx}^{-1} \Sigma_{xy} K_{yy} \\
-K_{yx} &amp;= -\Sigma_{yy}^{-1} \Sigma_{yx} K_{xx}.
-\end{aligned} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;In terms of &lt;script type=&quot;math/tex&quot;&gt;K&lt;/script&gt;, the marginal distribution of &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; has precision matrix &lt;script type=&quot;math/tex&quot;&gt;K_{xx \cdot y}&lt;/script&gt;, and the conditional distribution &lt;script type=&quot;math/tex&quot;&gt;X \vert Y&lt;/script&gt; has precision matrix &lt;script type=&quot;math/tex&quot;&gt;K_{xx}&lt;/script&gt;.  Notice the duality!  The marginal distribution &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; has covariance &lt;script type=&quot;math/tex&quot;&gt;\Sigma_{xx}&lt;/script&gt; and precision &lt;script type=&quot;math/tex&quot;&gt;K_{xx \cdot y}&lt;/script&gt;, and the conditional distribution &lt;script type=&quot;math/tex&quot;&gt;X \vert  Y&lt;/script&gt; has covariance &lt;script type=&quot;math/tex&quot;&gt;\Sigma_{xx \cdot y}&lt;/script&gt; and precision &lt;script type=&quot;math/tex&quot;&gt;K_{xx}&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;Choosing the parametrization (covariance or precision) depends on whether your application requires computing marginal or conditional distributions.  In Gaussian Markov random fields, for example, conditional distributions are important, so using a precision parametrization makes life easier.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="conditional distribution of multivariate normal" /><category term="covariance matrix" /><category term="precision matrix" /><category term="marginal distribution of multivariate normal" /><summary type="html">Multivariate normal distributions are really nice.  (Invertible) affine transformations, marginalization, and conditioning all preserve a multivariate normal distribution.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/normal.png" /></entry></feed>
+&lt;p&gt;By propagation of error combined with the central limit theorem, the mean BMI of &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; people is approximately normally distributed with mean &lt;script type=&quot;math/tex&quot;&gt;f(\theta) = (703)(164.39) / (70.45^2) = 23.28&lt;/script&gt; and variance &lt;script type=&quot;math/tex&quot;&gt;\nabla f(\theta)^T \Sigma \nabla f(\theta)) / n = 9.82 / n&lt;/script&gt;.  The approximation is better the larger &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; is.&lt;/p&gt;</content><author><name>Scott Roy</name></author><category term="central limit theorem" /><category term="propogration of error" /><summary type="html">Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/bmi.png" /></entry></feed>

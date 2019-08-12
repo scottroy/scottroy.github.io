@@ -1,0 +1,357 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Introduction to neural networks | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-135466463-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Introduction to neural networks | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Introduction to neural networks" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this post, I walk through some basics of neural networks. I assume the reader is already familar with some basic ML concepts such as logistic regression, linear regression, and classifier decision boundaries." />
+<meta property="og:description" content="In this post, I walk through some basics of neural networks. I assume the reader is already familar with some basic ML concepts such as logistic regression, linear regression, and classifier decision boundaries." />
+<link rel="canonical" href="http://localhost:4000/introduction-to-neural-networks.html" />
+<meta property="og:url" content="http://localhost:4000/introduction-to-neural-networks.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/ffnn-neuron-view.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-08-11T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"In this post, I walk through some basics of neural networks. I assume the reader is already familar with some basic ML concepts such as logistic regression, linear regression, and classifier decision boundaries.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/introduction-to-neural-networks.html","image":"http://localhost:4000/ffnn-neuron-view.png","headline":"Introduction to neural networks","dateModified":"2019-08-11T00:00:00-07:00","datePublished":"2019-08-11T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/introduction-to-neural-networks.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Introduction to neural networks
+</h1>
+
+
+  <img src="/assets/img/ffnn-neuron-view.png">
+
+
+<p>In this post, I walk through some basics of neural networks.  I assume the reader is already familar with some basic ML concepts such as logistic regression, linear regression, and classifier decision boundaries.</p>
+
+<h2 id="single-neuron">Single neuron</h2>
+<p>Neural networks are made up of neurons.  A single neuron in a neural network takes inputs <script type="math/tex">x_1, x_2, \ldots, x_p</script>, applies a linear transformation to these inputs to compute <script type="math/tex">z = b + w_1 x_1 + \ldots + w_p x_p</script>, and then applies a (nonlinear) activation function to <script type="math/tex">z</script> to compute an output <script type="math/tex">a = g(z)</script>.</p>
+
+<p><img src="/assets/img/neuron.png" alt="" /></p>
+
+<p>Different activation functions result in different generalized linear models.  For example, if <script type="math/tex">g(z) = 1 / (1 + e^z)</script> is the sigmoid function (also called the logistic function), the neuron is essentially a logistic regression, provided we fit the model using cross-entropy loss/maximum likelihood estimation.  Similarly, if <script type="math/tex">g(z) = z</script> is the identity function, the neuron is a linear regression as long as we fit the model using square loss.  Popular activation functions are</p>
+
+<ul>
+  <li>sigmoid (<script type="math/tex">g(z) = 1 / (1 + e^{-z})</script>)</li>
+  <li>tanh (<script type="math/tex">g(z) = (e^z - e^{-z}) / (e^{z} + e^{-z})</script>)</li>
+  <li>RELU (<script type="math/tex">g(z) = \max(0, z)</script>)</li>
+</ul>
+
+<p>The tanh (plotted below) and sigmoid functions have the same shape, but the sigmoid takes values in <script type="math/tex">(0,1)</script>, whereas tanh takes values in <script type="math/tex">(-1,1)</script>.  The precise relationship between the two is given by <script type="math/tex">\tanh(z) =  2\text{sigmoid}(2z) - 1</script>.</p>
+
+<p><img src="/assets/img/tanh.png" alt="" /></p>
+
+<p>A single neuron divides space with a hyperplane and can therefore learn to classify linearly separable data.  As an example, consider a two dimensional feature space and a single neuron with a hyperbolic tangent activation function.  The output of the neuron is</p>
+
+<script type="math/tex; mode=display">a = \tanh(w_1 x_1 + w_2 x_2 + b).</script>
+
+<p>Notice the neuron fires <script type="math/tex">a = 0</script> on the decision boundary <script type="math/tex">w_1 x_1 + w_2 x_2 + b = 0</script>, is positive on one side of the boundary, and is negative on the other.  By multiplying <script type="math/tex">w_1</script>, <script type="math/tex">w_2</script>, and <script type="math/tex">b</script> by a sufficiently large scalar, the boundary <script type="math/tex">w_1 x_1 + w_2 x_2 + b = 0</script> remains the same, but the transition from <script type="math/tex">a = -1</script> to <script type="math/tex">a = 1</script> as you move across the boundary essentially becomes a step function so that <script type="math/tex">a = -1</script> on one side, <script type="math/tex">a = 0</script> on the boundary, and <script type="math/tex">a = 1</script> on the other side.</p>
+
+<p><img src="/assets/img/linear-separation.png" alt="" /></p>
+
+<p>The key point is that one neuron can divide the plane in two.  We use this observation later when we discuss decision boundaries of neural networks.</p>
+
+<h2 id="neural-network-overview">Neural network overview</h2>
+<p>A neural network is a collection of connected neurons, where the output of each neuron is either an input to another neuron or a final output of the network.  As a reminder, each neuron has some parameters that describe how to linearly transform its inputs and an activation function.  The most basic neural network is the feed-forward neural network, in which the neurons are arranged in sequential layers, where the outputs of neurons from one layer are the inputs to the neurons in the next layer.</p>
+
+<p><img src="/assets/img/ffnn-neuron-view.png" alt="" /></p>
+
+<p>The zeroth layer contains the input features (3 features in the picture above) and is usually not counted as a layer when describing a neural network.  The above network thus has 3 layers: the first layer has 4 nodes, the second has 2 nodes, and the third (output) layer has 1 node.  Working through the depicted example:</p>
+
+<ol>
+  <li>A new observation with 3 features is loaded in the input layer.</li>
+  <li>Each node in the first layer takes as input the 3 features in the input layer, applies a linear transformation to these features, and then applies a nonlinear activation function to return a <em>single</em> output.  After the output from each node in the first layer is computed, the second layer is evaluated.</li>
+  <li>Similar to the first layer, each node in the second layer takes the outputs of the previous layer as input (4 outputs in this example) and returns a single output.</li>
+  <li>The single node in the third (and final) layer takes the 2 outputs from the second layer as input and returns one output.  For regression and binary classification tasks, the output layer always has 1 node because the network returns one number for each observation.</li>
+</ol>
+
+<p>Layers 1 and 2 are called hidden layers to distinguish them from the output layer.  Nodes are sometimes called units and so the nodes in the hidden layers are called hidden units.</p>
+
+<p>The neuron view above is complicated and obfuscates the bigger picture.  For more complicated networks, we often draw a layer view.</p>
+
+<p><img src="/assets/img/ffnn-layer-view.png" alt="" /></p>
+
+<p>The layer view emphasizes how many nodes are in each layer (its size) and some other information, such as which activation function is used for all nodes in the layer.</p>
+
+<h2 id="decision-boundaries">Decision boundaries</h2>
+
+<p>The primary task in supervised machine learning is given a set of points <script type="math/tex">(x_i, y_i)</script>, ‘‘learn’’ a function <script type="math/tex">f</script> such that <script type="math/tex">y_i \approx f(x_i)</script>.  Neural networks provide a very rich class of functions from which to learn <script type="math/tex">f</script>.</p>
+
+<p>To understand the kind of data we can fit with a neural network, recall that a single neuron can linearly separate data.  Suppose we have three neurons (with tanh activations) in the first layer of a neural network, each dividing the two-dimensional feature plane in a different way.  Let <script type="math/tex">a_1</script>, <script type="math/tex">a_2</script>, and <script type="math/tex">a_3</script> be outputs of these neurons and let <script type="math/tex">a = a_1 + a_2 + a_3</script> be the sum (computed by a neuron in the second layer).  The figure below depicts three lines corresponding to decision boundaries of the neurons in the first layer.  The shaded regions correspond to different values of <script type="math/tex">a</script>, the output of the second layer.</p>
+
+<p><img src="/assets/img/deep-learning-half-spaces.png" alt="" /></p>
+
+<p>Notice that <script type="math/tex">a = 3</script> on the dark blue triangle in the center, but is 2 or less in all other regions.  We can thus test if a point belongs to the center triangle by checking whether <script type="math/tex">a \geq 2.5</script>.  We just showed how a two-layer neural network can learn a triangular decision region.  Similar arguments show that neural networks can capture intersections and unions of half spaces, which allows them to model arbitrarily complex decision boundaries.</p>
+
+<p>In fact, shallow two-layer neural networks can model bounded continuous functions arbitrarily well.  Deep learning is crucial, though, because shallow networks do not necessarily model complex functions efficiently.  Indeed, there are functions that require exponentially more nodes to model with a shallow network than with a deep network.  A more intuitive explanation for why deep learning works better in practice is that the layers in a deep network gradually learn more and more complex structure.  For example, the first layer in an image recognition model might learn to recognize edges, the next layer might learn to recognize basic shapes, and so forth.</p>
+
+<h2 id="composition-view">Composition view</h2>
+
+<p>A feed forward neural network is just a composition of a lot of functions.  Indeed, the final output of the network is a composition of <script type="math/tex">L</script> layer transformations</p>
+
+<script type="math/tex; mode=display">a^{[L]}(a^{[L-1]}(a^{[L-2]}(...a^{[2]}(a^{[1]}(x))))),</script>
+
+<p>where the transformation in the <script type="math/tex">l</script>th layer <script type="math/tex">a^{[l]}(\cdot) = g^{[l]}(l^{[l]}(\cdot))</script> consists of a linear function <script type="math/tex">l^{[l]}(x) = W^{[l]} x + b^{[l]}</script> followed by a nonlinear activation <script type="math/tex">g^{[l]}</script>.</p>
+
+<p>To evaluate the network at a point <script type="math/tex">x</script>, we work from the inside outwards in the composition, first computing <script type="math/tex">a^{[1]} = a^{[1]}(x)</script>, then using <script type="math/tex">a^{[1]}</script> to compute <script type="math/tex">a^{[2]} = a^{[2]}(a^{[1]})</script>, and so forth.  In the layer diagram, this corresponds to going through the network from left to right and is called forward propagation.</p>
+
+<p>The coefficients <script type="math/tex">W</script> and <script type="math/tex">b</script> in the linear functions are the parameters of the network.  A neural network is usually fit with mini-batch gradient descent or some other first order optimization scheme.  This requires computing the derivative of some loss <script type="math/tex">\ell</script> with respect to the network’s parameters.</p>
+
+<p>The loss is also a large composition</p>
+
+<script type="math/tex; mode=display">\ell \circ a^{[L]} \circ a^{[L-1]} \circ \cdots \circ a^{[1]}.</script>
+
+<p>Assuming each layer has one node for simplicity, the chain rule gives the following:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\frac{d \ell}{d a^{[l]}} &= \frac{d \ell}{d a^{[L]}} \frac{d a^{[L]}}{d a^{[L-1]}} \cdots \frac{d a^{[l+2]}}{d a^{[l+1]}} \frac{d a^{[l+1]}}{d a^{[l]}} \\
+
+\frac{d \ell}{d W^{[l]}} &= \frac{d \ell}{d a^{[l]}} \frac{d a^{[l]}}{d W^{[l]}} \\
+\frac{d \ell}{d b^{[l]}} &= \frac{d \ell}{d a^{[l]}} \frac{d a^{[l]}}{d b^{[l]}}.
+\end{aligned} %]]></script>
+
+<p>To compute the loss derivative with respect to the <script type="math/tex">l</script>th layer’s parameters, we work from right to left in the network, first computing <script type="math/tex">\frac{d \ell}{d a^{[L]}}</script>, then computing <script type="math/tex">\frac{da^{[l]}}{da^{[L-1]}}</script>, and so on.  This is called back propagation.</p>
+
+<p>To summarize</p>
+
+<ul>
+  <li>A neural network is a composition of many functions</li>
+  <li>Forward propagation is a graphical way of evaluating the composition</li>
+  <li>Back propagation is a graphical way of applying the chain rule to evaluate the derivative of the composition</li>
+</ul>
+
+<p>I will discuss forward and back propagation in more detail in the next post, where I’ll walk through implementing a deep neural network.</p>
+
+
+<span class="post-date">
+  Written on
+  
+  August
+  11th,
+  2019
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Introduction to neural networks&amp;url=/introduction-to-neural-networks.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/introduction-to-neural-networks.html&amp;title=Introduction to neural networks" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/introduction-to-neural-networks.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/from-logistic-regression-to-a-neural-network.html">
+                Introduction to neural networks
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>August 8, 2019</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/calibration-in-logistic-regression-and-other-generalized-linear-models.html">
+                Calibration in logistic regression and other generalized linear models
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>August 21, 2018</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>
