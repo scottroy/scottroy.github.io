@@ -1,0 +1,834 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Implementing a neural network in Python | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-135466463-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Implementing a neural network in Python | statsandstuff</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Implementing a neural network in Python" />
+<meta name="author" content="Scott Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="In this post, I walk through implementing a basic feed forward deep neural network in Python from scratch. See Introduction to neural networks for an overview of neural networks." />
+<meta property="og:description" content="In this post, I walk through implementing a basic feed forward deep neural network in Python from scratch. See Introduction to neural networks for an overview of neural networks." />
+<link rel="canonical" href="http://localhost:4000/implementing-a-neural-network-in-python.html" />
+<meta property="og:url" content="http://localhost:4000/implementing-a-neural-network-in-python.html" />
+<meta property="og:site_name" content="statsandstuff" />
+<meta property="og:image" content="http://localhost:4000/backprop_prevoutput.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-09-17T00:00:00-07:00" />
+<script type="application/ld+json">
+{"description":"In this post, I walk through implementing a basic feed forward deep neural network in Python from scratch. See Introduction to neural networks for an overview of neural networks.","author":{"@type":"Person","name":"Scott Roy"},"@type":"BlogPosting","url":"http://localhost:4000/implementing-a-neural-network-in-python.html","image":"http://localhost:4000/backprop_prevoutput.png","headline":"Implementing a neural network in Python","dateModified":"2019-09-17T00:00:00-07:00","datePublished":"2019-09-17T00:00:00-07:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/implementing-a-neural-network-in-python.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Implementing a neural network in Python
+</h1>
+
+
+  <img src="/assets/img/backprop_prevoutput.png">
+
+
+<p>In this post, I walk through implementing a basic feed forward deep neural network in Python from scratch.  See <a href="/introduction-to-neural-networks.html">Introduction to neural networks</a> for an overview of neural networks.</p>
+
+<p>The post is organized as follows:</p>
+
+<ul>
+  <li>Predictive modeling overview</li>
+  <li>Training DNNs
+    <ul>
+      <li>Stochastic gradient descent</li>
+      <li>Forward propagation</li>
+      <li>Backward propagation</li>
+    </ul>
+  </li>
+  <li>Code</li>
+</ul>
+
+<p>The <a href="#predictive-modeling-overview">Prediction modeling overview</a> section discusses predictive modeling in general and how predictive models are fit.  Deep neural networks are a type of predictive model and are fit like other predictive models.  The section <a href="#training-dnns">Training DNNs</a> goes over computing derivatives of the loss function with respect to a DNN’s parameters.  Finally the code is given in section <a href="#code">Code</a>.</p>
+
+<h2 id="predictive-modeling-overview">Predictive modeling overview</h2>
+
+<p>A DNN is a type of <em>predictive model</em> and so before we discuss training DNNs in particular, let’s briefly go over what predictive models are and how they are fit.  The basic task in predictive modelling is given data <script type="math/tex">(x^{(i)}, y^{(i)})</script> consisting of <em>features</em> <script type="math/tex">x^{(i)}</script> and <em>labels</em> <script type="math/tex">y^{(i)}</script>, ‘‘learn’’ a model function <script type="math/tex">f</script> such that <script type="math/tex">y^{(i)} \approx f(x^{(i)})</script>.  More precisely, we want the model that “best” satisfies <script type="math/tex">f(x^{(i)}) \approx y^{(i)}</script> for all training data <script type="math/tex">i \in \{1, \ldots, N\}</script>, where best is defined with respect to a <em>loss function</em>.  For each mistake where <script type="math/tex">f(x^{(i)})</script> is not <script type="math/tex">y^{(i)}</script>, some loss <script type="math/tex">\ell^{(i)}</script> is incurred, e.g., <script type="math/tex">\ell^{(i)} = ( f(x^{(i)}) - y^{(i)} )^2</script> might be the square error.  The average loss on the dataset is</p>
+
+<script type="math/tex; mode=display">\ell = (1 / N) (\ell^{(1)} + \ell^{(2)} + \ldots + \ell^{(N)}).</script>
+
+<p>Minimizing average loss on a <em>particular</em> dataset is usually not the goal (in fact, we can achieve zero loss by just “memorizing” the dataset).  What we really care about solving is</p>
+
+<script type="math/tex; mode=display">\min_f \ \textbf{E}_{(x,y)}(\ell(f(x), y)),</script>
+
+<p>where the expectation is taken over the data distribution <script type="math/tex">(x, y)</script>.  The optimal model is called the <em>Bayes model</em> and the corresponding loss is called the <em>Bayes error</em>.  The Bayes error is a hard limit on how well we can predict a response <script type="math/tex">y</script> from features <script type="math/tex">x</script> with respect to a loss <script type="math/tex">\ell</script> and is usually unknown.  For some tasks like object detection or speech recognition, the Bayes error is near zero because humans can do these tasks with near zero error.  On the other hand, predicting if a borrower will default on a loan given a few characteristics like the loan amount, income, and credit score has a higher Bayes error.  We can improve the Bayes error by using more informative features.
+(As an aside, for a regression problem with square loss, the Bayes regressor is the conditional expectation <script type="math/tex">\textbf{E}(y \vert x)</script> and the Bayes error is the conditional variance <script type="math/tex">\textbf{Var}(y \vert x)</script>.  Regression modeling therefore reduces to efficiently estimating/learning the conditional expectation.)</p>
+
+<p>For tractability, most machine learning and statistics (including deep learning) is parametric.  This means we restrict our model to lie in a parametrized class <script type="math/tex">\mathcal{F} = \{ f_{\theta} : \theta \in \Theta\}</script> (e.g., all linear functions or all neural networks of a given architecture).  We also minimize loss over a sample of data.  These simplifications lead to <em>model class error</em> and <em>sample error</em>:</p>
+
+<ul>
+  <li>
+    <p>Finding the best model in <script type="math/tex">\mathcal{F}</script> instead of the best model overall leads to model class error.  Model class error can be improved by using a more complicated model class.  Note that if a simple model already achieves loss close to the Bayes error, using a more complicated model won’t help much.</p>
+  </li>
+  <li>
+    <p>Training on a sample of data instead of an infinite population leads to sample error and jeopardizes generalizability.  Sample error is usually addressed with training on more data or using regularization.</p>
+  </li>
+</ul>
+
+<p>After these simplifications the learning problem is</p>
+
+<script type="math/tex; mode=display">\min_{\theta \in \Theta} J(\theta) := \frac{1}{N} \sum_{i=1}^N \ell^{(i)}(\theta) + R(\theta).</script>
+
+<p>Notice that the loss <script type="math/tex">\ell^{(i)}(\theta)</script> on the <script type="math/tex">i</script>th observation is a function of the model parameters (before the loss was a function of the model <script type="math/tex">f</script>, but now <script type="math/tex">f</script> is identified with its parameters <script type="math/tex">\theta</script>).  Also notice that we’ve included a regularization term <script type="math/tex">R(\theta)</script> to deal with sample error.  The most common form of regularization is L2 regularization in which <script type="math/tex">R(\theta) = \alpha \vert \vert \theta \vert \vert_2^2</script>.</p>
+
+<p>Minimizing the regularized loss <script type="math/tex">J</script> over <script type="math/tex">\theta</script> may still be difficult.  <em>Optimization error</em> occurs when we only find an approximate minimizer; this can be addressed by optimizing for more iterations (i.e., training for longer) or using a better optimization algorithm.  The table below summarizes the different kinds of error in a predictive problem and how to improve each kind.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Error</th>
+      <th style="text-align: center">How to improve</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Bayes error</td>
+      <td style="text-align: center">Use better features</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Model class error</td>
+      <td style="text-align: center">Use a more complicated model</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Sample error</td>
+      <td style="text-align: center">Use regularization; get more data</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Optimization error</td>
+      <td style="text-align: center">Train longer; use a better optimization algorithm; reformulate loss/regularization to have properties more conducive to optimization like differentiability, Lipschitz continuous gradients, or strong convexity</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Before we discuss training DNNs, let’s quickly go over binary classification because it is formulated slightly differently than described above.  In classification, the labels <script type="math/tex">y^{(i)} \in \{0, 1\}</script> indicate whether an event occurred or not (e.g., did a person default on their loan or did a user buy a product).  Rather than model the labels <script type="math/tex">y^{(i)}</script> directly, the model returns <script type="math/tex">p = f(x)</script>, the probability that <script type="math/tex">y = 1</script> (see <a href="/ROC-space-and-AUC.html">ROC space and AUC</a> for a discussion of the difference between a classifier and a scorer).  In the classification setting, the loss is usually based on the likelihood of observing the training data under the model, assuming each observation is independent.  For example, given outcomes <script type="math/tex">y^{(1)} = 0</script>, <script type="math/tex">y^{(2)} = 1</script>, and <script type="math/tex">y^{(3)} = 0</script> and model probabilities <script type="math/tex">p^{(1)}</script>, <script type="math/tex">p^{(2)}</script>, and <script type="math/tex">p^{(3)}</script>, the likelihood of observing the data under the model is <script type="math/tex">P = (1 - p^{(1)}) \cdot p^{(2)} \cdot (1 - p^{(3)})</script>.  We define the loss as the negative log likelihood <script type="math/tex">-\log P = -\log(1 - p^{(1)}) - \log p^{(2)} - \log(1 - p^{(3)})</script>.  In general, the average negative log likelihood loss is</p>
+
+<script type="math/tex; mode=display">\ell = (1 / N) (\ell^{(1)} + \ldots + \ell^{(N)}),</script>
+
+<p>where <script type="math/tex">\ell^{(i)} = -y^{(i)} \log p^{(i)} - (1 - y^{(i)}) \log(1 - p^{(i)})</script>.  This is also called cross-entropy loss and is the most popular loss function for classification tasks.  As above, the negative log likelihood is a function of the model parameters <script type="math/tex">\theta</script>.</p>
+
+<h2 id="training-dnns">Training DNNs</h2>
+
+<p>In deep learning, as with general prediction tasks, the model fitting/learning involves minimizing the regularized loss function</p>
+
+<script type="math/tex; mode=display">J(\theta) = \ell(\theta) + R(\theta) = (1/N) \sum_{i=1}^N \ell^{(i)}(\theta) + R(\theta)</script>
+
+<p>over the parameters <script type="math/tex">\theta</script>.  This is often done with an iterative procedure such as gradient descent.  In gradient descent, we initialize the parameters at some value and continuously move in the direction of the negative gradient:</p>
+
+<ol>
+  <li>Initialize <script type="math/tex">\theta = \theta_0</script></li>
+  <li>Repeatedly update <script type="math/tex">\theta = \theta - r (\nabla J)(\theta)</script>, where <script type="math/tex">r</script> is the step size or learning rate</li>
+</ol>
+
+<p>The derivative is a linear operator so the gradient of <script type="math/tex">J</script> breaks apart:</p>
+
+<script type="math/tex; mode=display">\nabla J = \nabla \ell + \nabla R = (1/N) \sum_{i=1}^N \nabla \ell^{(i)} + \nabla R.</script>
+
+<p>The above expression shows why gradient descent can be prohibitively expensive in big data applications: each gradient computation requires computing <script type="math/tex">\nabla \ell^{(i)}</script> for <em>every</em> observation in the training data.  The usual solution is to replace the gradient with a noisy, but cheap, stochastic approximation:</p>
+
+<script type="math/tex; mode=display">g = (1 / \vert B \vert) \sum_{i \in B} \nabla \ell^{(i)} + \nabla R,</script>
+
+<p>where <script type="math/tex">B</script> is a (random) batch of training data.  This yields stochastic (or mini-batch) gradient descent.</p>
+
+<p>(It is important that <script type="math/tex">B</script> is a random batch of training data so that <script type="math/tex">\textbf{E}(g) = \nabla J</script>.  The requires shuffling the training data before breaking it into batches.)</p>
+
+<p>We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute <script type="math/tex">\nabla \ell^{(i)}</script>, the derivative of the loss on a single training sample.</p>
+
+<h3 id="forward-propagation">Forward propagation</h3>
+
+<p>Forward propagation is how we compute <script type="math/tex">f(x) = a^{[L]}</script>, the network’s prediction for an observation with features <script type="math/tex">x</script>.  (In classification tasks, it’s how we compute <script type="math/tex">p(x)</script>, the probability that <script type="math/tex">y = 1</script> given features <script type="math/tex">x</script>.)</p>
+
+<p>To set some context, in the code the user will specify the network architecture by specifying the input size, the size of each layer, and the activation functions for each layer.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">]</span>
+<span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">activation_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s">"relu"</span><span class="p">,</span> <span class="s">"reulu"</span><span class="p">,</span> <span class="s">"relu"</span><span class="p">,</span> <span class="s">"logistic"</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>We let <script type="math/tex">L</script> denote the number of layers in the network and <script type="math/tex">n_l</script> denote the number of units in layer <script type="math/tex">l</script>.  (As an example, <script type="math/tex">L = 4</script> and <script type="math/tex">n_2=32</script> in the code snippet above.)  Similarly, we let <script type="math/tex">g^{[l]}</script> denote the activation function in layer <script type="math/tex">l</script>.  The input layer is numbered 0 (e.g., <script type="math/tex">n_0 = 100</script> above).</p>
+
+<p>We let <script type="math/tex">a^{[0](i)} = x^{(i)}</script> be the input, <script type="math/tex">a^{[1](i)}</script> be the activations from the first layer, <script type="math/tex">a^{[2](i)}</script> be the activations from the second layer, and so on.  Notice that <script type="math/tex">a^{[l](i)}</script> is a vector of length <script type="math/tex">n_l</script>.  The output is <script type="math/tex">f(x^{(i)}) = a^{[L](i)}</script>.  In a feed-forward network, the activations are defined recursively:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+z^{[l](i)} &= W^{[l]} a^{[l-1](i)} + b^{[l]} \\
+a^{[l](i)} &= g^{[l]}(z^{[l](i)})
+\end{aligned} %]]></script>
+
+<p>Here <script type="math/tex">W^{[l]}</script> is an <script type="math/tex">n_l \times n_{l-1}</script> matrix and <script type="math/tex">b^{[l]}</script> is an <script type="math/tex">n_l \times 1</script> vector that linearly transform the outputs <script type="math/tex">a^{[l-1](i)}</script> from the previous layer.  The function <script type="math/tex">g^{[l]}</script> is applied elementwise.</p>
+
+<p>In code, we’ll process a batch of observations at a time.  For simplicity, suppose our batch is the first <script type="math/tex">m</script> observations <script type="math/tex">\{1, 2, \ldots, m\}</script>.  For each observation <script type="math/tex">i</script> in the batch, we store <script type="math/tex">z^{[l](i)}</script> and <script type="math/tex">a^{[l](i)}</script> as columns in a matrix:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+Z^{[l]} &= \begin{bmatrix} z^{[l](1)} & z^{[l](2)} & \ldots & z^{[l](m)} \end{bmatrix} \\
+A^{[l]} &= \begin{bmatrix} a^{[l](1)} & a^{[l](2)} & \ldots & a^{[l](m)} \end{bmatrix}
+\end{aligned} %]]></script>
+
+<p>With this notation, forward-propagating a batch requires recursively computing</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+Z^{[l]} &= W^{[l]} A^{[l-1]} + b^{[l]} \\
+A^{[l]} &= g^{[l]}(Z^{[l]}),
+\end{aligned} %]]></script>
+
+<p>where <script type="math/tex">% <![CDATA[
+A^{[0]} = \begin{bmatrix} x^{(1)} & x^{(2)} & \ldots & x^{(m)} \end{bmatrix} %]]></script> is the matrix of input observations.  (In computing <script type="math/tex">Z^{[l]}</script> above, <script type="math/tex">W^{[l]} A^{[l-1]}</script> is an <script type="math/tex">n_l \times m</script> matrix and <script type="math/tex">b^{[l]}</script> is an <script type="math/tex">n_l \times 1</script> vector.  The addition is done with broadcasting (NumPy behavior), which adds <script type="math/tex">b^{[l]}</script> to each column of <script type="math/tex">W^{[l]} A^{[l-1]}</script>.)</p>
+
+<h3 id="back-propagation">Back propagation</h3>
+
+<p>To train the network, we need to compute the derivative of the loss with respect to the network parameters <script type="math/tex">\theta = (b^{[1]}, W^{[1]}, b^{[2]}, W^{[2]}, \ldots, b^{[L]}, W^{[L]})</script>.  This is called back propagation, but is really just the chain rule.</p>
+
+<p>As with forward propagation, we will start with the single observation case.  Thinking recursively, suppose we already know</p>
+
+<script type="math/tex; mode=display">\frac{\partial \ell^{(i)}}{\partial a^{[l](i)}_j},</script>
+
+<p>the derivative of the loss on the <script type="math/tex">i</script>th observation for each unit <script type="math/tex">j \in \{1, \ldots, n_l\}</script> in the <script type="math/tex">l</script>th layer.  Since we are limiting our discussion to a single observation, we’ll drop indexing by <script type="math/tex">i</script> from the notation and write:</p>
+
+<script type="math/tex; mode=display">\frac{\partial \ell^{(i)}}{\partial a^{[l]}_j}.</script>
+
+<p>We now discuss how to compute</p>
+
+<ol>
+  <li>The derivative of the loss with respect to the parameters <script type="math/tex">b^{[l]}</script> and <script type="math/tex">W^{[l]}</script> in the <script type="math/tex">l</script>th layer.</li>
+  <li>The derivative of the loss with respect to the previous layer’s units.</li>
+</ol>
+
+<h4 id="parameter-derivatives">Parameter derivatives</h4>
+
+<p>The figure below illustrates how the parameters in layer <script type="math/tex">l</script> affect the loss.</p>
+
+<p><img src="/assets/img/backprop_params.png" alt="" /></p>
+
+<p>Since <script type="math/tex">a_j^{[l]} = g^{[l]} ( z_j^{[l]} )</script>, the chain rule gives:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\frac{\partial \ell^{(i)}}{\partial z_j^{[l]}} &= \frac{\partial \ell^{(i)}}{\partial a_j^{[l]}}\frac{\partial a_j^{[l]}}{\partial z_j^{[l]}} \\
+&= \frac{\partial \ell^{(i)}}{\partial a_j^{[l]}} \cdot (g^{[l]})'(z_j^{[l]}).
+\end{aligned} %]]></script>
+
+<p>Putting these derivatives into a gradient vector, we have</p>
+
+<script type="math/tex; mode=display">\nabla_{z^{[l]}} \ell^{(i)} = \nabla_{a^{[l]}} \ell^{(i)} * (g^{[l]})'(z^{[l]}),</script>
+
+<p>where the <script type="math/tex">*</script> denotes elementwise multiplication and the function <script type="math/tex">(g^{[l]})'</script> is applied elementwise.</p>
+
+<p>The parameters <script type="math/tex">b_j^{[l]}</script> and <script type="math/tex">W_{jk}^{[l]}</script> affect the loss through <script type="math/tex">z_j^{[l]}</script> (see figure above).  For <script type="math/tex">b_j^{[l]}</script>, the chain rule gives:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\frac{\partial \ell^{(i)}}{\partial b_j^{[l]}} &= \frac{\partial \ell^{(i)}}{\partial z_j^{[l]}}\frac{\partial z_j^{[l]}}{\partial b_j^{[l]}} \\
+&=  \frac{\partial \ell^{(i)}}{\partial z_j^{[l]}} \cdot 1 \\
+&= \frac{\partial \ell^{(i)}}{\partial z_j^{[l]}}.
+\end{aligned} %]]></script>
+
+<p>This means <script type="math/tex">\nabla_{b^{[l]}} \ell^{(i)} = \nabla_{z^{[l]}} \ell^{(i)}</script>.</p>
+
+<p>Similarly for <script type="math/tex">W_{jk}^{[l]}</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\frac{\partial \ell^{(i)}}{\partial W_{jk}^{[l]}} &= \frac{\partial \ell^{(i)}}{\partial z_j^{[l]}} \frac{\partial z_j^{[l]}}{\partial W_{jk}^{[l]}} \\
+&= \frac{\partial \ell^{(i)}}{\partial z_j^{[l]}} a_k^{[l-1]}.
+\end{aligned} %]]></script>
+
+<p>Putting these derivatives into a gradient matrix, we have</p>
+
+<script type="math/tex; mode=display">\nabla_{W^{[l]}} \ell^{(i)} =  \nabla_{z^{[l]}} \ell^{(i)} a^{[l-1]T}</script>
+
+<p>(Recall that a column times a row is a matrix.)</p>
+
+<h4 id="previous-layer-derivatives">Previous layer derivatives</h4>
+
+<p>The figure below shows how the previous layer <script type="math/tex">(l-1)</script> affects the loss.</p>
+
+<p><img src="/assets/img/backprop_prevoutput.png" alt="" /></p>
+
+<p>A particular unit <script type="math/tex">a_j^{[l-1]}</script> in the previous layer affects the loss through every unit in the current layer <script type="math/tex">z_1^{[l]}, z_2^{[l]}, \ldots, z_{n_l}^{[l]}</script>.</p>
+
+<p>The multivariate chain rule therefore gives</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\frac{\partial \ell^{(i)}}{\partial a_j^{[l-1]}} &= \frac{\partial \ell^{(i)}}{\partial z_1^{[l]}} \frac{\partial z_1^{[l]}}{\partial a_j^{[l-1]}} + \frac{\partial \ell^{(i)}}{\partial z_2^{[l]}} \frac{\partial z_2^{[l]}}{\partial a_j^{[l-1]}} + \ldots + \frac{\partial \ell^{(i)}}{\partial z_{n_l}^{[l]}} \frac{\partial z_{n_l}^{[l]}}{\partial a_j^{[l-1]}} \\
+&= \frac{\partial \ell^{(i)}}{\partial z_1^{[l]}} W_{1j}^{[l]} + \frac{\partial \ell^{(i)}}{\partial z_2^{[l]}} W_{2j}^{[l]} + \ldots + \frac{\partial \ell^{(i)}}{\partial z_{n_l}^{[l]}}  W_{n_lj}^{[l]}
+\end{aligned} %]]></script>
+
+<p>Putting these in a vector, we have</p>
+
+<script type="math/tex; mode=display">\nabla_{a^{[l-1]}} \ell^{(i)} = W^{[l]T} \nabla_{z^{[l]}} \ell^{(i)}</script>
+
+<h4 id="back-propagation-on-a-batch">Back propagation on a batch</h4>
+
+<p>Summarizing the derivatives from the previous sections, for a single observation we have:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\nabla_{z^{[l]}} \ell^{(i)} &= \nabla_{a^{[l]}} \ell^{(i)} * (g^{[l]})'(z^{[l]}) \\
+\nabla_{b^{[l]}} \ell^{(i)} &= \nabla_{z^{[l]}} \ell^{(i)} \\
+\nabla_{W^{[l]}} \ell^{(i)} &= \nabla_{z^{[l]}} \ell^{(i)} a^{[l-1]T} \\
+\nabla_{a^{[l-1]}} \ell^{(i)} &= W^{[l]T} \nabla_{z^{[l]}} \ell^{(i)}.
+\end{aligned} %]]></script>
+
+<p>As before, we consider a batch consisting of the first <script type="math/tex">m</script> observations and let <script type="math/tex">Z^{[l]}</script> and <script type="math/tex">A^{[l]}</script> be matrices whose <script type="math/tex">i</script>th columns are the network values in layer <script type="math/tex">l</script> evaluated on the <script type="math/tex">i</script>th observation.</p>
+
+<p>We also let</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+dZ^{[l]} = \begin{bmatrix} \nabla_{z^{[l](1)}} \ell^{(1)} & \nabla_{z^{[l](2)}} \ell^{(2)} & \ldots & \nabla_{z^{[l](m)}} \ell^{(m)} \end{bmatrix} \\
+dA^{[l]} = \begin{bmatrix} \nabla_{a^{[l](1)}} \ell^{(1)} & \nabla_{a^{[l](2)}} \ell^{(2)} & \ldots & \nabla_{a^{[l](m)}} \ell^{(m)} \end{bmatrix}
+\end{aligned} %]]></script>
+
+<p>be a matrices of gradients.  Notice that each column is a gradient of a different function <script type="math/tex">\ell^{(i)}</script>.</p>
+
+<p>From the single observation case and the definitions of <script type="math/tex">dZ^{[l]}</script> and <script type="math/tex">dA^{[l]}</script>, it is immediately clear that</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+dZ^{[l]}  &= dA^{[l]} * (g^{[l]})'(Z^{[l]}) \\
+dA^{[l-1]} &= W^{[l]T} dZ^{[l]}.
+\end{aligned} %]]></script>
+
+<p>For the parameters <script type="math/tex">b^{[l]}</script> and <script type="math/tex">W^{[l]}</script>, we are interested in the derivatives of the average batch loss <script type="math/tex">\ell^{\text{batch}} = \frac{1}{m} (\ell^{(1)} + \ldots + \ell^{(m)})</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\nabla_{b^{[l]}} \ell^{\text{batch}} &= \frac{1}{m} \text{rowSum}\left( dZ^{[l]} \right) \\
+\nabla_{W^{[l]}} \ell^{\text{batch}} &= \frac{1}{m} dZ^{[l]} A^{[l-1]T}.
+\end{aligned} %]]></script>
+
+<p>(To see the second equation, consider writing the matrix multiplication as an outer product expansion.)  Summarizing the batch back propagation equations, we have:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+dZ^{[l]}  &= dA^{[l]} * (g^{[l]})'(Z^{[l]}) \\
+dA^{[l-1]} &= W^{[l]T} dZ^{[l]} \\
+\nabla_{b^{[l]}} \ell^{\text{batch}} &= \frac{1}{m} \text{rowSum}\left( dZ^{[l]} \right) \\
+\nabla_{W^{[l]}} \ell^{\text{batch}} &= \frac{1}{m} dZ^{[l]} A^{[l-1]T}.
+\end{aligned} %]]></script>
+
+<h2 id="code">Code</h2>
+
+<p>This section goes over implementing a neural network in Python/NumPy.  The code is fairly comprehensive, but is intended for pedagogical (not production) purposes.  As such, things like error checking and unit tests (e.g., gradient checking with finite differences) are not implemented.  The code supports</p>
+
+<ul>
+  <li>Arbitrary feed forward architectures</li>
+  <li>Input normalization</li>
+  <li>Arbitrary loss and activation functions</li>
+  <li>Batch gradient descent</li>
+  <li>L2 regularization</li>
+</ul>
+
+<p>The code does not support:</p>
+
+<ul>
+  <li>Batch normalization</li>
+  <li>Momentum</li>
+  <li>Adam</li>
+  <li>Dropout</li>
+  <li>Normalizing input in a streaming fashion (as opposed to computing <code class="highlighter-rouge">mu</code> and <code class="highlighter-rouge">sig</code> over the entire dataset)</li>
+  <li>Automatric learning rate decay and early stopping using a validation set</li>
+</ul>
+
+<h3 id="activation-functions">Activation functions</h3>
+
+<p>An activation function has a signature like</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">activationFunction</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>and returns a dict with keys <code class="highlighter-rouge">value</code> and <code class="highlighter-rouge">derivative</code> (if returned).  The input <code class="highlighter-rouge">x</code> is a numpy array.  The outputs <code class="highlighter-rouge">value</code> and <code class="highlighter-rouge">derivative</code> are also numpy arrays with the same shape as <code class="highlighter-rouge">x</code>.  Below are implementations of some common activation functions.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">tanh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    
+    <span class="k">if</span> <span class="n">return_derivative</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="mi">1</span>  <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
+    
+    <span class="k">return</span> <span class="n">r</span>
+    
+<span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    
+    <span class="k">if</span> <span class="n">return_derivative</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+        <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
+    
+    <span class="k">return</span> <span class="n">r</span>
+
+<span class="k">def</span> <span class="nf">relu</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    
+    <span class="k">if</span> <span class="n">return_derivative</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
+    
+    <span class="k">return</span> <span class="n">r</span>
+
+<span class="k">def</span> <span class="nf">linear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    
+    <span class="k">if</span> <span class="n">return_derivative</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
+        
+    <span class="k">return</span> <span class="n">r</span>
+</code></pre></div></div>
+
+<h3 id="loss-functions">Loss functions</h3>
+
+<p>A loss function has signature like</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">lossFunction</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span>
+</code></pre></div></div>
+
+<p>The inputs <code class="highlighter-rouge">A</code> (predictions) and <code class="highlighter-rouge">Y</code> (labels) are numpy arrays of the same shape.  The output is a dictionary with keys <code class="highlighter-rouge">value</code> and <code class="highlighter-rouge">derivative</code> (if returned), both of which are numpy arrays of the same shape as the two inputs <code class="highlighter-rouge">A</code> and <code class="highlighter-rouge">Y</code>.  The array <code class="highlighter-rouge">derivative</code> must be the derivative of the loss function with respect to the predictions <code class="highlighter-rouge">A</code>.</p>
+
+<p>The cross-entropy and square loss functions are implemented below.  The cross-entropy loss below does not properly handle edge cases when <script type="math/tex">Y = \pm 1</script> or <script type="math/tex">A = \pm 1</script>, which should be corrected before productionizing the code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">xent</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    
+    <span class="n">l</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">Y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">Y</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">A</span><span class="p">))</span>
+    <span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+    
+    <span class="k">if</span> <span class="n">return_derivative</span><span class="p">:</span>
+        <span class="n">dA</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">Y</span> <span class="o">/</span> <span class="n">A</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Y</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">A</span><span class="p">))</span>
+        <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dA</span>
+    
+    <span class="k">return</span> <span class="n">r</span>
+
+<span class="k">def</span> <span class="nf">square</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    
+    <span class="n">l</span> <span class="o">=</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">A</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span>
+    
+    <span class="k">if</span> <span class="n">return_derivative</span><span class="p">:</span>
+        <span class="n">dA</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">A</span><span class="p">)</span>
+        <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dA</span>
+    
+    <span class="k">return</span> <span class="n">r</span>
+</code></pre></div></div>
+
+<h3 id="dnn-class">DNN class</h3>
+
+<p>Below is an implementation of a DNN class.  The code is self-explanatory.  Backpropagation is the most complicated method and uses the equations we derived in previous sections.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DNN</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">layer_sizes</span><span class="p">,</span> <span class="n">activation_functions</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">nlayers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">layer_sizes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_size</span> <span class="o">=</span> <span class="n">input_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer_sizes</span> <span class="o">=</span> <span class="n">layer_sizes</span>
+        
+        <span class="c1"># In many cases, it's useful to view the input as the "zeroth" layer.
+</span>        <span class="c1"># We define a private variable _layer_sizes for this.
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_size</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">layer_sizes</span><span class="p">)</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_functions</span> <span class="o">=</span> <span class="n">activation_functions</span>                
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>  
+        
+    <span class="k">def</span> <span class="nf">_initialize_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="c1"># Similar to Xavier initialization, but is adapted for RELU
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">"W"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">"b"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_layer_sizes</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">_loss_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">"xent"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">xent</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s">"square"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">square</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">" is not an implemented loss function."</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">_activation_lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">"tanh"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tanh</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s">"sigmoid"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sigmoid</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s">"relu"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">relu</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s">"linear"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">linear</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">" is not an implemented activation function."</span><span class="p">)</span>
+              
+    <span class="k">def</span> <span class="nf">_forward_propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        
+        <span class="n">cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+        <span class="n">A</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="k">if</span> <span class="n">return_cache</span><span class="p">:</span>
+            <span class="n">cache</span><span class="p">[</span><span class="s">"A0"</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span>
+            
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlayers</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s">"W"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)],</span> <span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="s">"b"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation_lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_functions</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">Z</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="n">return_cache</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">"value"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">return_cache</span><span class="p">:</span>
+                <span class="n">cache</span><span class="p">[</span><span class="s">"A"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">A</span>
+                <span class="n">cache</span><span class="p">[</span><span class="s">"gPrime"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">return_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">A</span><span class="p">,</span> <span class="n">cache</span>
+        
+        <span class="k">return</span> <span class="n">A</span>
+    
+    
+    <span class="k">def</span> <span class="nf">_back_propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
+    
+        <span class="n">grads</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+        <span class="n">m</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="s">"A"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlayers</span><span class="p">)]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss_lookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">)(</span><span class="n">A</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">grads</span><span class="p">[</span><span class="s">"dA"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlayers</span><span class="p">)]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s">"derivative"</span><span class="p">]</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s">"value"</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nlayers</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">grads</span><span class="p">[</span><span class="s">"dZ"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">grads</span><span class="p">[</span><span class="s">"dA"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">*</span> <span class="n">cache</span><span class="p">[</span><span class="s">"gPrime"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span>
+            <span class="n">grads</span><span class="p">[</span><span class="s">"dA"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">"W"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">grads</span><span class="p">[</span><span class="s">"dZ"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)])</span>
+            <span class="n">grads</span><span class="p">[</span><span class="s">"dByW"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="s">"dZ"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)],</span> <span class="n">cache</span><span class="p">[</span><span class="s">"A"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">grads</span><span class="p">[</span><span class="s">"dByb"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="s">"dZ"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">loss</span>   
+    
+    
+    <span class="k">def</span> <span class="nf">_update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">grads</span><span class="p">,</span> <span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">l2_regularization</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">):</span>
+        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nlayers</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">"W"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">-=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="s">"dByW"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">+</span> <span class="n">l2_regularization</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="s">"W"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)])</span>
+            <span class="n">params</span><span class="p">[</span><span class="s">"b"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">-=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">grads</span><span class="p">[</span><span class="s">"dByb"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">+</span> <span class="n">l2_regularization</span> <span class="o">*</span> <span class="n">params</span><span class="p">[</span><span class="s">"b"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)])</span>
+            
+        <span class="k">return</span> <span class="n">params</span>
+            
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">l2_regularization</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        
+        <span class="c1"># Normalize input
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">X_std</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig</span>
+        
+        <span class="c1"># Initialize parameters
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_parameters</span><span class="p">()</span>
+        
+        <span class="n">losses</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="n">n_obs</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n_full_batches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_obs</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
+        <span class="n">last_batch_size</span> <span class="o">=</span> <span class="n">n_obs</span> <span class="o">-</span> <span class="n">batch_size</span> <span class="o">*</span> <span class="n">n_full_batches</span>
+        
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">):</span>
+            <span class="c1"># Shuffle data
+</span>            <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">n_obs</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_full_batches</span><span class="p">):</span>
+                <span class="c1"># Define batch
+</span>                <span class="n">batch_ind</span> <span class="o">=</span> <span class="n">order</span><span class="p">[(</span><span class="n">batch</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">):((</span><span class="n">batch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">)]</span>  
+                <span class="n">X_batch_std</span> <span class="o">=</span> <span class="n">X_std</span><span class="p">[:,</span> <span class="n">batch_ind</span><span class="p">]</span>
+                <span class="n">Y_batch</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">batch_ind</span><span class="p">]</span>
+                
+                <span class="c1"># Forward/backward propagate to compute parameter gradients
+</span>                <span class="n">A</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_propagate</span><span class="p">(</span><span class="n">X_batch_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">return_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">grads</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_back_propagate</span><span class="p">(</span><span class="n">X_batch_std</span><span class="p">,</span> <span class="n">Y_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+                
+                <span class="c1"># Update parameters
+</span>                <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">grads</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">l2_regularization</span><span class="p">)</span>
+                
+                <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="p">(</span><span class="n">batch</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">"Loss after epoch "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s">" batch "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">+</span> <span class="s">": "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span>
+                
+            <span class="k">if</span> <span class="n">last_batch_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                
+                <span class="c1"># Define batch
+</span>                <span class="n">batch_ind</span> <span class="o">=</span> <span class="n">order</span><span class="p">[(</span><span class="n">n_full_batches</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">):]</span>
+                <span class="n">X_batch_std</span> <span class="o">=</span> <span class="n">X_std</span><span class="p">[:,</span> <span class="n">batch_ind</span><span class="p">]</span>
+                <span class="n">Y_batch</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">batch_ind</span><span class="p">]</span>
+                
+                <span class="n">A</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_propagate</span><span class="p">(</span><span class="n">X_batch_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">return_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">grads</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_back_propagate</span><span class="p">(</span><span class="n">X_batch_std</span><span class="p">,</span> <span class="n">Y_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">grads</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">l2_regularization</span><span class="p">)</span>
+                
+                <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="p">(</span><span class="n">batch</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">"Loss after epoch "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span> <span class="o">+</span> <span class="s">" batch "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">+</span> <span class="s">": "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span>
+            
+        <span class="k">return</span> <span class="n">losses</span>
+        
+    
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        
+        <span class="n">X_std</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig</span>
+        
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_propagate</span><span class="p">(</span><span class="n">X_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">return_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">A</span>
+</code></pre></div></div>
+
+<h3 id="toy-data">Toy data</h3>
+
+<p>To test the DNN class, we define a toy dataset below.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mi">100000</span>
+<span class="n">v1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+<span class="n">Y_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_train</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v2</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_train</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>
+<span class="n">Y_test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v2</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The classes are not linearly separable so logistic regression will not work very well (see plot of test data below).</p>
+
+<p><img src="/assets/img/dnn-toy-data.png" alt="" /></p>
+
+<h3 id="train-a-dnn-on-toy-data">Train a DNN on toy data</h3>
+
+<p>Below we use our DNN class to define a network architecture and train it on the toy data.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_size</span> <span class="o">=</span> <span class="n">n</span>
+<span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">activation_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s">"relu"</span><span class="p">,</span> <span class="s">"relu"</span><span class="p">,</span> <span class="s">"sigmoid"</span><span class="p">]</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="s">"xent"</span>
+<span class="n">dnn</span> <span class="o">=</span> <span class="n">DNN</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">layer_sizes</span><span class="p">,</span> <span class="n">activation_functions</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+
+<span class="n">dnn</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">l2_regularization</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The classifier achieves 98% accuracy on the test data:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A = dnn.predict(X_test)
+np.mean((A &gt; 0.5).astype(float) == Y_test)
+</code></pre></div></div>
+
+
+<span class="post-date">
+  Written on
+  
+  September
+  17th,
+  2019
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Implementing a neural network in Python&amp;url=/implementing-a-neural-network-in-python.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/implementing-a-neural-network-in-python.html&amp;title=Implementing a neural network in Python" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/implementing-a-neural-network-in-python.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <a href="/introduction-to-neural-networks.html">
+                Introduction to neural networks
+                <!--<img src="http://localhost:4000/images/">-->
+                <!--<small>August 11, 2019</small>-->
+              </a>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>
