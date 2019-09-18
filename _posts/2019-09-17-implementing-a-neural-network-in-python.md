@@ -81,7 +81,7 @@ $$g = (1 / \vert B \vert) \sum_{i \in B} \nabla \ell^{(i)} + \nabla R,$$
 
 where $$B$$ is a (random) batch of training data.  This yields stochastic (or mini-batch) gradient descent.
 
-(It is important that $$B$$ is a random batch of training data so that $$\textbf{E}(g) = \nabla J$$.  The requires shuffling the training data before breaking it into batches.)
+(It is important that $$B$$ is a random batch of training data so that $$\textbf{E}(g) = \nabla J$$.  This requires shuffling the training data before breaking it into batches.)
 
 We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute $$\nabla \ell^{(i)}$$, the derivative of the loss on a single training sample.
 
@@ -351,7 +351,7 @@ def lossFunction(A, Y, return_derivative=True).
 
 The inputs `A` (predictions) and `Y` (labels) are numpy arrays of the same shape.  The output is a dictionary with keys `value` and `derivative` (if returned), both of which are numpy arrays of the same shape as the two inputs `A` and `Y`.  The array `derivative` must be the derivative of the loss function with respect to the predictions `A`.
 
-The cross-entropy and square loss functions are implemented below.  The cross-entropy loss below does not properly handle edge cases when $$Y = \pm 1$$ or $$A = \pm 1$$, which should be corrected before productionizing the code.
+The cross-entropy and square loss functions are implemented below.  The cross-entropy loss below does not properly handle edge cases when $$A = \pm 1$$, which should be corrected before productionizing the code.
 
 ```python
 def xent(A, Y, return_derivative=True):
@@ -582,7 +582,7 @@ dnn = DNN(input_size, layer_sizes, activation_functions, loss)
 dnn.train(X_train, Y_train, batch_size=64, n_epochs=20, learning_rate=0.01, l2_regularization=0.01)
 ```
 
-The classifier achieves 98% accuracy on the test data:
+The classifier achieves 98% accuracy on the test data, which we compute with the following code:
 
 ```
 A = dnn.predict(X_test)

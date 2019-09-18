@@ -225,7 +225,7 @@
 
 <p>where <script type="math/tex">B</script> is a (random) batch of training data.  This yields stochastic (or mini-batch) gradient descent.</p>
 
-<p>(It is important that <script type="math/tex">B</script> is a random batch of training data so that <script type="math/tex">\textbf{E}(g) = \nabla J</script>.  The requires shuffling the training data before breaking it into batches.)</p>
+<p>(It is important that <script type="math/tex">B</script> is a random batch of training data so that <script type="math/tex">\textbf{E}(g) = \nabla J</script>.  This requires shuffling the training data before breaking it into batches.)</p>
 
 <p>We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute <script type="math/tex">\nabla \ell^{(i)}</script>, the derivative of the loss on a single training sample.</p>
 
@@ -494,7 +494,7 @@ dA^{[l-1]} &= W^{[l]T} dZ^{[l]} \\
 
 <p>The inputs <code class="highlighter-rouge">A</code> (predictions) and <code class="highlighter-rouge">Y</code> (labels) are numpy arrays of the same shape.  The output is a dictionary with keys <code class="highlighter-rouge">value</code> and <code class="highlighter-rouge">derivative</code> (if returned), both of which are numpy arrays of the same shape as the two inputs <code class="highlighter-rouge">A</code> and <code class="highlighter-rouge">Y</code>.  The array <code class="highlighter-rouge">derivative</code> must be the derivative of the loss function with respect to the predictions <code class="highlighter-rouge">A</code>.</p>
 
-<p>The cross-entropy and square loss functions are implemented below.  The cross-entropy loss below does not properly handle edge cases when <script type="math/tex">Y = \pm 1</script> or <script type="math/tex">A = \pm 1</script>, which should be corrected before productionizing the code.</p>
+<p>The cross-entropy and square loss functions are implemented below.  The cross-entropy loss below does not properly handle edge cases when <script type="math/tex">A = \pm 1</script>, which should be corrected before productionizing the code.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">xent</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">return_derivative</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="n">r</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -720,7 +720,7 @@ dA^{[l-1]} &= W^{[l]T} dZ^{[l]} \\
 <span class="n">dnn</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">Y_train</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">l2_regularization</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>The classifier achieves 98% accuracy on the test data:</p>
+<p>The classifier achieves 98% accuracy on the test data, which we compute with the following code:</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A = dnn.predict(X_test)
 np.mean((A &gt; 0.5).astype(float) == Y_test)
