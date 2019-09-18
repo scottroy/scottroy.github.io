@@ -18,7 +18,7 @@ The post is organized as follows:
 	* Backward propagation
 * Code
 
-The [Prediction modeling overview](#predictive-modeling-overview) section discusses predictive modeling in general and how predictive models are fit.  Deep neural networks are a type of predictive model and are fit like other predictive models.  The section [Training DNNs](#training-dnns) goes over computing derivatives of the loss function with respect to a DNN's parameters.  Finally the code is given in section [Code](#code).  
+The [Predictive modeling overview](#predictive-modeling-overview) section discusses predictive modeling in general and how predictive models are fit.  Deep neural networks are a type of predictive model and are fit like other predictive models.  The section [Training DNNs](#training-dnns) goes over computing derivatives of the loss function with respect to a DNN's parameters.  Finally the code is given in section [Code](#code).  
 
 ## Predictive modeling overview
 
