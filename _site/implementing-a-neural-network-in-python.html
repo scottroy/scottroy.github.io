@@ -49,7 +49,9 @@
 <meta property="og:site_name" content="statsandstuff">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://localhost:4000/implementing-a-neural-network-in-python.html">
-<meta property="og:image" content="http://localhost:4000/assets/img/backprop_prevoutput.png">
+<meta property="og:image:secure_url" content="http://localhost:4000/assets/img/backprop_prevoutput.png">
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 
 
 
@@ -121,7 +123,7 @@
     <ul>
       <li>Stochastic gradient descent</li>
       <li>Forward propagation</li>
-      <li>Backward propagation</li>
+      <li>Back propagation</li>
     </ul>
   </li>
   <li>Code</li>
@@ -219,22 +221,14 @@
 
 <p>(It is important that <script type="math/tex">B</script> is a random batch of training data so that <script type="math/tex">\textbf{E}(g) = \nabla J</script>.  This requires shuffling the training data before breaking it into batches.)</p>
 
-<p>We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute <script type="math/tex">\nabla \ell^{(i)}</script>, the derivative of the loss on a single training sample.</p>
+<p>We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute <script type="math/tex">\nabla \ell^{(i)}</script>, the derivative of the loss on a single training sample.  Before discussing back propagation (the way we compute <script type="math/tex">\nabla \ell^{(i)}</script>), we discuss forward propagation as a way to introduce notation.</p>
 
 <h3 id="forward-propagation">Forward propagation</h3>
 
-<p>Forward propagation is how we compute <script type="math/tex">f(x) = a^{[L]}</script>, the network’s prediction for an observation with features <script type="math/tex">x</script>.  (In classification tasks, it’s how we compute <script type="math/tex">p(x)</script>, the probability that <script type="math/tex">y = 1</script> given features <script type="math/tex">x</script>.)</p>
+<p>Forward propagation is how we compute <script type="math/tex">f(x)</script>, the network’s prediction for an observation with features <script type="math/tex">x</script>.  (In classification tasks, it’s how we compute <script type="math/tex">p(x)</script>, the probability that <script type="math/tex">y = 1</script> given features <script type="math/tex">x</script>.)</p>
 
-<p>To set some context, in the code the user will specify the network architecture by specifying the input size, the size of each layer, and the activation functions for each layer.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">input_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">]</span>
-<span class="n">layer_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="mi">32</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">activation_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s">"relu"</span><span class="p">,</span> <span class="s">"reulu"</span><span class="p">,</span> <span class="s">"relu"</span><span class="p">,</span> <span class="s">"logistic"</span><span class="p">]</span>
-</code></pre></div></div>
-
-<p>We let <script type="math/tex">L</script> denote the number of layers in the network and <script type="math/tex">n_l</script> denote the number of units in layer <script type="math/tex">l</script>.  (As an example, <script type="math/tex">L = 4</script> and <script type="math/tex">n_2=32</script> in the code snippet above.)  Similarly, we let <script type="math/tex">g^{[l]}</script> denote the activation function in layer <script type="math/tex">l</script>.  The input layer is numbered 0 (e.g., <script type="math/tex">n_0 = 100</script> above).</p>
-
-<p>We let <script type="math/tex">a^{[0](i)} = x^{(i)}</script> be the input, <script type="math/tex">a^{[1](i)}</script> be the activations from the first layer, <script type="math/tex">a^{[2](i)}</script> be the activations from the second layer, and so on.  Notice that <script type="math/tex">a^{[l](i)}</script> is a vector of length <script type="math/tex">n_l</script>.  The output is <script type="math/tex">f(x^{(i)}) = a^{[L](i)}</script>.  In a feed-forward network, the activations are defined recursively:</p>
+<p>We let <script type="math/tex">L</script> denote the number of layers in the network and <script type="math/tex">n_l</script> denote the number of units in layer <script type="math/tex">l</script> for <script type="math/tex">l \in \{0, 1, \ldots, L\}</script>.
+We let <script type="math/tex">a^{[0](i)} = x^{(i)}</script> be the input (for the <script type="math/tex">i</script>th data point), <script type="math/tex">a^{[1](i)}</script> be the activations from the first layer, <script type="math/tex">a^{[2](i)}</script> be the activations from the second layer, and so on.  Notice that <script type="math/tex">a^{[l](i)}</script> is a vector of length <script type="math/tex">n_l</script>.  The output is <script type="math/tex">f(x^{(i)}) = a^{[L](i)}</script>, the activations from the last layer.  In a feed-forward network, the activations are defined recursively:</p>
 
 <script type="math/tex; mode=display">% <![CDATA[
 \begin{aligned}
@@ -242,7 +236,7 @@ z^{[l](i)} &= W^{[l]} a^{[l-1](i)} + b^{[l]} \\
 a^{[l](i)} &= g^{[l]}(z^{[l](i)})
 \end{aligned} %]]></script>
 
-<p>Here <script type="math/tex">W^{[l]}</script> is an <script type="math/tex">n_l \times n_{l-1}</script> matrix and <script type="math/tex">b^{[l]}</script> is an <script type="math/tex">n_l \times 1</script> vector that linearly transform the outputs <script type="math/tex">a^{[l-1](i)}</script> from the previous layer.  The function <script type="math/tex">g^{[l]}</script> is applied elementwise.</p>
+<p>Here <script type="math/tex">W^{[l]}</script> is an <script type="math/tex">n_l \times n_{l-1}</script> matrix and <script type="math/tex">b^{[l]}</script> is an <script type="math/tex">n_l \times 1</script> vector that linearly transform the outputs <script type="math/tex">a^{[l-1](i)}</script> from the previous layer.  The function <script type="math/tex">g^{[l]}</script> is a nonlinear activation function and is applied elementwise.</p>
 
 <p>In code, we’ll process a batch of observations at a time.  For simplicity, suppose our batch is the first <script type="math/tex">m</script> observations <script type="math/tex">\{1, 2, \ldots, m\}</script>.  For each observation <script type="math/tex">i</script> in the batch, we store <script type="math/tex">z^{[l](i)}</script> and <script type="math/tex">a^{[l](i)}</script> as columns in a matrix:</p>
 
@@ -640,7 +634,7 @@ dA^{[l-1]} &= W^{[l]T} dZ^{[l]} \\
                 <span class="n">X_batch_std</span> <span class="o">=</span> <span class="n">X_std</span><span class="p">[:,</span> <span class="n">batch_ind</span><span class="p">]</span>
                 <span class="n">Y_batch</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">batch_ind</span><span class="p">]</span>
                 
-                <span class="c1"># Forward/backward propagate to compute parameter gradients
+                <span class="c1"># Forward/back propagate to compute parameter gradients
 </span>                <span class="n">A</span><span class="p">,</span> <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_propagate</span><span class="p">(</span><span class="n">X_batch_std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">return_cache</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
                 <span class="n">grads</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_back_propagate</span><span class="p">(</span><span class="n">X_batch_std</span><span class="p">,</span> <span class="n">Y_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
                 

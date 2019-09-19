@@ -15,7 +15,7 @@ The post is organized as follows:
 * Training DNNs
 	* Stochastic gradient descent
 	* Forward propagation
-	* Backward propagation
+	* Back propagation
 * Code
 
 The [Predictive modeling overview](#predictive-modeling-overview) section discusses predictive modeling in general and how predictive models are fit.  Deep neural networks are a type of predictive model and are fit like other predictive models.  The section [Training DNNs](#training-dnns) goes over computing derivatives of the loss function with respect to a DNN's parameters.  Finally the code is given in section [Code](#code).  
@@ -83,24 +83,14 @@ where $$B$$ is a (random) batch of training data.  This yields stochastic (or mi
 
 (It is important that $$B$$ is a random batch of training data so that $$\textbf{E}(g) = \nabla J$$.  This requires shuffling the training data before breaking it into batches.)
 
-We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute $$\nabla \ell^{(i)}$$, the derivative of the loss on a single training sample.
+We have given all the details for training an arbitrary predictive model in a big data setting.  In order to flesh out the details for deep learning, we just need to discuss how to compute $$\nabla \ell^{(i)}$$, the derivative of the loss on a single training sample.  Before discussing back propagation (the way we compute $$\nabla \ell^{(i)}$$), we discuss forward propagation as a way to introduce notation.
 
 ### Forward propagation
 
-Forward propagation is how we compute $$f(x) = a^{[L]}$$, the network's prediction for an observation with features $$x$$.  (In classification tasks, it's how we compute $$p(x)$$, the probability that $$y = 1$$ given features $$x$$.)
+Forward propagation is how we compute $$f(x)$$, the network's prediction for an observation with features $$x$$.  (In classification tasks, it's how we compute $$p(x)$$, the probability that $$y = 1$$ given features $$x$$.)
 
-To set some context, in the code the user will specify the network architecture by specifying the input size, the size of each layer, and the activation functions for each layer.
-
-```python
-input_size = [100]
-layer_sizes = [64,32,8,1]
-activation_functions = ["relu", "reulu", "relu", "logistic"]
-```
-
-We let $$L$$ denote the number of layers in the network and $$n_l$$ denote the number of units in layer $$l$$.  (As an example, $$L = 4$$ and $$n_2=32$$ in the code snippet above.)  Similarly, we let $$g^{[l]}$$ denote the activation function in layer $$l$$.  The input layer is numbered 0 (e.g., $$n_0 = 100$$ above).
-
-
-We let $$a^{[0](i)} = x^{(i)}$$ be the input, $$a^{[1](i)}$$ be the activations from the first layer, $$a^{[2](i)}$$ be the activations from the second layer, and so on.  Notice that $$a^{[l](i)}$$ is a vector of length $$n_l$$.  The output is $$f(x^{(i)}) = a^{[L](i)}$$.  In a feed-forward network, the activations are defined recursively:
+We let $$L$$ denote the number of layers in the network and $$n_l$$ denote the number of units in layer $$l$$ for $$l \in \{0, 1, \ldots, L\}$$.
+We let $$a^{[0](i)} = x^{(i)}$$ be the input (for the $$i$$th data point), $$a^{[1](i)}$$ be the activations from the first layer, $$a^{[2](i)}$$ be the activations from the second layer, and so on.  Notice that $$a^{[l](i)}$$ is a vector of length $$n_l$$.  The output is $$f(x^{(i)}) = a^{[L](i)}$$, the activations from the last layer.  In a feed-forward network, the activations are defined recursively:
 
 $$\begin{aligned}
 z^{[l](i)} &= W^{[l]} a^{[l-1](i)} + b^{[l]} \\
@@ -108,7 +98,7 @@ a^{[l](i)} &= g^{[l]}(z^{[l](i)})
 \end{aligned}
 $$
 
-Here $$W^{[l]}$$ is an $$n_l \times n_{l-1}$$ matrix and $$b^{[l]}$$ is an $$n_l \times 1$$ vector that linearly transform the outputs $$a^{[l-1](i)}$$ from the previous layer.  The function $$g^{[l]}$$ is applied elementwise.
+Here $$W^{[l]}$$ is an $$n_l \times n_{l-1}$$ matrix and $$b^{[l]}$$ is an $$n_l \times 1$$ vector that linearly transform the outputs $$a^{[l-1](i)}$$ from the previous layer.  The function $$g^{[l]}$$ is a nonlinear activation function and is applied elementwise.
 
 In code, we'll process a batch of observations at a time.  For simplicity, suppose our batch is the first $$m$$ observations $$\{1, 2, \ldots, m\}$$.  For each observation $$i$$ in the batch, we store $$z^{[l](i)}$$ and $$a^{[l](i)}$$ as columns in a matrix:
 
@@ -508,7 +498,7 @@ class DNN(object):
                 X_batch_std = X_std[:, batch_ind]
                 Y_batch = Y[:, batch_ind]
                 
-                # Forward/backward propagate to compute parameter gradients
+                # Forward/back propagate to compute parameter gradients
                 A, cache = self._forward_propagate(X_batch_std, self.params, return_cache=True)
                 grads, loss = self._back_propagate(X_batch_std, Y_batch, self.params, cache)
                 
