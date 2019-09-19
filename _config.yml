@@ -36,7 +36,7 @@ paginate:            5
 markdown:            kramdown
 highlighter:         rouge
 permalink:           none
-plugins:             [jekyll-paginate, jekyll-sitemap, jekyll-feed, jekyll-seo-tag]
+plugins:             [jekyll-paginate, jekyll-sitemap, jekyll-feed]
 
 # Customise atom feed settings (this is where Jekyll-Feed gets configuration information)
 title:		           'statsandstuff'
