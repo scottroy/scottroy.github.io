@@ -4,7 +4,7 @@ title: "Implementing a neural network in Python"
 author: "Scott Roy"
 categories:
 tags: [forward propagation, back propagation, neural network, deep learning]
-image: backprop_prevoutput.png
+image: backprop_prevoutput_small.png
 ---
 
 In this post, I walk through implementing a basic feed forward deep neural network in Python from scratch.  See [Introduction to neural networks]({% post_url 2019-08-11-introduction-to-neural-networks%}) for an overview of neural networks.
