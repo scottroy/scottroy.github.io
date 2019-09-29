@@ -7,6 +7,21 @@
 		<atom:link href="/rss-feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>What makes a better score distribution?</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;Suppose I train two binary classifiers on some data, and after examining the score distributions of each, I see the results below.  Which score distribution is better?  (And by extension, which classifier is better?)&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Sun, 29 Sep 2019 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/what-makes-a-better-score-distribution.html</link>
+				<guid isPermaLink="true">http://localhost:4000/what-makes-a-better-score-distribution.html</guid>
+			</item>
+		
+			<item>
 				<title>Implementing a neural network in Python</title>
 				
 					<dc:creator>Scott Roy</dc:creator>
@@ -141,21 +156,6 @@ There are many ways we could interpret “most related”:&lt;/p&gt;
 				<pubDate>Sun, 29 Apr 2018 00:00:00 -0700</pubDate>
 				<link>http://localhost:4000/ROC-space-and-AUC.html</link>
 				<guid isPermaLink="true">http://localhost:4000/ROC-space-and-AUC.html</guid>
-			</item>
-		
-			<item>
-				<title>Propagation of error</title>
-				
-					<dc:creator>Scott Roy</dc:creator>
-				
-				
-					<description>&lt;p&gt;Propagation of error describes how uncertainty in estimates propagates forward when we consider functions of those estimates.&lt;/p&gt;
-
-</description>
-				
-				<pubDate>Sat, 28 Apr 2018 00:00:00 -0700</pubDate>
-				<link>http://localhost:4000/propogation-of-error.html</link>
-				<guid isPermaLink="true">http://localhost:4000/propogation-of-error.html</guid>
 			</item>
 		
 	</channel>
