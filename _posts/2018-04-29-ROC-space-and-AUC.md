@@ -7,6 +7,8 @@ tags: [AUC, false positive rate, ROC, true positive rate, type I error, type II 
 image: cost_roc_space.png
 ---
 
+# KEVIN WAS HERE
+
 Before discussing ROC curves and AUC, let's fix some terminology around the confusion matrix:
 
 * **Condition positive (negative):** real positive (negative) case in the data
