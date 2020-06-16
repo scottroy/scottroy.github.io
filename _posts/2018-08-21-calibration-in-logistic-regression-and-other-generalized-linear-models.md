@@ -54,6 +54,7 @@ To explain how these equations calibrate the model, let's walk through an exampl
 
 **Note:** the calibration equations have many solutions for the probabilities.  Logistic regression chooses the solution of the form $$p_i = \frac{1}{1 + e^{-\beta^T X_i}}$$.
 
+<!---
 ## Up/down sampling will ruin logistic regression probability estimates
 The common practice of up/down sampling in machine learning to get class balance will ruin the calibration in logistic regression probability estimates.  To explain, we continue with our previous example (but drop the height covariate).  Consider trying to model whether a student studying English literature is a man or woman, based on whether they like Jane Austen or not.  Suppose 80% of students studying English are women and only 20% are men.  Further suppose that 70% of the women students like Jane Austen, but only 40% of the men do.  Using Bayes' rule, we can compute
 
@@ -84,6 +85,43 @@ $$\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 
 These probabilities do not match the probabilities $$12.5\%$$ and $$33.3\%$$ that we observe in reality!  In summary, logistic regression automatically calibrates (to some extent) its predicted probabilities, but this requires that the class balance in the training data match the class balance in the actual data.
 
 In this rest of this post, I want to go over where else the calibration equations above show up.
+-->
+
+## How does up and down sampling change $$\text{P}(y \vert x)$$?
+
+Suppose we downsample the positive class by keeping only 10% of its observations.  This changes $$P(y \vert x)$$ and therefore the scores from an ML model.  To see how the scores change, assume the $$y$$ conditional on $$x$$ follows some distribution $$\text{P}(y \vert x)$$ before downsampling.  We are then interested in the distribution of $$y$$ conditional on $$x$$ and the data being kept, i.e., the distribution $$\text{P}(y \vert x, \text{ keep})$$.  Using Bayes, we can write this as
+
+$$\text{P}(y \vert x, \text{ keep}) = \frac{\text{P}(\text{keep} \vert y, x) \text{P}(y \vert x)}{\text{P}(\text{keep} \vert x)}.$$
+
+If the positive class is kept with probability $$\alpha$$ and the negative class is not downsampled, we have
+
+$$
+\begin{aligned}
+\text{P}(\text{keep} \vert y=1, x) &= \alpha, \\
+\text{P}(\text{keep} \vert y=0, x) &= 1, \text{ and} \\
+\text{P}(\text{keep} \vert x) &= \alpha \text{P}(y = 1 \vert x) +  \text{P}(y = 0 \vert x).
+\end{aligned}
+$$
+
+Plugging these into the expression for $$\text{P}(y \vert x, \text{ keep})$$, and letting $$p(x) := \text{P}(y = 1 \vert x)$$ for brevity, we have
+
+$$\text{P}(y = 1 \vert x, \text{ keep}) = \frac{\alpha p(x)}{\alpha p(x) + 1-p(x)}.$$
+
+Notice that $$p \mapsto \alpha p / (\alpha p + 1 - p)$$ is increasing in $$p$$, which means the scores from the model trained on the downsampled data have the same ordering as the scores from the model trained on the original data.  The AUC, which only depends on the score order, also does not change.  (There may be slight fluctuations in the scores/AUC after downsampling due to estimation errors in finite samples.)
+
+The odds after downsampling are just multipled by $$\alpha$$
+
+$$\text{odds}(y = 1 \vert x, \text{ keep}) := \frac{\text{P}(y=1 \vert x, \text{ keep})}{\text{P}(y=0 \vert x, \text{ keep})} = \alpha \cdot \text{odds}(y = 1 \vert x),$$
+
+and the log odds are shifted by $$\log(\alpha)$$.  It follows that downsampling only shifts the intercept term in logistic regression by $$\log(\alpha)$$ and the other terms are unaffected (in the infinite data setting).
+
+### How downsampling changes the decision boundary?
+The decision boundary in a classificaiton task is shifted after downsampling.  Suppose we set the decision boundary at odds 1, which corresponds to score 0.5.  This boundary on the scores of the model trained on downsampled data corresponds to an odds boundary of $$1 / \alpha$$ on the scores from the model trained on the original data.  If $$\alpha$$ is chosen to balance the classes, the score threshold 0.5 on the balanced data is equivalent to using score threshold equal to the prevalence of the majority class on the original data.
+
+### How does stratified sampling change $$\text{P}(y \vert x)$$?
+Downsampling data by keeping observations with some probability based on $$y$$ changes $$\text{P}(y \vert x)$$, but in a predictable way.  If we instead downsample by keeping observations with some probability based on $$x$$, $$\text{P}(y \vert x)$$ is unchanged.  This is easy to see from the above equation for $$\text{P}(y \vert x, \text{ keep})$$.  Since observations are kept based on $$x$$, it follows that $$\text{P}(\text{keep} \vert y, x) = \text{P}(\text{keep} \vert x)$$ and so $$\text{P}(y \vert x, \text{ keep}) = \text{P}(y \vert x)$$.  Stratified sampling is a particular example of this.
+
+To make this concrete, suppose our observations are people and the binary covariates age and gender split the data into four groups: young men, old men, young women, and old women.  Moreover, suppose the prevalences of those groups are 20%, 40%, 30%, and 10%, respectively.  We can create a new dataset in which all four groups are equally represented by downsampling the first group with fraction $$\alpha_1 = 1/2$$, the second group with $$\alpha_2 = 1/4$$, the third group with $$\alpha_3 = \frac{1}{3}$$, and the fourth group with $$\alpha_4 = 1$$.  The conditional probabilities $$\text{P}(y \vert x)$$ on this new balanced dataset are unchanged.  (We do run into issues if $$\text{P}(x) > 0$$ in the original dataset, but $$\text{P}(x) = 0$$ in the new dataset.)  Although downsampling data does not change our estimate means, it does change the variance and statistical uncertainty.
 
 ## Binomial regression
 Binomial regression is a generalization of logistic regression.  In binomial regression, each response $$y_i$$ is the number of successes in $$n_i$$ trials, where the probability of success is $$p_i$$ is modeled with the logistic function:

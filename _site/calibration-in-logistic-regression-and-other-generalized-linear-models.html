@@ -163,36 +163,73 @@
 
 <p><strong>Note:</strong> the calibration equations have many solutions for the probabilities.  Logistic regression chooses the solution of the form <script type="math/tex">p_i = \frac{1}{1 + e^{-\beta^T X_i}}</script>.</p>
 
-<h2 id="updown-sampling-will-ruin-logistic-regression-probability-estimates">Up/down sampling will ruin logistic regression probability estimates</h2>
-<p>The common practice of up/down sampling in machine learning to get class balance will ruin the calibration in logistic regression probability estimates.  To explain, we continue with our previous example (but drop the height covariate).  Consider trying to model whether a student studying English literature is a man or woman, based on whether they like Jane Austen or not.  Suppose 80% of students studying English are women and only 20% are men.  Further suppose that 70% of the women students like Jane Austen, but only 40% of the men do.  Using Bayes’ rule, we can compute</p>
+<!---
+## Up/down sampling will ruin logistic regression probability estimates
+The common practice of up/down sampling in machine learning to get class balance will ruin the calibration in logistic regression probability estimates.  To explain, we continue with our previous example (but drop the height covariate).  Consider trying to model whether a student studying English literature is a man or woman, based on whether they like Jane Austen or not.  Suppose 80% of students studying English are women and only 20% are men.  Further suppose that 70% of the women students like Jane Austen, but only 40% of the men do.  Using Bayes' rule, we can compute
 
-<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{likes Jane Austen}) = 12.5\%</script>
+$$\text{P}(\text{man} \vert  \text{likes Jane Austen}) = 12.5\%$$
 
-<p>and</p>
+and
 
-<script type="math/tex; mode=display">\text{P}( \text{man} \vert  \text{does not like Jane Austen}) =33.3\%.</script>
+$$\text{P}( \text{man} \vert  \text{does not like Jane Austen}) =33.3\%.$$
 
-<p>A logistic regression with intercept term and an indicator for whether the English student likes Jane Austen will learn these probabilities (there is a unique solution to the calibration equations in this case).</p>
+A logistic regression with intercept term and an indicator for whether the English student likes Jane Austen will learn these probabilities (there is a unique solution to the calibration equations in this case).
 
-<p>The probabilities above depend on the ratio of women to men among English majors.  If instead of 4 women to every man, the ratio is <script type="math/tex">\text{P}(\text{woman}) /\text{P}(\text{man})</script>, the conditional probabilities are</p>
+The probabilities above depend on the ratio of women to men among English majors.  If instead of 4 women to every man, the ratio is $$\text{P}(\text{woman}) /\text{P}(\text{man})$$, the conditional probabilities are
 
-<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{likes Jane Austen}) = \frac{0.4}{0.4 + 0.7(\text{P}(\text{woman}) / \text{P}(\text{man}) )}</script>
+$$\text{P}(\text{man} \vert  \text{likes Jane Austen}) = \frac{0.4}{0.4 + 0.7(\text{P}(\text{woman}) / \text{P}(\text{man}) )}$$
 
-<p>and</p>
+and
 
-<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 + 0.3(\text{P}(\text{woman}) / \text{P}(\text{man}) )}.</script>
+$$\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 + 0.3(\text{P}(\text{woman}) / \text{P}(\text{man}) )}.$$
 
-<p>These are the probabilities that a logistic regression will predict when trained on data where the ratio of women to men is <script type="math/tex">\text{P}(\text{woman}) / \text{P}(\text{man})</script>.  In particular, if we were to artificially balance the classes by downsampling the number of women by 4, logistic regression would return the estimates</p>
+These are the probabilities that a logistic regression will predict when trained on data where the ratio of women to men is $$\text{P}(\text{woman}) / \text{P}(\text{man}) $$.  In particular, if we were to artificially balance the classes by downsampling the number of women by 4, logistic regression would return the estimates
 
-<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{likes Jane Austen}) = \frac{0.4}{0.4 + 0.7} = 36.4\%</script>
+$$\text{P}(\text{man} \vert  \text{likes Jane Austen}) = \frac{0.4}{0.4 + 0.7} = 36.4\%$$
 
-<p>and</p>
+and
 
-<script type="math/tex; mode=display">\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 + 0.3} = 66.7\%.</script>
+$$\text{P}(\text{man} \vert  \text{does not like Jane Austen}) = \frac{0.6}{0.6 + 0.3} = 66.7\%.$$
 
-<p>These probabilities do not match the probabilities <script type="math/tex">12.5\%</script> and <script type="math/tex">33.3\%</script> that we observe in reality!  In summary, logistic regression automatically calibrates (to some extent) its predicted probabilities, but this requires that the class balance in the training data match the class balance in the actual data.</p>
+These probabilities do not match the probabilities $$12.5\%$$ and $$33.3\%$$ that we observe in reality!  In summary, logistic regression automatically calibrates (to some extent) its predicted probabilities, but this requires that the class balance in the training data match the class balance in the actual data.
 
-<p>In this rest of this post, I want to go over where else the calibration equations above show up.</p>
+In this rest of this post, I want to go over where else the calibration equations above show up.
+-->
+
+<h2 id="how-does-up-and-down-sampling-change-textpy-vert-x">How does up and down sampling change <script type="math/tex">\text{P}(y \vert x)</script>?</h2>
+
+<p>Suppose we downsample the positive class by keeping only 10% of its observations.  This changes <script type="math/tex">P(y \vert x)</script> and therefore the scores from an ML model.  To see how the scores change, assume the <script type="math/tex">y</script> conditional on <script type="math/tex">x</script> follows some distribution <script type="math/tex">\text{P}(y \vert x)</script> before downsampling.  We are then interested in the distribution of <script type="math/tex">y</script> conditional on <script type="math/tex">x</script> and the data being kept, i.e., the distribution <script type="math/tex">\text{P}(y \vert x, \text{ keep})</script>.  Using Bayes, we can write this as</p>
+
+<script type="math/tex; mode=display">\text{P}(y \vert x, \text{ keep}) = \frac{\text{P}(\text{keep} \vert y, x) \text{P}(y \vert x)}{\text{P}(\text{keep} \vert x)}.</script>
+
+<p>If the positive class is kept with probability <script type="math/tex">\alpha</script> and the negative class is not downsampled, we have</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned}
+\text{P}(\text{keep} \vert y=1, x) &= \alpha, \\
+\text{P}(\text{keep} \vert y=0, x) &= 1, \text{ and} \\
+\text{P}(\text{keep} \vert x) &= \alpha \text{P}(y = 1 \vert x) +  \text{P}(y = 0 \vert x).
+\end{aligned} %]]></script>
+
+<p>Plugging these into the expression for <script type="math/tex">\text{P}(y \vert x, \text{ keep})</script>, and letting <script type="math/tex">p(x) := \text{P}(y = 1 \vert x)</script> for brevity, we have</p>
+
+<script type="math/tex; mode=display">\text{P}(y = 1 \vert x, \text{ keep}) = \frac{\alpha p(x)}{\alpha p(x) + 1-p(x)}.</script>
+
+<p>Notice that <script type="math/tex">p \mapsto \alpha p / (\alpha p + 1 - p)</script> is increasing in <script type="math/tex">p</script>, which means the scores from the model trained on the downsampled data have the same ordering as the scores from the model trained on the original data.  The AUC, which only depends on the score order, also does not change.  (There may be slight fluctuations in the scores/AUC after downsampling due to estimation errors in finite samples.)</p>
+
+<p>The odds after downsampling are just multipled by <script type="math/tex">\alpha</script></p>
+
+<script type="math/tex; mode=display">\text{odds}(y = 1 \vert x, \text{ keep}) := \frac{\text{P}(y=1 \vert x, \text{ keep})}{\text{P}(y=0 \vert x, \text{ keep})} = \alpha \cdot \text{odds}(y = 1 \vert x),</script>
+
+<p>and the log odds are shifted by <script type="math/tex">\log(\alpha)</script>.  It follows that downsampling only shifts the intercept term in logistic regression by <script type="math/tex">\log(\alpha)</script> and the other terms are unaffected (in the infinite data setting).</p>
+
+<h3 id="how-downsampling-changes-the-decision-boundary">How downsampling changes the decision boundary?</h3>
+<p>The decision boundary in a classificaiton task is shifted after downsampling.  Suppose we set the decision boundary at odds 1, which corresponds to score 0.5.  This boundary on the scores of the model trained on downsampled data corresponds to an odds boundary of <script type="math/tex">1 / \alpha</script> on the scores from the model trained on the original data.  If <script type="math/tex">\alpha</script> is chosen to balance the classes, the score threshold 0.5 on the balanced data is equivalent to using score threshold equal to the prevalence of the majority class on the original data.</p>
+
+<h3 id="how-does-stratified-sampling-change-textpy-vert-x">How does stratified sampling change <script type="math/tex">\text{P}(y \vert x)</script>?</h3>
+<p>Downsampling data by keeping observations with some probability based on <script type="math/tex">y</script> changes <script type="math/tex">\text{P}(y \vert x)</script>, but in a predictable way.  If we instead downsample by keeping observations with some probability based on <script type="math/tex">x</script>, <script type="math/tex">\text{P}(y \vert x)</script> is unchanged.  This is easy to see from the above equation for <script type="math/tex">\text{P}(y \vert x, \text{ keep})</script>.  Since observations are kept based on <script type="math/tex">x</script>, it follows that <script type="math/tex">\text{P}(\text{keep} \vert y, x) = \text{P}(\text{keep} \vert x)</script> and so <script type="math/tex">\text{P}(y \vert x, \text{ keep}) = \text{P}(y \vert x)</script>.  Stratified sampling is a particular example of this.</p>
+
+<p>To make this concrete, suppose our observations are people and the binary covariates age and gender split the data into four groups: young men, old men, young women, and old women.  Moreover, suppose the prevalences of those groups are 20%, 40%, 30%, and 10%, respectively.  We can create a new dataset in which all four groups are equally represented by downsampling the first group with fraction <script type="math/tex">\alpha_1 = 1/2</script>, the second group with <script type="math/tex">\alpha_2 = 1/4</script>, the third group with <script type="math/tex">\alpha_3 = \frac{1}{3}</script>, and the fourth group with <script type="math/tex">\alpha_4 = 1</script>.  The conditional probabilities <script type="math/tex">\text{P}(y \vert x)</script> on this new balanced dataset are unchanged.  (We do run into issues if <script type="math/tex">\text{P}(x) > 0</script> in the original dataset, but <script type="math/tex">\text{P}(x) = 0</script> in the new dataset.)  Although downsampling data does not change our estimate means, it does change the variance and statistical uncertainty.</p>
 
 <h2 id="binomial-regression">Binomial regression</h2>
 <p>Binomial regression is a generalization of logistic regression.  In binomial regression, each response <script type="math/tex">y_i</script> is the number of successes in <script type="math/tex">n_i</script> trials, where the probability of success is <script type="math/tex">p_i</script> is modeled with the logistic function:</p>
