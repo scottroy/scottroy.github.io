@@ -1,4 +1,348 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-15T22:29:13-07:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">statsandstuff</title><subtitle>a blog on statistics and machine learning</subtitle><author><name>Scott Roy</name></author><entry><title type="html">What makes a better score distribution?</title><link href="http://localhost:4000/what-makes-a-better-score-distribution.html" rel="alternate" type="text/html" title="What makes a better score distribution?" /><published>2019-09-29T00:00:00-07:00</published><updated>2019-09-29T00:00:00-07:00</updated><id>http://localhost:4000/what-makes-a-better-score-distribution</id><content type="html" xml:base="http://localhost:4000/what-makes-a-better-score-distribution.html">&lt;p&gt;Suppose I train two binary classifiers on some data, and after examining the score distributions of each, I see the results below.  Which score distribution is better?  (And by extension, which classifier is better?)&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-16T20:45:28-07:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">statsandstuff</title><subtitle>a blog on statistics and machine learning</subtitle><author><name>Scott Roy</name></author><entry><title type="html">Optimization and duality</title><link href="http://localhost:4000/optimization-duality.html" rel="alternate" type="text/html" title="Optimization and duality" /><published>2020-08-16T00:00:00-07:00</published><updated>2020-08-16T00:00:00-07:00</updated><id>http://localhost:4000/optimization-duality</id><content type="html" xml:base="http://localhost:4000/optimization-duality.html">&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;Consider the optimization problem&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\inf_{x \in E} &amp;\quad f(x) \\
+\text{subject to} &amp;\quad g(x) \leq 0,
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;where the function &lt;script type=&quot;math/tex&quot;&gt;g: \mathbb{R}^n \to \mathbb{R^p}&lt;/script&gt; defines &lt;script type=&quot;math/tex&quot;&gt;p&lt;/script&gt; constraints.  Constraints can also be built into the set &lt;script type=&quot;math/tex&quot;&gt;E \subseteq \mathbb{R}^n&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-lagrangian&quot;&gt;The Lagrangian&lt;/h3&gt;
+&lt;p&gt;The Lagrangian is defined as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;L(x, \lambda) = f(x) + \lambda^T g(x) = f(x) + \sum_{i=1}^p \lambda_i g_i(x).&lt;/script&gt;
+
+&lt;p&gt;In the Lagrangian, the “hard” constraints &lt;script type=&quot;math/tex&quot;&gt;g_i(x) \leq 0, \ 1 \leq i \leq p,&lt;/script&gt; in the optimization problem are replaced with “soft” penalties that can be violated, but for a cost; cost &lt;script type=&quot;math/tex&quot;&gt;\lambda_i&lt;/script&gt; is incurred per unit violation of the &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt;th constraint (and credit given per unit “under budget”).  A natural question is if there are “prices” &lt;script type=&quot;math/tex&quot;&gt;\lambda&lt;/script&gt; for which&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\Pi(\lambda) := \inf_{x \in E} L(x, \lambda) = \inf_{x \in E} f(x) + \lambda^T g(x)&lt;/script&gt;
+
+&lt;p&gt;has the same solution set as the original problem?  This is not always the case, as the figure below illustrates.  In the figure, the curve &lt;script type=&quot;math/tex&quot;&gt;v(t) = \inf \{ f(x) : g(x) \leq t, x \in E \}&lt;/script&gt; is plotted, which we assume is the boundary of the region &lt;script type=&quot;math/tex&quot;&gt;A = \{ (g(x), f(x)) : x \in E \}&lt;/script&gt;.  The problem that defines &lt;script type=&quot;math/tex&quot;&gt;\Pi(\lambda)&lt;/script&gt; can be viewed as maximization of the linear functional &lt;script type=&quot;math/tex&quot;&gt;(g, f) \mapsto (-\lambda, -1)^T (g,f)&lt;/script&gt; over &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt;.  The original problem corresponds to the point &lt;script type=&quot;math/tex&quot;&gt;(0, v(0))&lt;/script&gt;, which cannot be obtained by maximizing a linear functional (note that the functional corresponding to the tangent at &lt;script type=&quot;math/tex&quot;&gt;(0, v(0))&lt;/script&gt; is maximized at the red dot).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/scalarization.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;primal-and-dual-problems&quot;&gt;Primal and dual problems&lt;/h3&gt;
+&lt;p&gt;The connection between the original (primal) optimization problem and the  Lagrangian is given by&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;p^* = \inf_{x \in E} \sup_{\lambda \in \mathbb{R}^n_+} L(x, \lambda),&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;p^*&lt;/script&gt; is the primal optimal value.  This is easy to see by noting that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+P(x) := \sup_{\lambda \in \mathbb{R}^p_+} L(x, \lambda) = \left\{ \begin{matrix} f(x) &amp;\quad \text{if } g(x) \leq 0 \\ \infty &amp;\quad \text{otherwise} \end{matrix} \right. . %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;It is natural to consider the &lt;em&gt;dual problem&lt;/em&gt; in which the order of the inf and sup are reversed:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;d^* := \sup_{\lambda \in \mathbb{R}^p_+} \inf_{x \in E}  L(x, \lambda).&lt;/script&gt;
+
+&lt;p&gt;The function &lt;script type=&quot;math/tex&quot;&gt;\Pi(\lambda) = \inf_{x \in E}  L(x, \lambda)&lt;/script&gt; is called the Lagrangian dual function.&lt;/p&gt;
+
+&lt;p&gt;The minimax inequality implies &lt;em&gt;weak duality&lt;/em&gt;&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;d^* = \sup_{\lambda \in \mathbb{R}^p_+} \Pi(\lambda) = \sup_{\lambda \in \mathbb{R}^p_+} \inf_{x \in E}  L(x, \lambda) \leq \inf_{x \in E} \sup_{\lambda \in \mathbb{R}^n_+} L(x, \lambda) = \inf_{x \in E} P(x) = p^*.&lt;/script&gt;
+
+&lt;h2 id=&quot;the-minimax-inequality-and-saddle-points&quot;&gt;The minimax inequality and saddle points&lt;/h2&gt;
+
+&lt;p&gt;The minimax inequality is&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_{y \in Y} \inf_{x \in X} f(x, y) \leq \inf_{x \in X} \sup_{y \in Y} f(x, y)&lt;/script&gt;
+
+&lt;p&gt;and holds for any function &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; and any sets &lt;script type=&quot;math/tex&quot;&gt;X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt;.  To derive the inequality, start with&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;f(x, y) \leq \sup_{y \in Y} f(x,y),&lt;/script&gt;
+
+&lt;p&gt;then take an infimum on both sides&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\inf_{x \in X} f(x, y) \leq \inf_{x \in X} \sup_{y \in Y} f(x,y),&lt;/script&gt;
+
+&lt;p&gt;and finish with a supremum over the left side&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_{y \in Y} \inf_{x \in X} f(x, y) \leq \inf_{x \in X} \sup_{y \in Y} f(x,y).&lt;/script&gt;
+
+&lt;p&gt;To illustrate the inequality in a simple setting, consider the discrete function &lt;script type=&quot;math/tex&quot;&gt;f(i,j)&lt;/script&gt; whose values are enumerated in in the matrix below (&lt;script type=&quot;math/tex&quot;&gt;f(1,1) = 1&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;f(1,2) = 2&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;f(2,1) = 3&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;f(2,2)=1&lt;/script&gt;).&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{matrix} \begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 1 \end{bmatrix} &amp; \begin{matrix} \color{green}{2} \\ \color{green}{3} \end{matrix} \\ \begin{matrix} \color{red}{1} &amp; \color{red}{1} \end{matrix} &amp; \end{matrix} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;The minimax inequality says that the largest column min (1) is no more than the smallest row max (2).  (The column mins are shown in red below the matrix, and the row maxes are shown in green to the right of the matrix.)  This simple example shows that equality does not always hold.&lt;/p&gt;
+
+&lt;h3 id=&quot;equality-and-saddle-points&quot;&gt;Equality and saddle points&lt;/h3&gt;
+&lt;p&gt;Equality holding in the minimax inequality is closely related to the existence of saddle points of &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;.  A &lt;em&gt;saddle point&lt;/em&gt; &lt;script type=&quot;math/tex&quot;&gt;(\bar{x}, \bar{y})&lt;/script&gt; satifies&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;f(\bar{x}, y) \leq f(\bar{x}, \bar{y}) \leq f(x, \bar{y})&lt;/script&gt;
+
+&lt;p&gt;for all &lt;script type=&quot;math/tex&quot;&gt;x \in X&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;y \in Y&lt;/script&gt;.  A saddle point implies equality holds in minimax:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned} 
+\sup_{y \in Y} \inf_{x \in X} f(x,y) &amp;\geq \inf_{x \in X} f(x, \bar{y}) \\
+&amp;\geq f(\bar{x}, \bar{y}) \\
+&amp;\geq \sup_{y \in Y} f(\bar{x}, y) \\
+&amp;\geq \inf_{x \in X} \sup_{y \in Y} f(x, y).
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;In the discrete setting, a saddle point is an entry that is the largest in its row and the smallest in its column.  For example, 2 is a saddle point in the matrix below because it is the biggest value in its row and the smallest value in its column (and minimax equality holds).&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{matrix} \begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{bmatrix} &amp; \begin{matrix} \color{green}{2} \\ \color{green}{4} \end{matrix} \\ \begin{matrix} \color{red}{1} &amp; \color{red}{2} \end{matrix} &amp; \end{matrix} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Since a saddle point implies equality in minimax, it is natural to wonder the converse: if equality holds, does &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; have a saddle point?  This is true as long as the optimal values are &lt;em&gt;attained&lt;/em&gt;.  Suppose &lt;script type=&quot;math/tex&quot;&gt;\bar{x} \in X&lt;/script&gt; is optimal in that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_{y \in Y} f(\bar{x}, y) = \inf_{x \in X} \sup_{y \in Y} f(x, y).&lt;/script&gt;
+
+&lt;p&gt;and &lt;script type=&quot;math/tex&quot;&gt;\bar{y} \in Y&lt;/script&gt; is optimal in that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\inf_{x \in X} f(x, \bar{y}) = \sup_{y \in Y} \inf_{x \in X} f(x, y),&lt;/script&gt;
+
+&lt;p&gt;and equality holds in minimax.  Then we have&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\sup_{y \in Y} \inf_{x \in X} f(x,y) &amp;= \inf_{x \in X} f(x, \bar{y}) \\
+&amp;\leq f(\bar{x}, \bar{y}) \\
+&amp;\leq \sup_{y \in Y} f(\bar{x}, y) \\
+&amp;= \inf_{x \in X} \sup_{y \in Y} f(x, y) \\
+&amp;= \sup_{y \in Y} \inf_{x \in X} f(x,y),
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;so equality holds throughout.  In particular,&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_{y \in Y} f(\bar{x}, y) = f(\bar{x}, \bar{y}) = \inf_{x \in X} f(x, \bar{y}),&lt;/script&gt;
+
+&lt;p&gt;which means &lt;script type=&quot;math/tex&quot;&gt;(\bar{x}, \bar{y})&lt;/script&gt; is a saddle point.&lt;/p&gt;
+
+&lt;h3 id=&quot;lagrangian-saddle-points-and-the-kkt-conditions&quot;&gt;Lagrangian saddle points and the KKT conditions&lt;/h3&gt;
+&lt;p&gt;When &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; is the Lagrangian, the saddle point theorem characterizes strong duality.  Suppose the primal optimum is attained at &lt;script type=&quot;math/tex&quot;&gt;\bar{x}&lt;/script&gt; and dual optimum is attained at &lt;script type=&quot;math/tex&quot;&gt;\bar{y}&lt;/script&gt;.  Then strong duality holds if and only if &lt;script type=&quot;math/tex&quot;&gt;(\bar{x}, \bar{y})&lt;/script&gt; is a saddle point of the Lagrangian.&lt;/p&gt;
+
+&lt;p&gt;The point &lt;script type=&quot;math/tex&quot;&gt;(\bar{x}, \bar{y})&lt;/script&gt; is a saddle point of the Lagrangian &lt;script type=&quot;math/tex&quot;&gt;L&lt;/script&gt; if:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{x} \in X&lt;/script&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;script type=&quot;math/tex; mode=display&quot;&gt;\bar{y} \in Y&lt;/script&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_{y \in Y} L(\bar{x}, y) = L(\bar{x}, \bar{y})&lt;/script&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;script type=&quot;math/tex; mode=display&quot;&gt;L(\bar{x}, \bar{y}) = \inf_{x \in X} L(x, \bar{y}).&lt;/script&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In this case, strong duality holds and &lt;script type=&quot;math/tex&quot;&gt;(\bar{x}, \bar{y})&lt;/script&gt; form a primal-dual optimal pair.  These saddle point conditions can be stated more explicitly as:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;(Primal feasibility) &lt;script type=&quot;math/tex&quot;&gt;\bar{x} \in X \iff \bar{x} \in E \text{ and } g(\bar{x}) \leq 0&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;(Dual feasibility) &lt;script type=&quot;math/tex&quot;&gt;\bar{y} \in Y \iff \bar{y} \geq 0&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;(Complimentarity) &lt;script type=&quot;math/tex&quot;&gt;\sup_{y \in Y} L(\bar{x}, y) = L(\bar{x}, \bar{y}) \iff g(\bar{x}) \bar{y} = 0&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;(Stationarity) &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+L(\bar{x}, \bar{y}) = \inf_{x \in X} L(x, \bar{y})\begin{matrix} \implies&amp; \nabla f(\bar{x}) + \sum_{i=1}^p \bar{\lambda}_i \nabla g_i(\bar{x}) = 0 \text{ (smooth problem)} \\ \iff&amp; \nabla f(\bar{x}) + \sum_{i=1}^p \bar{\lambda}_i \nabla g_i(\bar{x}) = 0 \text{ (smooth convex problem)}  \end{matrix} %]]&gt;&lt;/script&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In this explicit form, the saddle point conditions are called KKT conditions.  The KKT conditions have other interpretations, as well.&lt;/p&gt;
+
+&lt;h2 id=&quot;normal-cones&quot;&gt;Normal cones&lt;/h2&gt;
+
+&lt;p&gt;Just as optimality in unconstrained smooth optimization can be characterized by a vanishing gradient, optimality in constrained optimization can be characterized by normality conditions.&lt;/p&gt;
+
+&lt;p&gt;As a simple example, consider the linearly constrained smooth problem:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\inf_{x \in E} &amp;\quad f(x) \\
+\text{subject to} &amp;\quad Ax = 0.
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Geometrically we are minimizing the smooth function &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; over the hyperplane &lt;script type=&quot;math/tex&quot;&gt;\{ x : Ax = 0 \}&lt;/script&gt;.  At optimality &lt;script type=&quot;math/tex&quot;&gt;\bar{x}&lt;/script&gt;, the negative gradient &lt;script type=&quot;math/tex&quot;&gt;-\nabla f(\bar{x})&lt;/script&gt; must be orthogonal to the hyperplane, i.e., belong to the row space of &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt;.  Otherwise, we could move in the component of the negative gradient that lies in the hyperplane and reduce the objective while staying feasible.&lt;/p&gt;
+
+&lt;p&gt;To generalize the learnings from this simple linear example, we first need to discuss the tangent and normal cones.  These cones generalize orthogonal subspaces from linear algebra and tangent/normal spaces from smooth analysis.&lt;/p&gt;
+
+&lt;h3 id=&quot;tangent-cone&quot;&gt;Tangent cone&lt;/h3&gt;
+&lt;p&gt;Given a set &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt;, the (limiting) tangent cone to &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt; at a point &lt;script type=&quot;math/tex&quot;&gt;x_0 \in C&lt;/script&gt; is defined as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;T_C(x_0) = \{ z : \text{ there exists } t_n &gt; 0 \text{ with } t_n \to \infty \text{ and } x_n \in C \text{ with } x_n \to x_0 \text{ such that } z = t_n (x_n - x_0) \}.&lt;/script&gt;
+
+&lt;p&gt;The tangent cone is a generalization of the tangent space, which is only defined at points where the boundary is smooth.  For a convex set, the tangent cone is more simply expressed as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;T_C(x_0) = \overline{\mathbb{R_+} (C - x_0)} = \overline{ \{ t (x - x_n) : t &gt; 0 \text{ and } x \in C \} },&lt;/script&gt;
+
+&lt;p&gt;where the bar denotes set closure.&lt;/p&gt;
+
+&lt;p&gt;The polar of the tangent cone is called normal cone:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;N_C(x_0) = \{ z : z^T x \leq 0 \text{ for all } x \in T_C(x_0) \}.&lt;/script&gt;
+
+&lt;p&gt;For a convex set, the normal cone can be written as&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;N_C(x_0) = \{ z : z^T (x-x_0) \leq 0 \text{ for all } x \in C \},&lt;/script&gt;
+
+&lt;p&gt;i.e., the set of all vectors that make obtuse angle to &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt; at &lt;script type=&quot;math/tex&quot;&gt;x_0&lt;/script&gt;.  This is illustrated at two points in the figure below.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/normal_cone.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The normal cone is important for characterizing optimality in convex optimization: a point &lt;script type=&quot;math/tex&quot;&gt;\bar{x}&lt;/script&gt; is optimal for the problem &lt;script type=&quot;math/tex&quot;&gt;\min \{ f(x) : x \in C \}&lt;/script&gt; if and only if &lt;script type=&quot;math/tex&quot;&gt;-\nabla f(\bar{x}) \in N_C(\bar{x})&lt;/script&gt;.  Indeed, if &lt;script type=&quot;math/tex&quot;&gt;-\nabla f(\bar{x})&lt;/script&gt; were not in the normal cone, we could find &lt;script type=&quot;math/tex&quot;&gt;x \in C&lt;/script&gt; such that &lt;script type=&quot;math/tex&quot;&gt;-\nabla f(\bar{x})^T (x - \bar{x}) &gt; 0&lt;/script&gt;.  This means that &lt;script type=&quot;math/tex&quot;&gt;d = x-\bar{x}&lt;/script&gt; is a descent direction for &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; and moving in this direction maintains feasibibility.&lt;/p&gt;
+
+&lt;p&gt;The optimality condition &lt;script type=&quot;math/tex&quot;&gt;-\nabla f(\bar{x}) \in N_C(\bar{x})&lt;/script&gt; is equivalent to the KKT conditions. (With the Lagrange multipliers giving the representation of &lt;script type=&quot;math/tex&quot;&gt;-\nabla f(\bar{x})&lt;/script&gt; in the normal cone.)  This is because for a convex set described by smooth inequalities &lt;script type=&quot;math/tex&quot;&gt;g_1 \leq 0, \ldots, g_p \leq 0&lt;/script&gt;, the normal cone at &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; is the cone generated by the gradients of the active constraints:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;N_C(x) = \left\{ \sum_{i=1}^p \lambda_i \nabla g_i(x) : \lambda_i \geq 0, \ g_i(x) \lambda_i = 0 \right\}.&lt;/script&gt;
+
+&lt;h2 id=&quot;convex-congugates&quot;&gt;Convex congugates&lt;/h2&gt;
+
+&lt;p&gt;Given a function &lt;script type=&quot;math/tex&quot;&gt;f : \mathbb{R}^n \to \mathbb{R}&lt;/script&gt;, the &lt;em&gt;convex conjugate&lt;/em&gt; is defined by&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;f^*(w) = \sup_{x \in \mathbb{R}^n} w^T x - f(x).&lt;/script&gt;
+
+&lt;p&gt;The function &lt;script type=&quot;math/tex&quot;&gt;f^*&lt;/script&gt; is convex, even if &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; is not (since it is the pointwise maximum of convex functions).&lt;/p&gt;
+
+&lt;p&gt;Notice that &lt;script type=&quot;math/tex&quot;&gt;f^*(w)&lt;/script&gt; is the is the smallest offset &lt;script type=&quot;math/tex&quot;&gt;b&lt;/script&gt; so that &lt;script type=&quot;math/tex&quot;&gt;l(x) = w^T x - b&lt;/script&gt; globally underestimates &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;.  Geometrically this defines a nonvertical supporting hyperplane &lt;script type=&quot;math/tex&quot;&gt;H_w = \{ (x,y) : y = w^T x - f^*(w) \}&lt;/script&gt; to the graph of &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; that intersects the vertical axis at &lt;script type=&quot;math/tex&quot;&gt;-f^*(w)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/convex-conjugate.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Also note that &lt;script type=&quot;math/tex&quot;&gt;f^*(w)&lt;/script&gt; is the maximum value of the linear functional &lt;script type=&quot;math/tex&quot;&gt;(x, y) \mapsto (w, -1)^T (x,y)&lt;/script&gt; over the graph of &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;, and so &lt;script type=&quot;math/tex&quot;&gt;(w,-1)&lt;/script&gt; is normal to the graph of &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; where the hyperplane &lt;script type=&quot;math/tex&quot;&gt;H_w&lt;/script&gt; touches:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+f^*(w) &amp;= \sup_{x \in \mathbb{R}^n} w^T x - f(x) \\
+&amp;= \sup_{x \in \mathbb{R}^n} (w, -1)^T (x, f(x)) \\
+&amp;= \sup_{(x,y) \in \text{grh}(f)} (w, -1)^T (x,y).
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;We can replace the graph with the epigraph since&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_{(x,y) \in \text{grh}(f)} (w, -1)^T (x,y) = \sup_{(x,t) \in \text{epi}(f)} (w, -1)^T (x,t).&lt;/script&gt;
+
+&lt;p&gt;(Recall that the graph of a function is the set &lt;script type=&quot;math/tex&quot;&gt;\text{grh}(f) = \{ (x, y) : x \in \mathbb{R}^n, y = f(x) \}&lt;/script&gt; and the epigraph is the region “above” the graph &lt;script type=&quot;math/tex&quot;&gt;\text{epi}(f) = \{ (x, t) : x \in \mathbb{R}^n, t \geq f(x) \}&lt;/script&gt;.)&lt;/p&gt;
+
+&lt;p&gt;There is thus a correspondence between the domain of &lt;script type=&quot;math/tex&quot;&gt;f^*&lt;/script&gt; and supporting hyperplanes to the epigraph of &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;biconjugate&quot;&gt;Biconjugate&lt;/h3&gt;
+
+&lt;p&gt;A “dual” view of &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; is given by the pointwise maximum of all linear underestimators:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\phi(x) = \sup \{ l(x) : l \text{ is a linear underestimator of f} \}.&lt;/script&gt;
+
+&lt;p&gt;In fact, if &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; is closed and convex, then &lt;script type=&quot;math/tex&quot;&gt;\phi = f^{**}&lt;/script&gt;, the &lt;em&gt;biconjugate&lt;/em&gt; of f.  Geometrically it is clear that&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;f^{**}(0) = \sup_w -f^*(w) = \phi(0)&lt;/script&gt;
+
+&lt;p&gt;from the previous discussion, and the same geometry applies at other points.&lt;/p&gt;
+
+&lt;h2 id=&quot;value-function-and-the-lagrange-dual&quot;&gt;Value function and the Lagrange dual&lt;/h2&gt;
+
+&lt;p&gt;Consider the primal optimization problem&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\inf_{x \in E} &amp;\quad f(x) \\
+\text{subject to} &amp;\quad g(x) \leq 0,
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;f : E \to \mathbb{R}&lt;/script&gt; is the objective and &lt;script type=&quot;math/tex&quot;&gt;g : E \to \mathbb{R}^p&lt;/script&gt; are contraint functions.  The value function describes how the optimal value changes as constraints are relaxed:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;v(b) = \inf \{ f(x) : x \in E,\ g(x) \leq b\}.&lt;/script&gt;
+
+&lt;p&gt;The conjugate of the value function closely related to the Lagrange dual:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+v^*(w) &amp;= \sup_{b \in \mathbb{R}^p} \left\{ w^T b - v(b) \right\} \\
+&amp; = \sup_{b \in \mathbb{R}^p,\ x \in E,\ g(x) \leq b} \left\{ w^T b - f(x) \right\} \\
+&amp; = \sup_{s \geq 0,\ x \in E} \left\{ w^T (g(x) + s) - f(x) \right\} \\
+&amp; = \sup_{x \in E} \left\{ w^T g(x) - f(x) \right\} + \sup_{s \geq 0} w^T s \\
+&amp;= -\inf_{x \in E} \left\{ f(x) + (-w)^T g(x) \right\} + \sup_{s \geq 0} w^T s \\
+&amp;= \left\{ \begin{matrix} -\Pi(-w) &amp;\quad w \leq 0 \\ \infty &amp;\quad \text{otherwise} \end{matrix} \right. \\
+&amp;= -\Pi(-w).
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;The above relation shows that the Lagrange dual problem can be viewed as maximization over supporting hyperplanes to the value function.  From previous discussions, it is clear that &lt;script type=&quot;math/tex&quot;&gt;v^{**}(0)&lt;/script&gt; is the dual optimal value and &lt;script type=&quot;math/tex&quot;&gt;v(0)&lt;/script&gt; is the primal optimal value.  The dual optimal vectors are subgradients to the value function at 0 and therefore contain information about how sensitive the optimal value is to the constraints.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/nonconvex-duality-gap.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The figure above shows a duality gap (&lt;script type=&quot;math/tex&quot;&gt;p^* &gt; d^*&lt;/script&gt;) for the original problem &lt;script type=&quot;math/tex&quot;&gt;v(0)&lt;/script&gt;.  Some of the peturbed problems &lt;script type=&quot;math/tex&quot;&gt;v(t)&lt;/script&gt; have duality gaps (red regions) and others do not (green regions).&lt;/p&gt;
+
+&lt;p&gt;There is no duality gap if &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; has a nonvertical supporting hyperplane at 0.  This is true when &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; and each component of &lt;script type=&quot;math/tex&quot;&gt;g&lt;/script&gt; is convex and &lt;em&gt;Slater’s condition&lt;/em&gt; holds: there is a point &lt;script type=&quot;math/tex&quot;&gt;x&lt;/script&gt; so that &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+g(x) &lt; 0 %]]&gt;&lt;/script&gt;.  Convexity is not sufficient to ensure no duality gap; the function &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; must also be closed at 0 (see the figure below).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/convex-duality-gap.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The value function above corresponds to the following convex program (which fails Slater’s condition):&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+\inf_{x, y &gt; 0} &amp;\quad e^{-x} \\
+\text{subject to} &amp;\quad x^2 / y \leq 0.
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;h1 id=&quot;fenchel-duality&quot;&gt;Fenchel duality&lt;/h1&gt;
+
+&lt;p&gt;Fenchel duality consists of the primal problem&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\inf_x \{ f(x) + g(Ax) \}&lt;/script&gt;
+
+&lt;p&gt;and the dual problem&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_w \{ -f^*(A^Tw) - g^*(-w) \}.&lt;/script&gt;
+
+&lt;p&gt;Duality is analyzed through the perturbation function &lt;script type=&quot;math/tex&quot;&gt;v(u) = \inf_x \{ f(x) + g(Ax - u) \}&lt;/script&gt;, which is convex in &lt;script type=&quot;math/tex&quot;&gt;u&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Notice that the primal optimal value is &lt;script type=&quot;math/tex&quot;&gt;v(0)&lt;/script&gt;, and the dual problem is &lt;script type=&quot;math/tex&quot;&gt;\max_w -v^*(w) = v^{**}(0)&lt;/script&gt; since:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+-v^*(w) &amp;= \inf_u \{ v(u) - w^T u \} \\
+&amp;= \inf_{u,x} \{ f(x) + g(Ax-u) - w^Tu \} \\
+&amp;= \inf_{z,x} \{ f(x) + g(z) - w^T(Ax - z) \} \\
+&amp;= \inf_{z,x} \{ f(x) - (A^Tw)^T x + g(z) - (-w)^T z \} \\
+&amp;= -f^*(A^T w) - g^*(-w).
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;Strong duality holds when 0 belongs to the interior of the domain of &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; (recall the domain of convex function is the region where it is not positive infinity).  Further note that:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+u \in \text{dom} (v) &amp;\iff \exists  x \text{ s.t } f(x) + g(Ax - u) &lt; \infty \\
+&amp;\iff \exists  x \text{ s.t } x \in \text{dom}(f) \text{ and } Ax - u \in \text{dom}(g) \\
+&amp;\iff u \in A \text{dom}(f) - \text{dom}(g),
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;so &lt;script type=&quot;math/tex&quot;&gt;\text{dom}(v) = A \text{dom}(f) - \text{dom}(g)&lt;/script&gt;, and strong duality holds if &lt;script type=&quot;math/tex&quot;&gt;0 \in \text{int}(A \text{dom}(f) - \text{dom}(g))&lt;/script&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;duality-via-perturbation-functions&quot;&gt;Duality via perturbation functions&lt;/h1&gt;
+
+&lt;p&gt;We derived both Lagrangian and Fenchel duality by reasoning about perturbations.  More generally a perturbation function &lt;script type=&quot;math/tex&quot;&gt;F(x,u)&lt;/script&gt; is one where &lt;script type=&quot;math/tex&quot;&gt;f(x) = F(x,0)&lt;/script&gt;.  By considering&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;v(u) = \inf_x F(x, u)&lt;/script&gt;
+
+&lt;p&gt;and its conjugate&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{aligned}
+-v^*(w) &amp;= \inf_u \{ v(u) - w^T u \} \\
+&amp;= \inf_{x,u} \{ F(x,u) - w^T u \} \\
+&amp;= \inf_{x,u} \{ F(x,u) - (0,w)^T (x,u) \} \\
+&amp;= -F^*(0,w)
+\end{aligned} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;we get the primal problem&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\inf_x F(x,0)&lt;/script&gt;
+
+&lt;p&gt;and the dual problem&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sup_w -F^*(0,w).&lt;/script&gt;
+
+&lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;Convex analysis and nonlinear optimization&lt;/em&gt; by Borwein and Lewis&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Convex optimization&lt;/em&gt; by Boyd and Vandenberghe&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Convex analysis&lt;/em&gt; by Rockafellar&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Variational analysis&lt;/em&gt; by Rockafellar and Wets&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Scott Roy</name></author><summary type="html">Introduction</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/convex-conjugate.png" /></entry><entry><title type="html">What makes a better score distribution?</title><link href="http://localhost:4000/what-makes-a-better-score-distribution.html" rel="alternate" type="text/html" title="What makes a better score distribution?" /><published>2019-09-29T00:00:00-07:00</published><updated>2019-09-29T00:00:00-07:00</updated><id>http://localhost:4000/what-makes-a-better-score-distribution</id><content type="html" xml:base="http://localhost:4000/what-makes-a-better-score-distribution.html">&lt;p&gt;Suppose I train two binary classifiers on some data, and after examining the score distributions of each, I see the results below.  Which score distribution is better?  (And by extension, which classifier is better?)&lt;/p&gt;
 
 &lt;table&gt;
   &lt;tbody&gt;
@@ -1493,72 +1837,4 @@ In this rest of this post, I want to go over where else the calibration equation
 &lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
 &lt;ul&gt;
   &lt;li&gt;&lt;em&gt;Adaptive Rejection Sampling for Gibbs Sampling&lt;/em&gt; by W. R. Gilks and P. Wild&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Scott Roy</name></author><category term="adaptive rejection sampling" /><category term="rejection method" /><summary type="html">There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/sampling.png" /></entry><entry><title type="html">ROC space and AUC</title><link href="http://localhost:4000/ROC-space-and-AUC.html" rel="alternate" type="text/html" title="ROC space and AUC" /><published>2018-04-29T00:00:00-07:00</published><updated>2018-04-29T00:00:00-07:00</updated><id>http://localhost:4000/ROC-space-and-AUC</id><content type="html" xml:base="http://localhost:4000/ROC-space-and-AUC.html">&lt;p&gt;Before discussing ROC curves and AUC, let’s fix some terminology around the confusion matrix:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;Condition positive (negative):&lt;/strong&gt; real positive (negative) case in the data&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;True positive (negative):&lt;/strong&gt; condition positive (negative) that is classified as positive (negative)&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;False positive (negative):&lt;/strong&gt; condition negative (positive) that is classified as positive (negative)&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;True positive rate (TPR):&lt;/strong&gt; empirically defined as (# true positives) / (# condition positives).  More generally, it is the probability that a condition positive is labelled as positive.&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;False positive rate (FPR):&lt;/strong&gt; empirically defined as (# false positives) / (# condition negatives).  More generally, it is the probability that a condition negative is classified as positive.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/confusion.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;True positive rate and false positive rate do not depend on the class ratio, that is, the ratio of condition positives to condition negatives in the data. Contrast this with precision, the number of true positives over the number of predicted positives, which does depend on the class ratio.&lt;/p&gt;
-
-&lt;h2 id=&quot;roc-space&quot;&gt;ROC Space&lt;/h2&gt;
-
-&lt;p&gt;The concept of ROC (receiver operator characteristic) space was introduced by engineers during WWII.  Radar operators had to decide if a blip on a radar screen was an enemy target or not. The performance of different operators can be compared by plotting an operator’s true positive rate along the y-axis and false positive rate along the x-axis.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/random_guessers.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;In “ROC space,” the better operators are in the upper, left corner (high true positive rate, low false positive rate). Any decent operator lies in the upper, left region above the diagonal. In fact, points on the diagonal correspond to the performance of “random guessers.” Suppose Jim flips a coin and classifies a blip as an enemy target if the coin shows heads. In this case, Jim will classify half of condition positives as targets (50% true positive rate) and half of condition negatives as targets (50% false positive rate). If the coin is biased and has a 70% chance of showing heads, Jim’s TPR and FPR will both be 70%. The entire diagonal line corresponds to the performance of random guessers who use biased coins with varying probabilities of showing heads.&lt;/p&gt;
-
-&lt;h2 id=&quot;roc-curves&quot;&gt;ROC Curves&lt;/h2&gt;
-&lt;p&gt;Like radar operators, we can compare the performance of classifiers by plotting TPR and FPR in ROC space. Before discussing ROC curves, I want to distinguish between a classifier and a scorer. A classifier labels an input as positive or negative. Its output is binary. Many classifiers in machine learning are built from scorers. A scorer assigns each input a score that measures a “belief” that the input is a positive example. For example, a logistic regression scorer assigns each input a probability score of being a positive example. (As an aside, the probability scores computed by logistic regression (or any machine learning model) need not be well-calibrated, true probabilities. For this reason, care should be taken when comparing scores from different models.)  We get a logistic regression classifier, for example, by labelling an input as positive if its score is greater than 0.5.  A scorer generates many classifiers indexed by a threshold &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt;, where the classifier at threshold &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt; labels an input as positive or negative depending on if its score is above or below &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;We can plot the performance of all the classifiers generated by a scorer in ROC space.  For high values of &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt;, few examples are classified as positive, and so both the true positive rate and false positive rate are low. Similarly, the true positive rate and false positive rate are are high for low values of &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt;.  So the ROC curve for a scorer starts in the upper right corner, ends in the lower left corner, and will (hopefully) bulge out toward the upper left corner.&lt;/p&gt;
-
-&lt;h2 id=&quot;auc&quot;&gt;AUC&lt;/h2&gt;
-&lt;p&gt;A good scorer will have an ROC curve that bulges out toward the upper left corner.  The AUC is the area under the ROC curve, and is a heuristic for measuring how much the curve bulges toward the upper left corner.  A perfect scorer has AUC 1.&lt;/p&gt;
-
-&lt;p&gt;AUC has an alternative interpretation: it is the probability that a condition positive has a higher score than a condition negative.  Let’s see why. Let &lt;script type=&quot;math/tex&quot;&gt;\beta(t)&lt;/script&gt; be the TPR at threshold &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\alpha(t)&lt;/script&gt; be the FPR at threshold &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt;. (Notice that the use of &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\beta&lt;/script&gt; here is consistent with their use to denote Type I error and power in statistics.)
-Let &lt;script type=&quot;math/tex&quot;&gt;f_{+}(x)&lt;/script&gt; be the score density of the condition positives.  Then we can write &lt;script type=&quot;math/tex&quot;&gt;\beta(t) = \int_{t}^{\infty} f_{+}(x)\ dx&lt;/script&gt;. Similarly, &lt;script type=&quot;math/tex&quot;&gt;\alpha(t) = \int_t^{\infty} f_{-}(x) \ dx&lt;/script&gt;.  The AUC is the integral over infinitesimal rectangles under of the ROC curve. The rectangle at &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt; has height &lt;script type=&quot;math/tex&quot;&gt;\beta(t)&lt;/script&gt; and width &lt;script type=&quot;math/tex&quot;&gt;d\alpha = f_{-}(t) dt&lt;/script&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/auc.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Putting things together, we have&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
-\begin{aligned}\text{AUC} &amp;= \int \beta(t) f_{-}(t) dt \\ &amp;= \int \textbf{P}(\text{condition positive has score greater than } t)\ \textbf{P}(\text{condition negative has score } t) dt \\ &amp;= \textbf{P}(\text{condition positive has higher score than condition negative}). \end{aligned} %]]&gt;&lt;/script&gt;
-
-&lt;p&gt;ROC curves and AUC (being based on TPR and FPR) do not depend on the class ratio in the data.&lt;/p&gt;
-
-&lt;h2 id=&quot;picking-the-best-classifier-in-roc-space&quot;&gt;Picking the “best” classifier in ROC space&lt;/h2&gt;
-&lt;p&gt;A classifier above &lt;strong&gt;and&lt;/strong&gt; to the left of another in ROC space is objectively better.  But not all points in ROC space are comparable.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/better_worse_roc_space.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;For example, a classifier can have a better TPR than another, but a worse FPR.  Choosing between incomparable classifiers depends on the specific problem.  In particular, it depends on the cost of a false positive, the cost of a false negative, and the ratio of condition positives to condition negatives in the data.  As an example, consider a classifier that predicts if a patient has HIV.  In this case, the cost of a false negative (failing to detect an HIV positive patient) is significantly more than the cost of a false positive (incorrectly diagnosing HIV).&lt;/p&gt;
-
-&lt;p&gt;Let’s model expected total cost.  Each mistake has a cost.  Let &lt;script type=&quot;math/tex&quot;&gt;M_{+}&lt;/script&gt; be the number of false positives and &lt;script type=&quot;math/tex&quot;&gt;c_{+}&lt;/script&gt; be the cost of a false positive (with similar definitions for &lt;script type=&quot;math/tex&quot;&gt;M_{-}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;c_{-}&lt;/script&gt;).  In expectation, &lt;script type=&quot;math/tex&quot;&gt;M_{+}&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;n p_{-} \alpha&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;n&lt;/script&gt; is the number of classified points, &lt;script type=&quot;math/tex&quot;&gt;p_{-}&lt;/script&gt; is the probability of a condition negative, and &lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt; is the true positive rate.  Similarly, the expected value of &lt;script type=&quot;math/tex&quot;&gt;M_{-}&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;n p_{+} (1-\beta)&lt;/script&gt;.  The average total cost is&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;c_{+} n p_{-} \alpha + c_{-} n p_{+} (1-\beta),&lt;/script&gt;
-
-&lt;p&gt;and we can find the best classifier by minimizing this over ROC space.  Equivalently, we can maximize the linear functional&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt;(\alpha, \beta) \mapsto -\left( \frac{c_{+}}{c_{-}} \right) \left( \frac{p_{-}}{p_{+}} \right) \alpha + \beta.&lt;/script&gt;
-
-&lt;p&gt;Notice that the selection of the best classifier only depends on the cost ratio &lt;script type=&quot;math/tex&quot;&gt;c_{+} / c_{-}&lt;/script&gt; and the class ratio &lt;script type=&quot;math/tex&quot;&gt;p_{-} / p_{+}&lt;/script&gt;. In the special case where the classes are balanced and a false positive has the same cost as a false negative, the best classifier is the one furthest in the northeast direction.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/img/cost_roc_space.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;interpolating-classifiers-in-roc-space&quot;&gt;Interpolating classifiers in ROC space&lt;/h2&gt;
-&lt;p&gt;Given any two classifiers in ROC space, we can interpolate on the line segment between them.  Suppose classifier 1 is at &lt;script type=&quot;math/tex&quot;&gt;(\alpha_1, \beta_1)&lt;/script&gt; and classifier 2 is at &lt;script type=&quot;math/tex&quot;&gt;(\alpha_2, \beta_2)&lt;/script&gt;.  We can form a combined classifier that lies at &lt;script type=&quot;math/tex&quot;&gt;(\theta \alpha_1 + (1-\theta) \alpha_2, \theta \beta_1 + (1-\theta) \beta_2)&lt;/script&gt; as follows.  We flip a coin that shows heads with probability &lt;script type=&quot;math/tex&quot;&gt;\theta&lt;/script&gt; and predict the output of classifier 1 if the coin shows heads, and predict the output of classifier 2 if the coin shows tails. In this way, we can get the performance of any point in the convex hull of the classifiers we plot in ROC space.&lt;/p&gt;
-
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;Measuring classifier performance: a coherent alternative to the area under the ROC curve&lt;/em&gt; by David J. Hand&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;An introduction to ROC analysis&lt;/em&gt; by Tom Fawcett&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Scott Roy</name></author><category term="AUC" /><category term="false positive rate" /><category term="ROC" /><category term="true positive rate" /><category term="type I error" /><category term="type II error" /><summary type="html">Before discussing ROC curves and AUC, let’s fix some terminology around the confusion matrix:</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/cost_roc_space.png" /></entry></feed>
+&lt;/ul&gt;</content><author><name>Scott Roy</name></author><category term="adaptive rejection sampling" /><category term="rejection method" /><summary type="html">There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/sampling.png" /></entry></feed>
