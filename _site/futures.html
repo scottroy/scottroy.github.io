@@ -1,0 +1,877 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>
+    
+      Making a future in C++ | statsandstuff
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- Use Atom -->
+    <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="statsandstuff" />
+  <!-- Use RSS-2.0 -->
+  <!--<link href="/rss-feed.xml" type="application/rss+xml" rel="alternate" title="statsandstuff | a blog on statistics and machine learning"/>
+  //-->
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-135466463-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+<meta name="author" content="Scott Roy"/>  
+<meta property="og:locale" content="en_US">
+<meta property="og:description" content="I recently started looking at concurrent programming in C++ and decided to design my own future class as an exercise. Throughout several iterations of the design, I learned a lot...">
+<meta property="description" content="I recently started looking at concurrent programming in C++ and decided to design my own future class as an exercise. Throughout several iterations of the design, I learned a lot...">
+<meta property="og:title" content="Making a future in C++">
+<meta property="og:site_name" content="statsandstuff">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://localhost:4000/futures.html">
+<meta property="og:image:url" content="http://localhost:4000/assets/img/">
+<meta property="og:image:secure_url" content="http://localhost:4000/assets/img/">
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+
+
+</head>
+
+
+<body>
+
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="/">statsandstuff</a>
+    <small class="masthead-subtitle">a blog on statistics and machine learning</small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="/menu/about.html">About</a>
+    
+      <a href="/menu/writing.html">Writing</a>
+    
+      <a href="/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  Making a future in C++
+</h1>
+
+
+
+<p>I recently started looking at concurrent programming in C++ and decided to design my own future class as an exercise.
+Throughout several iterations of the design, I learned a lot about why C++ futures are designed the way they are.</p>
+
+<p>A future represents a later-known value.
+Values are usually computed eagerly.
+In the code below, the value <code class="highlighter-rouge">f</code> is computed right away before proceeding to the print statement.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="n">compute_something</span><span class="p">();</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"This prints after something is computed.</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>We could wrap <code class="highlighter-rouge">compute_something()</code> in a future that is lazily started or started eagerly on another thread.  This allows execution to continue even though the value of <code class="highlighter-rouge">f</code> is not known yet.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">compute_something</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"This prints after the future f is constructed, but possibly before compute_something() runs and the future is ready.</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="c1">// Some time later we want the value of the future</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The future has value: "</span> <span class="o">&lt;&lt;</span> <span class="n">f</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>With that very short introduction, my first attempt at making a future is below.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;thread&gt;
+#include &lt;functional&gt;
+#include &lt;exception&gt;
+</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">R</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">Future</span> <span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="k">using</span> <span class="n">result_type</span> <span class="o">=</span> <span class="n">R</span><span class="p">;</span>
+
+    <span class="n">Future</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">)</span>
+        <span class="o">:</span>   <span class="n">f_</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">start_on_new_thread_</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="o">~</span><span class="n">Future</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">wait_</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="n">Future</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Future</span><span class="p">(</span><span class="k">const</span> <span class="n">Future</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Future</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="n">result_type</span> <span class="n">get</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">wait_</span><span class="p">();</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">eptr_</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">rethrow_exception</span><span class="p">(</span><span class="n">eptr_</span><span class="p">);</span>
+        <span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">result_</span><span class="p">;</span>
+    <span class="p">}</span>
+        
+<span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">f_</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span> <span class="n">eptr_</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">thread_</span><span class="p">;</span>
+    <span class="n">result_type</span> <span class="n">result_</span><span class="p">;</span>
+
+    <span class="kt">void</span> <span class="n">start_on_new_thread_</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">thread_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="p">([</span><span class="k">this</span><span class="p">]{</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="n">result_</span> <span class="o">=</span> <span class="n">f_</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+                <span class="n">eptr_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">wait_</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">thread_</span><span class="p">.</span><span class="n">joinable</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">thread_</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>The future is constructed from a callable <code class="highlighter-rouge">f</code>, which is immediately started on a new thread.  Actually the callable itself is not passed to the new thread.  Instead <code class="highlighter-rouge">f</code> is wrapped in a try-catch block that is in turn wrapped in a temporary callable.  This temporary is what is passed to the new thread.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="k">this</span><span class="p">]{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="n">result_</span> <span class="o">=</span> <span class="n">f_</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+        <span class="n">eptr_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>The reason for this is two fold.  The temporary callable never throws, even if the user-supplied callable <code class="highlighter-rouge">f</code> does.  This is good news because throwing on another thread causes <code class="highlighter-rouge">std::terminate()</code> is execute, which we do not want.  The other reason is we want to catch and store any exception thrown by <code class="highlighter-rouge">f</code> so that we can forward it if <code class="highlighter-rouge">get()</code> is later called on the future.</p>
+
+<p>(I said the temporary never throws, but this isn’t quite true.  We run into issues storing the result/exception if <code class="highlighter-rouge">this</code> is destroyed before the callable finishes.  This doesn’t happen, though, because the future’s destructor waits for the thread to join.)</p>
+
+<p>The write to <code class="highlighter-rouge">result_</code> from the callable executing thread is synchronized with any read from <code class="highlighter-rouge">result_</code> (via <code class="highlighter-rouge">get()</code>) in the future owning thread.  Synchronization is accomplished with <code class="highlighter-rouge">thread_.join()</code> inside the <code class="highlighter-rouge">wait_()</code> function.</p>
+
+<p>Now on to the problems with the design.</p>
+
+<ul>
+  <li>
+    <p>This future is not default constructible, copyable, or moveable, which means we can forget about storing these futures in a container.</p>
+  </li>
+  <li>
+    <p>There is no way to check if the future is ready (i.e., if <code class="highlighter-rouge">result_</code> is set).</p>
+  </li>
+  <li>
+    <p>The design does not work with void futures.  In C++ we cannot have the class member <code class="highlighter-rouge">void result_</code>, much less assign to it <code class="highlighter-rouge">result_ = f_()</code>.</p>
+  </li>
+  <li>
+    <p>The future is not thread safe.  If <code class="highlighter-rouge">get()</code> is called from two threads around the same time, <code class="highlighter-rouge">thread_.join()</code> can be called from both threads, which throws an exception.</p>
+  </li>
+</ul>
+
+<h2 id="adding-ready-to-the-future">Adding <code class="highlighter-rouge">ready()</code> to the future</h2>
+
+<p>A naive idea to check if the future is ready is to check if the thread executing it has joined.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">bool</span> <span class="nf">ready</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="o">!</span><span class="n">thread_</span><span class="p">.</span><span class="n">joinable</span><span class="p">();</span>
+<span class="err">}</span>
+</code></pre></div></div>
+
+<p>But this is silly.  The future would only be ready after we wait for it (which is where <code class="highlighter-rouge">thread_.join()</code> is called).  But of course the future is ready after we wait for it!  And it could be ready a lot earlier, too.</p>
+
+<p>We could introduce a new boolean member variable <code class="highlighter-rouge">ready_</code> that is returned by <code class="highlighter-rouge">ready()</code>.  We initialize <code class="highlighter-rouge">ready_</code> to false in the constructor, and set it after execution finishes (but before the executing thread is joined).</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="k">this</span><span class="p">]{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="n">result_</span> <span class="o">=</span> <span class="n">f_</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+        <span class="n">eptr_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="n">ready_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Unfortunately this leads to a race condition between the thread setting <code class="highlighter-rouge">ready_</code> and the thread calling <code class="highlighter-rouge">ready()</code>.  To deal with this, we could make <code class="highlighter-rouge">ready_</code> atomic or use a mutex.  Either idea throws cold water on making the future copyable or moveable, since atomics and mutexes are neither.</p>
+
+<h2 id="why-isnt-the-future-moveable">Why isn’t the future moveable?</h2>
+
+<p>You might think “What a minute!  I understand why the future isn’t copyable.  <code class="highlighter-rouge">std::thread</code> isn’t copyable.  But putting aside our wish to add synchronization primitives, why isn’t the current future moveable?  All of its member variables are!”</p>
+
+<p>Adding default move operations to the future leads to incorrect and undefined behavior.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Future</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+<span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Consider what happens in the following code that moves a future.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">bright</span> <span class="o">=</span> <span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([](){</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+    <span class="k">return</span> <span class="mi">314</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">bleak</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">bright</span><span class="p">));</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The bleak future has value: "</span> <span class="o">&lt;&lt;</span> <span class="n">bleak</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The code defines a bright future that sleeps for 1 second and then returns 314.
+The future is moved to bleak before getting its value.
+On my machine <code class="highlighter-rouge">bleak.get()</code> returns 0.  Not 314.
+What happened?
+This issue is the capture of <code class="highlighter-rouge">this</code> in the lambda that gets executed on the future’s <code class="highlighter-rouge">thread_</code>.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="k">this</span><span class="p">]{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="n">result_</span> <span class="o">=</span> <span class="n">f_</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+        <span class="n">eptr_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>When bright future is constructed, it starts executing the lambda on <code class="highlighter-rouge">bright.thread_</code>.  The lambda captures <code class="highlighter-rouge">this</code>, the memory location of bright (<code class="highlighter-rouge">&amp;bright</code>).  Inside the lambda <code class="highlighter-rouge">result_</code> means <code class="highlighter-rouge">bright.result_</code>.  This is true from the moment the lambda is created.</p>
+
+<p>During construction of bleak, <code class="highlighter-rouge">bright.thread_</code> is moved to <code class="highlighter-rouge">bleak.thread_</code> and <code class="highlighter-rouge">bright.result_</code> is moved to <code class="highlighter-rouge">bleak.result_</code>.  Since <code class="highlighter-rouge">bright.result_</code> is not initialized until the future is ready, <code class="highlighter-rouge">bleak.result_</code> is likely initialized with garbage.  When the future is ready, its result (as instructed by the lambda) is written to <code class="highlighter-rouge">bright.result_</code>, where we cannot acess it from <code class="highlighter-rouge">bleak.get()</code>.  Instead <code class="highlighter-rouge">bleak.get()</code> returns the initialized garbage (0 on my machine).</p>
+
+<p>If we add a 2 second pause before constructing bleak, then <code class="highlighter-rouge">bleak.get()</code> returns 314, but not for the correct reason.  In the pause, the bright future becomes ready and stores 314 in <code class="highlighter-rouge">bright.result_</code>.  This value is moved into <code class="highlighter-rouge">bleak.result_</code> when its constructed.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">bright</span> <span class="o">=</span> <span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([](){</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+    <span class="k">return</span> <span class="mi">314</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span> <span class="c1">// Enjoy the bright future for a bit</span>
+
+<span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">bleak</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">bright</span><span class="p">));</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The bleak future has value: "</span> <span class="o">&lt;&lt;</span> <span class="n">bleak</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>We need a persistent location to store the result of the future outside of the future itself.</p>
+
+<h2 id="making-the-future-flexible">Making the future flexible</h2>
+
+<p>We’d like to move and copy our futures, and guarantee safe access to the future from multiple threads.  The idea is to seperate the future from its data.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// FutureData is not copyable or moveable and can therefore have</span>
+<span class="c1">// synchronization primitives (atomics, mutexes, condition variables), which</span>
+<span class="c1">// are usually not copyable or moveable</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">R</span><span class="p">&gt;</span>
+<span class="k">struct</span> <span class="nc">FutureData</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span> <span class="n">eptr</span><span class="p">;</span>
+    <span class="n">R</span> <span class="n">result</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">ready</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// Future contains a pointer to its data and can be moved</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">R</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">Future</span> <span class="p">{</span>
+    <span class="c1">// Stuff here</span>
+<span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">FutureData</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;&gt;</span> <span class="n">data_ptr_</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>This works great.
+Moving the future is done by moving <code class="highlighter-rouge">data_ptr_</code>.
+But the data is always fixed in one location, even if the future is moved.
+So at the time the lambda is created, it knows where to store the result.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="k">this</span><span class="p">]{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="n">data_ptr_</span><span class="o">-&gt;</span><span class="n">result</span> <span class="o">=</span> <span class="n">f_</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+        <span class="n">data_ptr_</span><span class="o">-&gt;</span><span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This code is still no good.
+Suppose we start a bright future and move it to a bleak one as before.
+Recall that <code class="highlighter-rouge">data_ptr_</code> in the above lambda really means <code class="highlighter-rouge">bright.data_ptr_</code> because <code class="highlighter-rouge">this</code> captures bright at construction.
+After bright is moved to bleak, <code class="highlighter-rouge">bleak.data_ptr_</code> points to the (unmoved) future data and <code class="highlighter-rouge">bright.data_ptr_</code> is set to <code class="highlighter-rouge">nullptr</code>.
+The line <code class="highlighter-rouge">data_ptr_-&gt;result = f_()</code> in the lambda attempts to dereference a <code class="highlighter-rouge">nullptr</code>.
+Not good.</p>
+
+<p>We need two pointers to the future data.
+One to sit in the future itself as we have, and the other to sit in the lambda.
+I’ll make both pointers owning, meaning that each will keep the future data alive.
+This requires that we swap out <code class="highlighter-rouge">std::unique_ptr</code> for <code class="highlighter-rouge">std::shared_ptr</code> in the future.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Future</span> <span class="p">{</span>
+    <span class="c1">// Stuff here</span>
+<span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">FutureData</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;&gt;</span> <span class="n">data_ptr_</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>We can then copy <code class="highlighter-rouge">data_ptr_</code> into the lambda at construction.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="n">data_ptr</span><span class="o">=</span><span class="n">data_ptr_</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f_</span><span class="p">]{</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="n">data_ptr</span><span class="o">-&gt;</span><span class="n">result</span> <span class="o">=</span> <span class="n">f</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+        <span class="n">data_ptr</span><span class="o">-&gt;</span><span class="n">eptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here I use initializer capture.
+The variable <code class="highlighter-rouge">data_ptr</code> is copy constructed from <code class="highlighter-rouge">data_ptr_</code> and <code class="highlighter-rouge">f</code> is copy constructed from <code class="highlighter-rouge">f_</code> when the lambda is created.
+Simply writing <code class="highlighter-rouge">[data_ptr_, f_]</code> to capture these variables by value directly does not compile.  Clang complains that <code class="highlighter-rouge">data_ptr_</code> and <code class="highlighter-rouge">f_</code> in the capture list do not name variables.  Writing <code class="highlighter-rouge">[=]</code> would implicitly capture <code class="highlighter-rouge">this</code> because <code class="highlighter-rouge">data_ptr_</code> is interpreted as <code class="highlighter-rouge">this-&gt;data_ptr_</code> within the future class.  Initializer capture is the way to get a new copy of the shared pointer.</p>
+
+<p>There is an entirely different route we could take to address the problem with the lambda capturing a particular future’s <code class="highlighter-rouge">this</code>.
+A particular future’s <code class="highlighter-rouge">this</code> is captured because the lambda is <strong>created in the context of Future</strong>.  If instead the lambda were created in the context of FutureData, then <code class="highlighter-rouge">this</code> would capture the one and only FutureData.  And that would be just fine.</p>
+
+<p>If we move lambda creation to the FutureData struct, then <code class="highlighter-rouge">start_()</code> must belong to to FutureData.  So the future data struct is more like a future control class.</p>
+
+<h2 id="final-attempt">Final attempt</h2>
+
+<p>Below is the code for the thread-safe future control block.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;thread&gt;
+#include &lt;functional&gt;
+#include &lt;exception&gt;
+#include &lt;condition_variable&gt;
+#include &lt;mutex&gt;
+</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">R</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">FutureControlBlock</span> <span class="p">{</span>
+<span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">f_</span><span class="p">;</span> <span class="c1">// Callable that future executes</span>
+    <span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="n">thread_</span><span class="p">;</span> <span class="c1">// Thread executing the callable f_</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">exception_ptr</span> <span class="n">eptr_</span><span class="p">;</span> <span class="c1">// Stores exception (if any) from callable f_</span>
+    <span class="n">R</span> <span class="n">result_</span><span class="p">;</span> <span class="c1">// Stores result of callable f_</span>
+    <span class="kt">bool</span> <span class="n">started_</span><span class="p">;</span> <span class="c1">// Initialized to false.  True after execution starts</span>
+                   <span class="c1">// Once true, started_ is never set to false again.</span>
+    
+    <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">ready_</span><span class="p">;</span>
+    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">ready_mutex_</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span> <span class="n">ready_cond_var_</span><span class="p">;</span>
+
+
+    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">started_mutex_</span><span class="p">;</span> <span class="c1">// mutex to protect started_</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">thread_mutex_</span><span class="p">;</span> <span class="c1">// mutex to protect thread_</span>
+
+
+    <span class="kt">void</span> <span class="n">join_thread_</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// Mutex is locked so multiple threads don't call thread._join()</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">thread_mutex_</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">thread_</span><span class="p">.</span><span class="n">joinable</span><span class="p">())</span> <span class="p">{</span>
+            <span class="n">thread_</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// We guarantee that start_() is invoked at most one time</span>
+    <span class="c1">// across multiple thread calls to start() and start_on_new_thread()</span>
+    <span class="c1">// Its invocation status is captured by started_</span>
+    <span class="c1">// This means result_ and eptr_ are written by at most one thread</span>
+    <span class="c1">// This happens before ready_ is set to true</span>
+    <span class="c1">// which happens before any reads of those variables</span>
+    <span class="kt">void</span> <span class="n">start_</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="n">result_</span> <span class="o">=</span> <span class="n">f_</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">catch</span><span class="p">(...)</span> <span class="p">{</span>
+            <span class="n">eptr_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">current_exception</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">ready_mutex_</span><span class="p">);</span>
+            <span class="n">ready_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">ready_cond_var_</span><span class="p">.</span><span class="n">notify_all</span><span class="p">();</span>
+    <span class="p">}</span>
+
+<span class="nl">public:</span>
+    <span class="n">FutureControlBlock</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">start</span><span class="p">)</span>
+        <span class="o">:</span> <span class="n">f_</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">started_</span><span class="p">(</span><span class="nb">false</span><span class="p">),</span> <span class="n">ready_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">start_on_new_thread</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="o">~</span><span class="n">FutureControlBlock</span><span class="p">()</span> <span class="p">{</span> <span class="n">join_thread_</span><span class="p">();</span> <span class="p">}</span>
+
+    <span class="c1">// Not default constructible</span>
+    <span class="n">FutureControlBlock</span><span class="p">()</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+
+    <span class="c1">// Not copyable</span>
+    <span class="n">FutureControlBlock</span><span class="p">(</span><span class="k">const</span> <span class="n">FutureControlBlock</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">FutureControlBlock</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">FutureControlBlock</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+
+    <span class="c1">// Not moveable</span>
+    <span class="n">FutureControlBlock</span><span class="p">(</span><span class="n">FutureControlBlock</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">FutureControlBlock</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">FutureControlBlock</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    
+
+    <span class="kt">bool</span> <span class="n">started</span><span class="p">()</span> <span class="k">const</span>
+    <span class="p">{</span>
+        <span class="c1">// Correct because the return value is constructed before the destruction of</span>
+        <span class="c1">// local variables (i.e., the lock)</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">started_mutex_</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">started_</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">start</span><span class="p">()</span> <span class="p">{</span>
+        <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">started_mutex_</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">started_</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">}</span>
+
+            <span class="c1">// Update started right away because this runs on current thread</span>
+            <span class="c1">// Compare to start_on_new_thread()</span>
+            <span class="n">started_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span> 
+        <span class="p">}</span>
+        <span class="n">start_</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">start_on_new_thread</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">started_lock</span><span class="p">(</span><span class="n">started_mutex_</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">started_</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="c1">// We allow early exit if started_ == true *before* trying to aquire thread_mutex_</span>
+        <span class="c1">// which is unavailable during its join attempt</span>
+        
+        <span class="c1">// This is the only function that aquires a mutex when it already holds one</span>
+        <span class="c1">// * started_mutex_ is aquired first</span>
+        <span class="c1">// * thread_mutex_ is aquired second</span>
+        <span class="c1">// * ready_mutex_ is aquired third (in the call to start_() on the other thread)</span>
+        <span class="c1">// There is no cycle in the aquire sequence, so no deadlock</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">thread_lock</span><span class="p">(</span><span class="n">thread_mutex_</span><span class="p">);</span>
+        <span class="n">thread_</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="p">([</span><span class="k">this</span><span class="p">]{</span> <span class="n">start_</span><span class="p">();</span> <span class="p">});</span>
+        <span class="n">started_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>  <span class="c1">// Update started_ only after successful creation of thread</span>
+    <span class="p">}</span>
+
+    <span class="kt">bool</span> <span class="n">ready</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">scoped_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">ready_mutex_</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">ready_</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">wait</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">ready_mutex_</span><span class="p">);</span>
+        <span class="n">ready_cond_var_</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="p">[</span><span class="k">this</span><span class="p">]{</span> <span class="k">return</span> <span class="n">ready_</span> <span class="o">==</span> <span class="nb">true</span><span class="p">;</span> <span class="p">}</span> <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Rep</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Period</span><span class="p">&gt;</span>
+    <span class="kt">bool</span> <span class="n">wait_for</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">duration</span><span class="o">&lt;</span><span class="n">Rep</span><span class="p">,</span> <span class="n">Period</span><span class="o">&gt;&amp;</span> <span class="n">rel_time</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">ready_mutex_</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">ready_cond_var_</span><span class="p">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="n">rel_time</span><span class="p">,</span> <span class="p">[</span><span class="k">this</span><span class="p">]{</span> <span class="k">return</span> <span class="n">ready_</span> <span class="o">==</span> <span class="nb">true</span><span class="p">;</span> <span class="p">}</span> <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Clock</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Duration</span><span class="p">&gt;</span>
+    <span class="kt">bool</span> <span class="n">wait_until</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">time_point</span><span class="o">&lt;</span><span class="n">Clock</span><span class="p">,</span> <span class="n">Duration</span><span class="o">&gt;&amp;</span> <span class="n">timeout_time</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">lock</span><span class="p">(</span><span class="n">ready_mutex_</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">ready_cond_var_</span><span class="p">.</span><span class="n">wait_until</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="n">timeout_time</span><span class="p">,</span> <span class="p">[</span><span class="k">this</span><span class="p">]{</span> <span class="k">return</span> <span class="n">ready_</span> <span class="o">==</span> <span class="nb">true</span><span class="p">;</span> <span class="p">}</span> <span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">R</span> <span class="n">get</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">wait</span><span class="p">();</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">eptr_</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">rethrow_exception</span><span class="p">(</span><span class="n">eptr_</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">result_</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>The class uses mutexes and is thread safe.
+The flag <code class="highlighter-rouge">ready_</code> is protected with a mutex and synchronization in <code class="highlighter-rouge">wait()</code> is done with a condition variable.
+These changes are not needed to support <code class="highlighter-rouge">wait()</code>, but to support its variants <code class="highlighter-rouge">wait_for()</code> and <code class="highlighter-rouge">wait_until()</code> as well as the new method <code class="highlighter-rouge">start()</code> (in the first attempt we only had something like <code class="highlighter-rouge">start_on_new_thread()</code>).  Without these changes, synchronization could still be done with join as before (and ready_ could be atomic).</p>
+
+<p>The future class is just a view into the FutureControlBlock.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">R</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">Future</span> <span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="k">using</span> <span class="n">result_type</span> <span class="o">=</span> <span class="n">R</span><span class="p">;</span>
+
+    <span class="n">Future</span><span class="p">()</span>
+        <span class="o">:</span>   <span class="n">control_block_ptr_</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">),</span>
+            <span class="n">valid_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span> <span class="p">{}</span>
+
+    <span class="n">Future</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">R</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">start</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+        <span class="o">:</span>   <span class="n">control_block_ptr_</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">FutureControlBlock</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">start</span><span class="p">)),</span>
+            <span class="n">valid_</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{}</span>
+
+    <span class="o">~</span><span class="n">Future</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+
+    <span class="n">Future</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">Future</span><span class="p">(</span><span class="k">const</span> <span class="n">Future</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Future</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+
+    <span class="kr">inline</span> <span class="n">R</span> <span class="n">get</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">get</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">wait</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">wait</span><span class="p">();</span> <span class="p">}</span>
+    
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Rep</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Period</span><span class="p">&gt;</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">wait_for</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">duration</span><span class="o">&lt;</span><span class="n">Rep</span><span class="p">,</span> <span class="n">Period</span><span class="o">&gt;&amp;</span> <span class="n">rel_time</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">wait_for</span><span class="p">(</span><span class="n">rel_time</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Clock</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Duration</span><span class="p">&gt;</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">wait_until</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">time_point</span><span class="o">&lt;</span><span class="n">Clock</span><span class="p">,</span> <span class="n">Duration</span><span class="o">&gt;&amp;</span> <span class="n">timeout_time</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">wait_until</span><span class="p">(</span><span class="n">timeout_time</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">valid</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">valid_</span><span class="p">;</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">ready</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">ready</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">start_on_new_thread</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">start_on_new_thread</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">start</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">start</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">started</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">started</span><span class="p">();</span> <span class="p">}</span>
+
+<span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">FutureControlBlock</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;&gt;</span> <span class="n">control_block_ptr_</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">valid_</span><span class="p">;</span>   
+<span class="p">};</span>
+</code></pre></div></div>
+<p>We also give a void total specialization that has almost no code change.
+It simply wraps the void-returning callable into an int-returning callable that is used to construct a <code class="highlighter-rouge">FutureControlBlock&lt;int&gt;</code>.  The int is then discarded in the void-returning <code class="highlighter-rouge">get()</code> function.  The code is below.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="p">&gt;</span>
+<span class="k">class</span> <span class="nc">Future</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="k">using</span> <span class="n">result_type</span> <span class="o">=</span> <span class="kt">void</span><span class="p">;</span>
+
+    <span class="n">Future</span><span class="p">()</span>
+        <span class="o">:</span>   <span class="n">control_block_ptr_</span><span class="p">(</span><span class="nb">nullptr</span><span class="p">),</span>
+            <span class="n">valid_</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span> <span class="p">{}</span>
+
+    <span class="n">Future</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">()</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">start</span><span class="o">=</span><span class="nb">true</span><span class="p">)</span>
+        <span class="o">:</span>   <span class="n">control_block_ptr_</span><span class="p">(</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">FutureControlBlock</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">f</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">f</span><span class="p">)]</span> <span class="p">{</span> <span class="n">f</span><span class="p">();</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="p">},</span>
+                    <span class="n">start</span><span class="p">)),</span>
+            <span class="n">valid_</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{}</span>
+
+    <span class="o">~</span><span class="n">Future</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+
+    <span class="n">Future</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Future</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">Future</span><span class="p">(</span><span class="k">const</span> <span class="n">Future</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="n">Future</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Future</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">get</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">get</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">wait</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">wait</span><span class="p">();</span> <span class="p">}</span>
+    
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Rep</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Period</span><span class="p">&gt;</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">wait_for</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">duration</span><span class="o">&lt;</span><span class="n">Rep</span><span class="p">,</span> <span class="n">Period</span><span class="o">&gt;&amp;</span> <span class="n">rel_time</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">wait_for</span><span class="p">(</span><span class="n">rel_time</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Clock</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Duration</span><span class="p">&gt;</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">wait_until</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">time_point</span><span class="o">&lt;</span><span class="n">Clock</span><span class="p">,</span> <span class="n">Duration</span><span class="o">&gt;&amp;</span> <span class="n">timeout_time</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">wait_until</span><span class="p">(</span><span class="n">timeout_time</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">valid</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">valid_</span><span class="p">;</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">ready</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">ready</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">start_on_new_thread</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">start_on_new_thread</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">void</span> <span class="n">start</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">start</span><span class="p">();</span> <span class="p">}</span>
+    <span class="kr">inline</span> <span class="kt">bool</span> <span class="n">started</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">control_block_ptr_</span><span class="o">-&gt;</span><span class="n">started</span><span class="p">();</span> <span class="p">}</span>
+
+<span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">FutureControlBlock</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">control_block_ptr_</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">valid_</span><span class="p">;</span>   
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Here are some examples of using the future class.
+From the examples, you can see that this future is like a mixture of <code class="highlighter-rouge">std::async</code>, <code class="highlighter-rouge">std::packaged_task</code>, and <code class="highlighter-rouge">std::future</code>.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Run 10 futures that are eagerly started on new threads</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;&gt;</span> <span class="n">futs</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">futs</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">([</span><span class="n">i</span><span class="p">]{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">milliseconds</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">i</span><span class="p">));</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Done executing future "</span> <span class="o">&lt;&lt;</span> <span class="n">i</span>
+            <span class="o">&lt;&lt;</span> <span class="s">" on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="p">},</span> <span class="nb">true</span><span class="p">);</span>
+<span class="p">}</span>
+    
+
+<span class="c1">// Define a future, but do not start it on construction</span>
+<span class="c1">// Explicitly start it on main thread after construction</span>
+<span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+<span class="k">auto</span> <span class="n">f</span> <span class="o">=</span> <span class="n">Future</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span><span class="p">([]{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"This future runs on the main thread "</span>
+        <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="p">},</span> <span class="nb">false</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"On the main thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="n">f</span><span class="p">.</span><span class="n">start</span><span class="p">();</span>
+
+
+<span class="c1">// Define a future, but do not start it on construction</span>
+<span class="c1">// Explicitly start it on another thread after construction</span>
+<span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+<span class="k">auto</span> <span class="n">g</span> <span class="o">=</span> <span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([]{</span> 
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"This future runs on thread "</span>
+        <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="mi">314</span><span class="p">;</span>
+<span class="p">},</span> <span class="nb">false</span><span class="p">);</span>
+
+<span class="n">g</span><span class="p">.</span><span class="n">start_on_new_thread</span><span class="p">();</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value of the future is "</span> <span class="o">&lt;&lt;</span> <span class="n">g</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+
+<span class="c1">// Define a future, but do not start it on construction</span>
+<span class="c1">// Manually start it on another thread after construction</span>
+<span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">sleep_for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">chrono</span><span class="o">::</span><span class="n">seconds</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+<span class="k">auto</span> <span class="n">h</span> <span class="o">=</span> <span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([]{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"This future runs on thread "</span>
+        <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    
+    <span class="k">return</span> <span class="mi">42</span><span class="p">;</span>
+<span class="p">},</span> <span class="nb">false</span><span class="p">);</span>
+
+<span class="n">std</span><span class="o">::</span><span class="kr">thread</span> <span class="nf">thread</span><span class="p">([</span><span class="o">&amp;</span><span class="n">h</span><span class="p">]{</span> <span class="n">h</span><span class="p">.</span><span class="n">start</span><span class="p">();</span> <span class="err">}</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value of the future is "</span> <span class="o">&lt;&lt;</span> <span class="n">h</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="kr">thread</span><span class="p">.</span><span class="n">join</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>To design a future-promise very little needs to change.  We keep the non-copyable and non-moveable FutureControlBlock (called the shared state in the standard) and create seperate classes to access the block.  Rather than have one accessor that both reads (via <code class="highlighter-rouge">get()</code>) and writes (via <code class="highlighter-rouge">start()</code> and <code class="highlighter-rouge">start_on_new_thread()</code>) to the control block as we do with the design of the above future, we create separate readers and writers.</p>
+
+<p>The reader accessor is traditionally called a Future (with methods <code class="highlighter-rouge">get()</code>, <code class="highlighter-rouge">ready()</code>, and the variants of <code class="highlighter-rouge">wait()</code>).  The writer accessor is usually called a Promise (with methods <code class="highlighter-rouge">set_value()</code> and <code class="highlighter-rouge">set_exception()</code>).  We can have a seperate TaskPromise writer (similar to <code class="highlighter-rouge">std::packaged_task</code>) with methods like <code class="highlighter-rouge">set_task()</code>, <code class="highlighter-rouge">start_task()</code> and <code class="highlighter-rouge">start_task_on_new_thread()</code>. The control block only needs <code class="highlighter-rouge">result_</code>, <code class="highlighter-rouge">eptr_</code>, and <code class="highlighter-rouge">ready_</code>.  We can move <code class="highlighter-rouge">thread_</code>, <code class="highlighter-rouge">f_</code>, and the various start methods to the TaskPromise writer.</p>
+
+<p>The write to the control block is a one-time operation.  It therefore makes sense to make the writers (Promise and TaskPromise) moveable, but not copyable.  On the other hand, the readers (Future) can be moveable and copyable. (Note that <code class="highlighter-rouge">std::future</code> is only moveable, but <code class="highlighter-rouge">std::shared_future</code> is also copyable.  <code class="highlighter-rouge">std::promise</code> is only moveable.)</p>
+
+<p>One final question to address is who creates the control block when we have separate readers and writers?  One design is to directly create the control block and give it <code class="highlighter-rouge">get_future()</code> and <code class="highlighter-rouge">get_promise()</code> methods.  A more common design is to have the writer (Promise, TaskPromise) create the control block and give the writer a <code class="highlighter-rouge">get_future()</code> method that returns a control block reader.</p>
+
+<p>The code is <a href="assets/code/future/">here</a>.
+It includes code for tasks that can be chained as in the following snippet.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">t</span> <span class="o">=</span> <span class="n">MakeTask</span><span class="p">([]{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task 1 on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="s">"Secret message"</span><span class="p">;</span>
+<span class="p">}).</span><span class="n">then</span><span class="p">([](</span><span class="n">Future</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">char</span><span class="o">*&gt;</span> <span class="n">input</span><span class="p">){</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task 2 on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">". "</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"First task says: "</span> <span class="o">&lt;&lt;</span> <span class="n">input</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">10</span><span class="p">;</span>
+<span class="p">}).</span><span class="n">then</span><span class="p">([](</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">input</span><span class="p">){</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task 3 on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">input</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="n">t</span><span class="p">.</span><span class="n">start</span><span class="p">();</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task final value is: "</span> <span class="o">&lt;&lt;</span> <span class="n">t</span><span class="p">.</span><span class="n">get_future</span><span class="p">().</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The chaining is dynamic and can be used in a for-loop as long as the return type is constant.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">auto</span> <span class="n">t</span> <span class="o">=</span> <span class="n">MakeTask</span><span class="p">([]{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task 1 on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="s">"Secret message"</span><span class="p">;</span>
+<span class="p">}).</span><span class="n">then</span><span class="p">([](</span><span class="n">Future</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">char</span><span class="o">*&gt;</span> <span class="n">input</span><span class="p">){</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task 2 on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">". "</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"First task says: "</span> <span class="o">&lt;&lt;</span> <span class="n">input</span><span class="p">.</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">10</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">.</span><span class="n">then</span><span class="p">([</span><span class="n">i</span><span class="p">](</span><span class="n">Future</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">input</span><span class="p">){</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task "</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">" on thread "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">this_thread</span><span class="o">::</span><span class="n">get_id</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+        <span class="k">return</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">input</span><span class="p">.</span><span class="n">get</span><span class="p">();</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="n">t</span><span class="p">.</span><span class="n">start</span><span class="p">();</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Task final value is: "</span> <span class="o">&lt;&lt;</span> <span class="n">t</span><span class="p">.</span><span class="n">get_future</span><span class="p">().</span><span class="n">get</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">".</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Tasks are moveable, but not copyable.
+The <code class="highlighter-rouge">then()</code> method moves from <code class="highlighter-rouge">*this</code> and returns a new task.
+I lastly want to go over the code for <code class="highlighter-rouge">then()</code> because I struggled getting it to work at first.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">Callable</span><span class="p">&gt;</span>
+<span class="k">auto</span> <span class="nf">then</span><span class="p">(</span><span class="n">Callable</span> <span class="n">next</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">R2</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">result_of_t</span><span class="o">&lt;</span><span class="n">Callable</span><span class="p">(</span><span class="n">Future</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+
+    <span class="k">auto</span> <span class="n">task_ptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_shared</span><span class="o">&lt;</span><span class="n">Task</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">));</span>
+
+    <span class="k">return</span> <span class="n">Task</span><span class="o">&lt;</span><span class="n">R2</span><span class="o">&gt;</span><span class="p">([</span><span class="n">task_ptr</span><span class="o">=</span><span class="n">task_ptr</span><span class="p">,</span> <span class="n">next</span><span class="o">=</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">next</span><span class="p">)]</span> <span class="p">{</span> 
+        <span class="n">task_ptr</span><span class="o">-&gt;</span><span class="n">start_on_new_thread</span><span class="p">();</span>
+        <span class="k">auto</span> <span class="n">res</span> <span class="o">=</span> <span class="n">task_ptr</span><span class="o">-&gt;</span><span class="n">get_future</span><span class="p">();</span>
+        <span class="n">res</span><span class="p">.</span><span class="n">wait</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">next</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">res</span><span class="p">));</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This works by moving <code class="highlighter-rouge">*this</code> into a heap allocated location and giving the returned task a way to invoke <code class="highlighter-rouge">*this</code> through <code class="highlighter-rouge">task_ptr</code>.
+A more explicit representation of what is going on is a singly linked list of tasks arranged in reverse order; the head pointing to the last task to complete and the tail pointing to the first.
+Each node invokes previous work, waits for it to finish, and then does its own work.
+So the head of the list (last task) invokes the next node (penultimate task), waits for it to finish, and then does its own work.
+It seems far more natural for the list to be in order, with each node doing its own work, waiting, and then invoking the next node.
+One issue with that approach has to do with type.
+The final result of the task chaining has type parametrized by the return value of the last task.
+It is convenient having this be the head of the list so that each link in the chain knows its type.</p>
+
+<p>Why use <code class="highlighter-rouge">task_ptr</code> and not directly capture <code class="highlighter-rouge">*this</code> in the lambda like this <code class="highlighter-rouge">[task=std::move(*this)]</code>?
+This would nest tasks within tasks and make larger and larger objects with each <code class="highlighter-rouge">then()</code> call.
+Beyond that two compilation errors occur.
+The first happens because capturing <code class="highlighter-rouge">*this</code> makes the lambda itself moveable, but not copyable.
+This matters because the <code class="highlighter-rouge">Task&lt;R&gt;</code> constructor creates a <code class="highlighter-rouge">std::function&lt;R()&gt;</code> from the passed callable and <code class="highlighter-rouge">std::function</code> requires the passed callable be <strong>copy</strong> constructable.
+The second error occurs because items captured by the lambda are effectively <code class="highlighter-rouge">const</code>.
+The lambda’s <code class="highlighter-rouge">operator()</code> is defined <code class="highlighter-rouge">const</code> so writing <code class="highlighter-rouge">task.start_on_new_thread()</code> in the lambda fails because the captured <code class="highlighter-rouge">task</code> is <code class="highlighter-rouge">const</code>, but <code class="highlighter-rouge">start_on_new_thread()</code> is not a <code class="highlighter-rouge">const</code>-method.
+(Notice we did not have this problem when capturing <code class="highlighter-rouge">this</code> earlier because the capture simply makes <code class="highlighter-rouge">this</code> a <code class="highlighter-rouge">const</code>-pointer, but not a pointer to <code class="highlighter-rouge">const</code>-object.  Capturing <code class="highlighter-rouge">*this</code> has a different effect.)</p>
+
+<p>Both these problems can be overcome.
+To overcome the first, we can remove <code class="highlighter-rouge">std::function</code> from the task template and parametrize the template on the callable itself.
+The second problem can be overcome by marking the lambda <code class="highlighter-rouge">mutable</code>.
+The <code class="highlighter-rouge">template &lt;Callable&gt; Task2</code> in Task.h takes this approach.
+The downside for not dynamically allocating new space with each <code class="highlighter-rouge">then()</code> call is that the size (and type) of task object grows with each <code class="highlighter-rouge">then()</code> call.
+Since the type changes, it cannot be used in a for-loop like the first version.</p>
+
+
+<span class="post-date">
+  Written on
+  
+  June
+  15th,
+  2021
+  by
+  
+    Scott Roy
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=Making a future in C++&amp;url=/futures.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=/futures.html&amp;title=Making a future in C++" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=/futures.html" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/scottroy" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/scott-roy/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="mailto:scott.michael.roy@gmail.com" target="_blank"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="/menu/about.html">statsandstuff | a blog on statistics and machine learning by Scott Roy</a></div>
+</footer>
+
+  </div>
+
+</body>
+</html>

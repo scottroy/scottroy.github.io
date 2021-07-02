@@ -7,6 +7,22 @@
 		<atom:link href="/rss-feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Making a future in C++</title>
+				
+					<dc:creator>Scott Roy</dc:creator>
+				
+				
+					<description>&lt;p&gt;I recently started looking at concurrent programming in C++ and decided to design my own future class as an exercise.
+Throughout several iterations of the design, I learned a lot about why C++ futures are designed the way they are.&lt;/p&gt;
+
+</description>
+				
+				<pubDate>Tue, 15 Jun 2021 00:00:00 -0700</pubDate>
+				<link>http://localhost:4000/futures.html</link>
+				<guid isPermaLink="true">http://localhost:4000/futures.html</guid>
+			</item>
+		
+			<item>
 				<title>Optimization and duality</title>
 				
 					<dc:creator>Scott Roy</dc:creator>
@@ -141,21 +157,6 @@ There are many ways we could interpret “most related”:&lt;/p&gt;
 				<pubDate>Fri, 18 May 2018 00:00:00 -0700</pubDate>
 				<link>http://localhost:4000/inference-based-on-entropy-maximization.html</link>
 				<guid isPermaLink="true">http://localhost:4000/inference-based-on-entropy-maximization.html</guid>
-			</item>
-		
-			<item>
-				<title>Sampling from distributions</title>
-				
-					<dc:creator>Scott Roy</dc:creator>
-				
-				
-					<description>&lt;p&gt;There is almost no difference between knowing a distribution’s density (and thus knowing its mean, variance, mode, or anything else about it) and being able to sample from the distribution.  On the one hand, if we can sample from a distribution, we can estimate the density with a histogram or kernel density estimator.  Conversely, I’ll discuss ways to sample from a density in this post.&lt;/p&gt;
-
-</description>
-				
-				<pubDate>Sat, 12 May 2018 00:00:00 -0700</pubDate>
-				<link>http://localhost:4000/sampling-from-distributions.html</link>
-				<guid isPermaLink="true">http://localhost:4000/sampling-from-distributions.html</guid>
 			</item>
 		
 	</channel>
